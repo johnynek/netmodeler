@@ -1,8 +1,9 @@
-noinst_LIBRARIES = netmodlib.a
+noinst_LIBRARIES = libnetmod.a
 noinst_PROGRAMS = netmodeler
 netmodeler_SOURCES = main.cpp
-netmodeler_LDADD = netmodlib.a
-netmodlib_a_SOURCES = amnesiacmessage.cpp amnesiacmessage.h \
+netmodeler_LDADD = libnetmod.a
+libnetmod_a_SOURCES = amnesiacmessage.cpp amnesiacmessage.h \
+agglompart.h agglompart.cpp \
 anycastmessage.cpp \
 anycastmessage.h \
 broadcastmessage.h \
@@ -14,6 +15,7 @@ callawaynetwork.h \
 contentnetwork.cpp \
 contentnetwork.h \
 contentnode.h \
+componentpart.h componentpart.cpp \
 debianaliasnode.h \
 debiandependencynetwork.cpp \
 debiandependencynetwork.h \
@@ -55,6 +57,7 @@ gnutellanode.h \
 gnutellaquery.cpp  gnutellaquery.h \
 graphmatrix.cpp graphmatrix.h \
 incrementable.h \
+inetworkpartitioner.h inetworkpartitioner.cpp \
 linearpreference.cpp \
 linearpreference.h \
 magnetmessage.h \
@@ -69,6 +72,7 @@ mrucache.cpp \
 mrucache.h \
 network.cpp \
 network.h \
+newmancom.h newmancom.cpp \
 node.h \
 node.cpp \
 noisystardnet.h \
@@ -94,6 +98,7 @@ random.cpp \
 randomdirectednetwork.cpp \
 randomdirectednetwork.h \
 random.h \
+randagpart.h randagpart.cpp \
 randomnetwork.cpp \
 randomnetwork.h \
 realcontentnetwork.cpp \
@@ -126,3 +131,6 @@ walkandsitepercmessage.cpp \
 walkandsitepercmessage.h \
 weightednetwork.h \
 weightednetwork.cpp
+
+netmodeler.h : 
+	ls *.h | sed -e 's/\(.*\)/#include "\1"/' > netmodeler.h

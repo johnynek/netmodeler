@@ -136,6 +136,7 @@ class Network {
 	 * @return average clustering coefficient for the whole network
 	 */
 	double getClusterCoefficient() const;
+#if 0
 	/**
 	 * Use the Newman community finding algorithm to find
 	 * communities: @see cond-mat/0309508
@@ -166,6 +167,7 @@ class Network {
 	 * @return a set of networks.  One network for each component.
 	 */
 	std::set<Network> getComponents() const;
+#endif
 	/**
 	 * @return degree of a given node
 	 */
@@ -344,10 +346,11 @@ class Network {
 	 * Get a subgraph of this graph using only the given nodes.
 	 * The edges in the returned graph are all the edges
 	 * that exist between the given nodes
+	 * The caller must delete the returned network when done.
 	 * @param nodes the nodes for which to build the subgraph
 	 * @return the Network which is the subgraph
 	 */
-	virtual Network getSubNet(const NodePSet& nodes) const;
+	virtual Network* getSubNet(const NodePSet& nodes) const;
 	/**
 	 * This is an alternative definition of clustering
 	 * for the entire graph.  It is:

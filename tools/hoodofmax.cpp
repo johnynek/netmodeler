@@ -30,7 +30,8 @@ int main(int argc, char* argv[]) {
     }
   }
 
-  Network subgraph = net.getSubNet( net.getNeighborhood(max_n, distance) );
-  subgraph.printTo(cout);
+  Network* subgraph = net.getSubNet( net.getNeighborhood(max_n, distance) );
+  subgraph->printTo(cout);
+  delete subgraph;
   return 1;
 }

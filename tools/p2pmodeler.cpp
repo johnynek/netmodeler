@@ -43,14 +43,18 @@ int main(int argc, char* argv[]) {
      Network *net = 0;
      int choice = 2;
      if(choice == 1){
-       cout << "The number of components of this network is: " << my_net->getComponents().size() << endl;
-       set<Network> net_set = my_net->getComponents();
-       set<Network>::const_iterator comp_it;
+       ComponentPart cp;
+       set<Network*>* net_set = cp.partition(*my_net);
+       cout << "The number of components of this network is: " << net_set->size() << endl;
+       set<Network*>::const_iterator comp_it;
        cout << "The components have the following sizes: ";
-       for(comp_it = net_set.begin(); comp_it != net_set.end(); comp_it++){
-	 cout << (*comp_it).getNodes().size() << " ";
-	 net = new Network(*(comp_it));
+       for(comp_it = net_set->begin(); comp_it != net_set->end(); comp_it++){
+	 net = *(comp_it);
+	 cout << net->getNodes().size() << " ";
        }
+       //Free the memory here:
+       cp.deletePartition(net_set);
+       net = 0;
      }
      else{
        //The exponent -1.81 is what we want for the email network

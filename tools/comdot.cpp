@@ -21,7 +21,7 @@ void printEdges(const Network::EdgeSet& print,
   printed.insert(print.begin(), print.end());
 }
 
-void printCommunities(string prefix, const Network& net,
+void printCommunities(AgglomPart& ap, string prefix, const Network& net,
 		      ostream& out, Network::EdgeSet& printed_edges,
 		      int depth) {
     stringstream community;
@@ -29,25 +29,29 @@ void printCommunities(string prefix, const Network& net,
     //Print out the communities:
     vector< pair<int, int> > joins;
     vector<double> q_t;
-    int step = net.getCommunities(q_t, joins);
+    int step = ap.getCommunities(net, q_t, joins);
     out << "//" << prefix << "=" << q_t[step] << endl;
     out << "subgraph cluster" << prefix << " {" << endl;
     out << "node [style=filled];" << endl;
     if( q_t[step] > 0.25 ) {
       
-      set< Network > comms = net.getCommunity(step, joins);
-      set< Network >::const_reverse_iterator comit;
+      set< Network* >* comms = ap.getCommunity(net,step, joins);
+      set< Network* >::const_reverse_iterator comit;
       Network::NodePSet::const_iterator comnodeit;
       int com = 0;
-      for(comit = comms.rbegin();
-	  comit != comms.rend();
+      for(comit = comms->rbegin();
+	  comit != comms->rend();
 	  comit++) {
+	Network* this_commun = *comit;
         stringstream this_com;
         this_com << community.str() << com++;
 	//Recurse:
-	printCommunities(this_com.str(), *comit, out, printed_edges, depth + 1);
+	printCommunities(ap, this_com.str(), *this_commun, out, printed_edges, depth + 1);
       }
       //Print the end of the subgraph
+      
+      //Free up the memory
+      ap.deletePartition(comms);
     }
     else {
       //The community cannot be split further, so print it out:
@@ -82,13 +86,16 @@ int main(int argc, char* argv) {
   cout << "graph G {" << endl; 
   Network::EdgeSet printed_edges;
   //Look on components:
-  set<Network> components = my_net.getComponents();
-  set<Network>::const_reverse_iterator comp_it;
+  ComponentPart cp;
+  NewmanCom comfinder;
+  set<Network*>* components = cp.partition(my_net);
+  set<Network*>::const_reverse_iterator comp_it;
   int community = 0;
-  for(comp_it = components.rbegin(); comp_it != components.rend(); comp_it++) {
+  for(comp_it = components->rbegin(); comp_it != components->rend(); comp_it++) {
     stringstream com;
     com << community++;
-    printCommunities(com.str(), *comp_it, cout, printed_edges, 1);
+    Network* this_net = *comp_it;
+    printCommunities(comfinder, com.str(), *this_net, cout, printed_edges, 1);
   }
   printEdges(my_net.getEdges(), printed_edges, "[len=16, color=green]");
   cout << "}" << endl;

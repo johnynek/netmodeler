@@ -9,7 +9,8 @@ int main(int argc, char* argv) {
   Network my_net(cin);
   vector< pair<int, int> > joins;
   vector<double> q_t;
-  my_net.getCommunities(q_t, joins);
+  NewmanCom comfinder;
+  comfinder.getCommunities(my_net,q_t, joins);
   //In order to know which community refers to what, we must build a table:
   vector<Node*> all_nodes;
   all_nodes.insert( all_nodes.begin(),

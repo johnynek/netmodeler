@@ -294,7 +294,7 @@ const Network::EdgeSet& Network::getMinCut(Node* node1,Node* node2) const {
   ///\todo
 }
 
-
+#if 0
 int Network::getCommunities(vector<double>& q_t,
 		            vector< pair<int,int> >& joins) const {
 
@@ -468,6 +468,7 @@ set<Network> Network::getCommunity(int step,
   return output;
 }
 
+
 set<Network> Network::getComponents() const {
 
     set<Network> output;
@@ -520,6 +521,7 @@ set<Network> Network::getComponents() const {
     }
     return output;
 }
+#endif
 
 double Network::getDegreeMoment(int m) const
 {
@@ -1196,12 +1198,13 @@ map<int, int> Network::getNthNeighborDist(int nth) const {
   return getNthNeighborDist(node_set, nth);
 }
 
-Network Network::getSubNet(const NodePSet& nodes) const {
+Network* Network::getSubNet(const NodePSet& nodes) const {
   //Return a Network with just the nodes given
   NodePSet::const_iterator n_it;
   map<Node*, EdgeSet>::const_iterator map_it;
   EdgeSet::const_iterator e_it;
-  Network output;
+  Network* out = new Network();
+  Network& output = *out;
   for( n_it = nodes.begin();
        n_it != nodes.end();
        n_it++) {
@@ -1220,7 +1223,7 @@ Network Network::getSubNet(const NodePSet& nodes) const {
       }
     }
   }
-  return output;
+  return out;
 }
 
 double Network::getTransitivity() const {
