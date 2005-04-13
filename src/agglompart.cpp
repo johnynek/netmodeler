@@ -152,7 +152,16 @@ set<Network*>* AgglomPart::getCommunity(const Network& net, int step,
       n_it++) {
     comm_node[community++].insert( *n_it );
   }
-  //Recreate the step with the best structure:
+  /**
+   * Recreate the step with the best structure:
+   * Keep in mind, join[0] is the join associated
+   * with q[1], since q[0] is the null join, or
+   * every node in its very own community.
+   * q[i] corresponds to join[i-1] (for i>0)
+   * So, if q[step_max] is q_max, then
+   * we want to join up to and including
+   * join[step_max-1]
+   */
   int join1, join2;
   for(int k = 0; k < step; k++) {
     join1 = joins[k].first;
@@ -163,10 +172,9 @@ set<Network*>* AgglomPart::getCommunity(const Network& net, int step,
   }
   //Prepare the output:
   set< Network* >* out = new set<Network*>();
-  set<Network*>& output = *out;
   for(int k = 0; k < comm_node.size(); k++) {
     if( comm_node[k].size() > 0 ) {
-      output.insert( net.getSubNet( comm_node[k] ) );
+      out->insert( net.getSubNet( comm_node[k] ) );
     }
   }
   return out;

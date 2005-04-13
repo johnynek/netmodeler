@@ -23,7 +23,7 @@ while(<>) {
        $label = $biggest_idx;
        $biggest_idx++;
      }
-     print $cleanname . " [label=\"$label\"];\n";
+     #print $cleanname . " [label=\"$label\"];\n";
   }
 }
 

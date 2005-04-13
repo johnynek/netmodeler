@@ -16,17 +16,27 @@ struct network_comp : public binary_function<Network*, Network*, bool> {
 };
 
 
-void printCommunities(AgglomPart& ap, ostream& out, string prefix, const Network& net) {
+void printCommunities(AgglomPart* ap, ostream& out, string prefix, const Network& net) {
     stringstream community;
     community << prefix << ".";
     //Print out the communities:
     vector< pair<int, int> > joins;
     vector<double> q_t;
-    int step = ap.getCommunities(net, q_t, joins);
+    int step = ap->getCommunities(net, q_t, joins);
+    /*
+    for(int i = 0; i < q_t.size(); i++) {
+      cout << "q_t[" << i << "] = " << q_t[i] <<
+	      " join(" << joins[i].first << ", " << joins[i].second << ")" << endl;;
+    }
+    cout << "stepmax: " << step << endl;
+    */
     if( q_t[step] > 0.25 ) {
       out << "#" << prefix << "=" << q_t[step] << endl;
       //cout << "Getting best split"<< endl;
-      set< Network* >* comms = ap.getCommunity(net, step, joins);
+      set< Network* >* comms = ap->getCommunity(net, step, joins);
+      //Double check the modularity:
+      double qmod = ap->modularityOf(*comms, net);
+      cout << "mod: " << qmod << endl;
       //cout << "Got best split"<< endl;
       vector<Network*> vcoms;
       vcoms.insert(vcoms.begin(), comms->begin(), comms->end());
@@ -53,7 +63,7 @@ void printCommunities(AgglomPart& ap, ostream& out, string prefix, const Network
 	printCommunities(ap, out, this_com.str(), *this_comnet);
       }
       //Free up the memory
-      ap.deletePartition(comms);
+      ap->deletePartition(comms);
     }
 }
 
@@ -93,10 +103,15 @@ int main(int argc, char* argv[]) {
     /**
      * Here is where we select which community finding algorithm to use
      */
-  NewmanCom nm;
-  RandAgPart rap(r,argv[3],prob);
-  //AgglomPart& comfinder = nm;
-  AgglomPart& comfinder = rap;
+  AgglomPart* comfinder = 0;
+  if( string(argv[3]) == "Newman" ) {
+    NewmanCom nm;
+    comfinder = &nm;
+  }
+  else {
+    RandAgPart rap(r,argv[3],prob);
+    comfinder = &rap;
+  }
  
   Network& my_net = *net;
  
