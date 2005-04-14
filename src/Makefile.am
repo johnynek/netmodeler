@@ -58,6 +58,7 @@ gnutellaquery.cpp  gnutellaquery.h \
 graphmatrix.cpp graphmatrix.h \
 incrementable.h \
 inetworkpartitioner.h inetworkpartitioner.cpp \
+inetworkmapper.h \
 linearpreference.cpp \
 linearpreference.h \
 magnetmessage.h \
@@ -80,6 +81,7 @@ noisystardnet.cpp \
 npartitenetwork.cpp  npartitenetwork.h \
 percolationmessage.cpp \
 percolationmessage.h \
+percolationmapper.h percolationmapper.cpp \
 polypreference.cpp \
 polypreference.h \
 powerlawprobabilityfunction.cpp \

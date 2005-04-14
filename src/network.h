@@ -13,9 +13,11 @@
 #include <iostream>
 #include <cmath>
 #include <list>
+#include <algorithm>
 
 namespace Starsky {
 
+	
 /**
  * This handles all the general algorithms on undirected graphs.
  * Subclass this class to make specific types of networks (such as Erdos-Renyi random graphs).
@@ -471,6 +473,24 @@ class Network {
 	    static std::map<Node*, int> _node_ref_count;
 	    static std::map<Edge*, int> _edge_ref_count;
   };
+
+/**
+ * Here is a sorting functor for Network* objects
+ * Returns true if the first is >= the second
+ *
+ * Useful for STL algorithms
+ */
+struct networkptr_gt : public std::binary_function<Network*, Network*, bool> {
+  bool operator()(Network* x, Network* y) {
+    return !(*x < *y);
+  }
+};
+
+struct networkptr_lt : public std::binary_function<Network*, Network*, bool> {
+  bool operator()(Network* x, Network* y) {
+    return (*x < *y);
+  }
+};
 
 }
 #endif

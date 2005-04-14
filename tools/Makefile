@@ -1,5 +1,5 @@
 PROGS =  p2pmodeler spamgraph comgraph comdot graph_deg_dist hoodofmax \
-	triangleman merger comtree compsplit
+	triangleman merger comtree compsplit bpsim
 NMDIR = ../src
 LIBNM = $(NMDIR)/libnetmod.a
 

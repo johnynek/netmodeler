@@ -6,16 +6,6 @@
 using namespace std;
 using namespace Starsky;
 
-/**
- * Here is a sorting functor for Network* objects
- */
-struct network_comp : public binary_function<Network*, Network*, bool> {
-  bool operator()(Network* x, Network* y) {
-    return !(*x < *y);
-  }
-};
-
-
 void printCommunities(AgglomPart* ap, ostream& out, string prefix, const Network& net) {
     stringstream community;
     community << prefix << ".";
@@ -41,7 +31,8 @@ void printCommunities(AgglomPart* ap, ostream& out, string prefix, const Network
       vector<Network*> vcoms;
       vcoms.insert(vcoms.begin(), comms->begin(), comms->end());
       //Sort the vector
-      sort(vcoms.begin(), vcoms.end(), network_comp());
+      //networkprt_gt is in network.h
+      sort(vcoms.begin(), vcoms.end(), networkptr_gt());
       vector< Network* >::iterator comit;
       Network::NodePSet::const_iterator comnodeit;
       int com = 0;
@@ -120,7 +111,7 @@ int main(int argc, char* argv[]) {
   vector<Network*> vcoms;
   vcoms.insert(vcoms.begin(), comms->begin(), comms->end());
   //Sort the vector
-  sort(vcoms.begin(), vcoms.end(), network_comp());
+  sort(vcoms.begin(), vcoms.end(), networkptr_gt());
   while(iterations-- > 0 ) {
     stringstream name;
     name << argv[2] << "_com_" << argv[3] << "." << iterations;
