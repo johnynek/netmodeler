@@ -29,6 +29,9 @@ class NetworkFactory {
      * Read from a file.
      */
     virtual Network* create(std::istream& input);
+
+    virtual NodeFactory* getNodeFactory() { return _nf; }
+    virtual EdgeFactory* getEdgeFactory() { return _ef; }
   protected:
     NodeFactory* _nf;
     EdgeFactory* _ef;

@@ -29,6 +29,14 @@ class NodeFactory {
      * the same string
      */
     virtual Node* create(const std::string& node);
+
+    /**
+     * @param node String representation of the node.
+     * If we have not created this node yet, this function
+     * returns 0
+     */
+    virtual Node* getNode(const std::string& node);
+    
   protected:
     /**
      * Return the same as new Node() for

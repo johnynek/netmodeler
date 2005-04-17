@@ -563,6 +563,20 @@ const Network::ConnectedNodePSet& Network::getNeighbors(Node* node) const {
 }
 
 double Network::getClusterCoefficient(Node* node) const {
+  int degree = getDegree(node);
+  if( degree > 1 ) {
+    int triangles = getTriangles(node);
+    double dd = (double)degree;
+    double d2 = dd * (dd - 1.0)/2.0;
+    return (double)triangles/d2;
+  }
+  else {
+    //This is not well defined;
+    return -1.0;
+  }
+}
+#if 0
+double Network::getClusterCoefficient(Node* node) const {
     map<Node*, ConnectedNodePSet >::const_iterator i, j;
     ConnectedNodePSet::const_iterator k,l;
 
@@ -603,6 +617,7 @@ double Network::getClusterCoefficient(Node* node) const {
       return -1.0;
     }
 }
+#endif
 
 double Network::getClusterCoefficient(const NodePSet& nodes) const {
     double out = 0.0;
@@ -1231,7 +1246,102 @@ double Network::getTransitivity() const {
   getTrianglesWedges(triangles,wedges);
   return 3.0 * (double)triangles/(double)wedges;
 }
-	
+
+int Network::getTriangles(Node* node) const {
+    map<Node*, ConnectedNodePSet >::const_iterator i, j;
+    ConnectedNodePSet::const_iterator k,l;
+
+    /*
+     * edges counts the number of edges between the nodes that node is connected
+     * to.  The clustering coefficient is that number, divided by the maximum.
+     */
+    
+    int edges = 0;
+    int i_deg = 0;
+   
+    i = connection_map.find(node);
+    if( i != connection_map.end() ) {
+      i_deg = i->second.size();
+      if ( i_deg == 0 ) {
+          return 0;
+      }
+      if ( i_deg == 1 ) {
+          return 0;
+      }
+      for(k = i->second.begin(); k != i->second.end(); k++) {
+	l = k;
+	l++;
+	for(; l != i->second.end(); l++) {
+          j = connection_map.find(*k);
+          if( j != connection_map.end() ) {
+            edges += j->second.count(*l);
+ 	  }
+	}
+      }
+      return edges; 
+    }
+    else {
+      //Maybe we should throw an exception
+      return 0;
+    }
+}
+
+int Network::getTriangles(Edge* this_edge) const {
+
+  /*
+   * 
+   */
+  EdgeSet::const_iterator e2_it;
+  map<Node*, EdgeSet>::const_iterator emap_it;
+  int triangles = 0;
+  int wedges = 0;
+    //Look at the wedges from one end:
+    Node* this_node = this_edge->first;
+    Node* other1 = this_edge->second;
+    emap_it = _node_to_edges.find(this_node);
+    for( e2_it = emap_it->second.begin();
+	 e2_it != emap_it->second.end();
+	 e2_it++) {
+      if( *e2_it != this_edge ) {
+        //There is one more wedge:
+        wedges++;
+        //See if it is a triangle:
+	Node* other = (*e2_it)->getOtherNode(this_node);
+	map<Node*, ConnectedNodePSet>::const_iterator map_it;
+	map_it = connection_map.find(other);
+        if( map_it->second.find(other1) != map_it->second.end() ) {
+          //The "other" nodes are also connected.  This is a triangle:
+	  triangles++;
+	}
+      }
+    }
+    //Look at the wedges from the other end:
+    this_node = this_edge->second;
+    other1 = this_edge->first;
+    emap_it = _node_to_edges.find(this_node);
+    for( e2_it = emap_it->second.begin();
+	 e2_it != emap_it->second.end();
+	 e2_it++) {
+      if( *e2_it != this_edge ) {
+        //There is one more wedge:
+        wedges++;
+        //See if it is a triangle:
+	Node* other = (*e2_it)->getOtherNode(this_node);
+	map<Node*, ConnectedNodePSet>::const_iterator map_it;
+	map_it = connection_map.find(other);
+        if( map_it->second.find(other1) != map_it->second.end() ) {
+          //The "other" nodes are also connected.  This is a triangle:
+	  triangles++;
+	}
+      }
+    }
+  //We saw the triangles 2 times, once
+  //from one "end" once from the other
+  //reduce the number:
+  triangles /= 2;
+  return triangles;
+}
+
 void Network::getTrianglesWedges(int& triangles, int& wedges) const {
 
   /*

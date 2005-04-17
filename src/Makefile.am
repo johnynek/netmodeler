@@ -1,3 +1,7 @@
+netmodeler.h : 
+	rm -f netmodeler.h;
+	ls *.h | sed -e 's/\(.*\)/#include "\1"/' > netmodeler.h
+
 noinst_LIBRARIES = libnetmod.a
 noinst_PROGRAMS = netmodeler
 netmodeler_SOURCES = main.cpp
@@ -140,6 +144,3 @@ weightednetworkfactory.h weightednetworkfactory.cpp
 
 .PHONY : netmodeler.h
 
-netmodeler.h : 
-	rm netmodeler.h
-	ls *.h | sed -e 's/\(.*\)/#include "\1"/' > netmodeler.h

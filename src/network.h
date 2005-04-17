@@ -78,6 +78,22 @@ class Network {
 	 * Empties the network and deletes all the Node*
 	 */
 	virtual void clear();
+	/**
+	 * Use STL algorithm for_each on all the nodes
+	 */
+	template <class T>
+	T forEachNode(T fun)
+	{
+          return for_each(node_set.begin(), node_set.end(), fun);
+        }
+	/**
+	 * Use STL algorithm for_each on all the edges 
+	 */
+	template <class T>
+	T forEachEdge(T fun)
+	{
+          return for_each(edge_set.begin(), edge_set.end(), fun);
+        }
         /**
 	 * This measures the correlation of degrees at either ends of edges.
 	 * @see cond-mat/0205405
@@ -361,6 +377,15 @@ class Network {
 	virtual double getTransitivity() const;
 
 	/**
+	 * @return the number of triangle that involve this node
+	 */
+	virtual int getTriangles(Node* n) const;
+
+	/**
+	 * @return the number of triangles that contain this edge
+	 */
+	virtual int getTriangles(Edge* e) const;
+	/**
 	 * Returns the number of triangles and wedges in the graph
 	 * @param triangles pass-by-reference count of the number of triangles
 	 * @param wedges pass-by-reference count of the number of wedges
@@ -473,24 +498,6 @@ class Network {
 	    static std::map<Node*, int> _node_ref_count;
 	    static std::map<Edge*, int> _edge_ref_count;
   };
-
-/**
- * Here is a sorting functor for Network* objects
- * Returns true if the first is >= the second
- *
- * Useful for STL algorithms
- */
-struct networkptr_gt : public std::binary_function<Network*, Network*, bool> {
-  bool operator()(Network* x, Network* y) {
-    return !(*x < *y);
-  }
-};
-
-struct networkptr_lt : public std::binary_function<Network*, Network*, bool> {
-  bool operator()(Network* x, Network* y) {
-    return (*x < *y);
-  }
-};
 
 }
 #endif
