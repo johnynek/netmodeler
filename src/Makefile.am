@@ -40,6 +40,7 @@ doubleprefatnetwork.h \
 dynamicnetwork.h \
 edge.cpp \
 edge.h \
+edgefactory.h \
 emailnetwork.cpp \
 emailnetwork.h \
 exppreference.cpp \
@@ -73,9 +74,11 @@ mrucache.cpp \
 mrucache.h \
 network.cpp \
 network.h \
+networkfactory.h networkfactory.cpp \
 newmancom.h newmancom.cpp \
 node.h \
 node.cpp \
+nodefactory.h nodefactory.cpp \
 noisystardnet.h \
 noisystardnet.cpp \
 npartitenetwork.cpp  npartitenetwork.h \
@@ -132,7 +135,11 @@ walkandpercmessage.h \
 walkandsitepercmessage.cpp \
 walkandsitepercmessage.h \
 weightednetwork.h \
-weightednetwork.cpp
+weightednetwork.cpp \
+weightednetworkfactory.h weightednetworkfactory.cpp
+
+.PHONY : netmodeler.h
 
 netmodeler.h : 
+	rm netmodeler.h
 	ls *.h | sed -e 's/\(.*\)/#include "\1"/' > netmodeler.h

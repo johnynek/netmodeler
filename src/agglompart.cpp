@@ -3,6 +3,10 @@
 using namespace std;
 using namespace Starsky;
 
+AgglomPart::AgglomPart() {
+  _weighted = false;
+}
+
 set<Network*>* AgglomPart::partition(const Network& input) {
 
   vector<double> q_t;
@@ -48,14 +52,29 @@ int AgglomPart::getCommunities(const Network& net, std::vector<double>& q_t,
   Network::EdgeSet::const_iterator e_it;
   int com1, com2;
   double e_total = 0.0;
-  for(e_it = edge_set.begin();
+  //This is the only difference in the wieghted version of the algorithm:
+  if( _weighted == false ) {
+    for(e_it = edge_set.begin();
       e_it != edge_set.end();
       e_it++) {
-    com1 = node_community[ (*e_it)->first ];
-    com2 = node_community[ (*e_it)->second ];
-    e_ij[com1][com2] += 1.0;
-    e_ij[com2][com1] += 1.0;
-    e_total += 2.0;
+      com1 = node_community[ (*e_it)->first ];
+      com2 = node_community[ (*e_it)->second ];
+      e_ij[com1][com2] += 1.0;
+      e_ij[com2][com1] += 1.0;
+      e_total += 2.0;
+    }
+  }
+  else {
+    for(e_it = edge_set.begin();
+      e_it != edge_set.end();
+      e_it++) {
+      double weight = (*e_it)->getWeight();
+      com1 = node_community[ (*e_it)->first ];
+      com2 = node_community[ (*e_it)->second ];
+      e_ij[com1][com2] += weight;
+      e_ij[com2][com1] += weight;
+      e_total += weight + weight;
+    }
   }
   //Normalize e_ij:
   for(int i = 0; i < e_ij.size(); i++) {
@@ -178,6 +197,11 @@ set<Network*>* AgglomPart::getCommunity(const Network& net, int step,
     }
   }
   return out;
+}
+
+void AgglomPart::useWeights(bool weights)
+{
+  _weighted = weights;
 }
 
 void AgglomPart::update(std::map<Node*, int>& community_map,

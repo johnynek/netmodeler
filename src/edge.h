@@ -23,6 +23,12 @@ namespace Starsky {
      * not matter.  @see Starsky::DirectedNode
      */
     Edge (Node * start = 0, Node * end = 0, double a_weight=1.0);
+    /**
+     * Make an edge with the given attributes.  This
+     * edge only supports a weight (double in the string)
+     */
+    Edge(Node* start, Node* end, const std::string& attrs);
+
     virtual ~Edge() { };
     /**
      * @param start

@@ -3,6 +3,8 @@
 
 #include <algorithm>
 
+#include "optionparser.h"
+
 using namespace std;
 using namespace Starsky;
 
@@ -62,48 +64,74 @@ int main(int argc, char* argv[]) {
 
   if( argc < 4 ) {
     cout << "usage: " << argv[0]
-	 << " input_file.nm outfile method [iterations] [seed] [prob]" << endl;
+	 << " input outfile method [iterations] [seed] [prob]" << endl;
     return 0;
   }
-  
-  Network* net;
-  if( string(argv[1]) == string("-") ) {
-    net = new Network(cin);
-  }
-  else {
-    ifstream input(argv[1]);
-    net = new Network(input);
-  }
+  OptionParser op;
+  vector<string> opts;
+  //Here are the default ordering of options:
+  opts.push_back("input");
+  opts.push_back("outfile");
+  opts.push_back("method");
+  opts.push_back("iterations");
+  opts.push_back("seed");
+  opts.push_back("prob");
 
+  map<string, string> popts = op.getOpts(argc, argv, opts);
+  map<string,string>::iterator mit;
+  
   int iterations = 1;
-  if( argc > 4 ) {
-    iterations = atoi(argv[4]);
+  mit = popts.find("iterations");
+  if( mit != popts.end() ) {
+    //We have this option:
+    iterations = atoi( popts["iteration"].c_str() );
   }
   int seed = -1;
-  if( argc > 5 ) {
-    seed = atoi(argv[5]);
+  mit = popts.find("seed");
+  if( mit != popts.end() ) {
+    //We have this option:
+    seed = atoi( popts["seed"].c_str() );
   }
+  
   double prob;
-  if( argc > 6 ) {
-    prob = atof(argv[6]);
-  }
-  else {
-    prob = 0.0;
+  mit = popts.find("prob");
+  if( mit != popts.end() ) {
+    //We have this option:
+    prob = atof( popts["prob"].c_str() );
   }
   Ran1Random r(seed);
     /**
      * Here is where we select which community finding algorithm to use
      */
   AgglomPart* comfinder = 0;
-  if( string(argv[3]) == "Newman" ) {
+  if( popts["method"] == "Newman" ) {
     NewmanCom nm;
     comfinder = &nm;
   }
   else {
-    RandAgPart rap(r,argv[3],prob);
+    RandAgPart rap(r, popts["method"] ,prob);
     comfinder = &rap;
   }
- 
+  
+  //Here we can choose what kind of network to use:
+  NetworkFactory* nf;
+  mit = popts.find("weighted");
+  if( mit != popts.end() ) {
+    nf = new WeightedNetworkFactory();
+    comfinder->useWeights(true);
+  }
+  else {
+    //Here is unweighted:
+    nf = new NetworkFactory();
+  }
+  Network* net;
+  if( popts["input"] == "-" ) {
+    net = nf->create(cin);
+  }
+  else {
+    ifstream input( popts["input"].c_str() );
+    net = nf->create(input);
+  }
   Network& my_net = *net;
  
   ComponentPart cp;
@@ -114,7 +142,7 @@ int main(int argc, char* argv[]) {
   sort(vcoms.begin(), vcoms.end(), networkptr_gt());
   while(iterations-- > 0 ) {
     stringstream name;
-    name << argv[2] << "_com_" << argv[3] << "." << iterations;
+    name << popts["outfile"] << "_com_" << popts["method"] << "." << iterations;
     cout << name.str() << endl;
     ofstream out(name.str().c_str());
     //Look on components:
@@ -127,6 +155,9 @@ int main(int argc, char* argv[]) {
       printCommunities(comfinder, out, com.str(), *this_component );
     }
   }
+  //Delete the memory we allocated:
   cp.deletePartition(comms);
+  delete nf;
+  delete net;
   return 1;
 }

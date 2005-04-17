@@ -1,17 +1,21 @@
 #include "edge.h"
+#include <algorithm>
+#include <sstream>
+
 using namespace Starsky;
 
 Edge::Edge (Node * start, Node * end, double a_weight)
 : weight(a_weight)
 {
-  if( start < end ) {
-    first = start;
-    second = end;
-  }
-  else {
-    first = end;
-    second = start;
-  }
+  first = std::min(start, end);
+  second = std::max(start, end);
+}
+
+Edge::Edge(Node* start, Node* end, const std::string& attr)
+{
+  first = std::min(start, end);
+  second = std::max(start, end);
+  weight = atof( attr.c_str() );
 }
 
 bool Edge::connects (Node * start, Node * end) const
@@ -49,7 +53,13 @@ void Edge::setWeight(double a_weight)
 }
 
 std::string Edge::toString() const {
-  return first->toString() + " : " + second->toString();
+  std::stringstream out;
+  out << first->toString() << " : " <<
+	 second->toString();
+  if( weight != 1.0 ) {
+    out << " : " << weight;
+  }
+  return out.str();
 }
 
 bool Edge::operator<(const Edge& b) const

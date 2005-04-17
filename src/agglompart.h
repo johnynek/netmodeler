@@ -12,6 +12,7 @@ namespace Starsky {
 class AgglomPart : public INetworkPartitioner {
 
   public:
+    AgglomPart();
     /**
      * implements INetworkPartitioner
      */
@@ -27,6 +28,9 @@ class AgglomPart : public INetworkPartitioner {
    * you can also use getCommunity to get the network that has
    * all edges BETWEEN communities removed, leaving only the
    * edges inside communities
+   * @param net the Network to find the communities for
+   * @param q the values of Modularity before step i
+   * @param joins the pair of communities to join at step i
    */
     virtual int getCommunities(const Network& net, std::vector<double>& q,
 		   std::vector< std::pair<int,int> >& joins);
@@ -52,6 +56,11 @@ class AgglomPart : public INetworkPartitioner {
 		               const std::vector< std::vector<double> >& e_ij,
 			       const std::vector< double >& a_i,
 			       int& com1, int& com2) = 0;
+    /**
+     * Use the weights of the edges in computing modularity
+     * The default is to ignore the weights
+     */
+    virtual void useWeights(bool weights);
 	 
   protected:
     /**
@@ -60,7 +69,7 @@ class AgglomPart : public INetworkPartitioner {
     void update(std::map<Node*, int>& community_map,
 		std::vector< std::vector<double> >& e_ij,
 		std::vector< double >& a_i, int com1, int com2);
-	
+    double _weighted;
 };
 	
 }
