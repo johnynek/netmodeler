@@ -37,12 +37,24 @@ Node* Edge::getOtherNode (Node * start) const
   }
 }
 
+std::string Edge::getAttributes() const
+{
+  if( weight != 1.0 ) {
+    std::stringstream attrs;
+    attrs << getWeight();
+    return attrs.str();
+  }
+  else {
+    return "";
+  }
+}
+
 bool Edge::hasNode (Node * node) const
 {
   return (first == node) || (second == node);
 }
 
-double Edge::getWeight()
+double Edge::getWeight() const
 {
   return weight;
 }

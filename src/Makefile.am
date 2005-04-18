@@ -45,6 +45,7 @@ dynamicnetwork.h \
 edge.cpp \
 edge.h \
 edgefactory.h \
+edgerewirer.h edgerewirer.cpp \
 emailnetwork.cpp \
 emailnetwork.h \
 exppreference.cpp \
@@ -64,6 +65,8 @@ graphmatrix.cpp graphmatrix.h \
 incrementable.h \
 inetworkpartitioner.h inetworkpartitioner.cpp \
 inetworkmapper.h \
+inetworkmonitor.h \
+inodeselector.h \
 linearpreference.cpp \
 linearpreference.h \
 magnetmessage.h \
@@ -132,6 +135,7 @@ trustgraphmatrix.h \
 trustgraphmatrix.cpp \
 uniformattachnet.h \
 uniformattachnet.cpp \
+uniformnodeselector.h uniformnodeselector.cpp \
 vazquezdirectednetwork.cpp \
 vazquezdirectednetwork.h \
 walkandpercmessage.cpp \

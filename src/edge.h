@@ -41,12 +41,16 @@ namespace Starsky {
      */
     Node * getOtherNode (Node * start) const;
     /**
+     * Returns the attributes of this edge.  Useful in EdgeFactories
+     */
+    virtual std::string getAttributes() const;
+    /**
      * @return true of this Node is first or second
      */
     bool hasNode (Node *) const;
     virtual std::string toString() const;
 
-    double getWeight();
+    double getWeight() const;
     void setWeight(double a_weight);
 			
     virtual bool operator<(const Edge& a) const;

@@ -60,7 +60,7 @@ int main(int argc, char* argv[])
     for(int k = 0; k < count; k++) {
    
       Network net2 = net;
-      bp->map(net2);
+      bp->map(&net2);
       //Here are the number of edges that remain after percolation
       edges += net2.getEdges().size();
       //Get the components:

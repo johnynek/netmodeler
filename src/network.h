@@ -5,6 +5,7 @@
 
 #include "node.h"
 #include "edge.h"
+#include "inetworkmonitor.h"
 #include "superstring.h"
 #include <set>
 #include <map>
@@ -74,6 +75,10 @@ class Network {
 	 * @return false if the Node* is already in the network, else true
 	 */
 	virtual bool add(Node* node);
+	/**
+	 * @param INetworkMonitor to add:
+	 */
+	virtual void add(INetworkMonitor* nm);
 	/**
 	 * Empties the network and deletes all the Node*
 	 */
@@ -436,6 +441,8 @@ class Network {
 	 * @return the number of edges removed by this operation
 	 */
 	virtual int remove(const NodePSet& aset);
+	
+	virtual void remove(INetworkMonitor* nm);
         /**
 	 * the STL uses < to sort inside of sets, we return set<Network>,
 	 * so we need this operator
@@ -475,6 +482,10 @@ class Network {
 	     * Holds the edges each node is involved with:
 	     */
 	    std::map<Node*, EdgeSet> _node_to_edges;
+	    /**
+	     * Holds all the network monitors:
+	     */
+            std::list<INetworkMonitor*> _net_mon;
 	    /**
 	     * sometimes we need to return a const reference to an empty node set
 	     */

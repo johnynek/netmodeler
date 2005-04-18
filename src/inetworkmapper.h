@@ -19,7 +19,7 @@ namespace Starsky {
 class INetworkMapper {
 
   public:
-    virtual void map(Network& net) = 0;
+    virtual void map(Network* net) = 0;
 	
 };
 	

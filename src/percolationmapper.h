@@ -19,7 +19,7 @@ class PercolationMapper : public INetworkMapper {
      * This "percolates" the given network
      * modifying it in place.
      */
-    virtual void map(Network& net);
+    virtual void map(Network* net);
 
   protected:
     double _bond_p;

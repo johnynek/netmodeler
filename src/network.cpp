@@ -41,7 +41,13 @@ bool Network::add(const Edge& e) {
 }
 
 bool Network::add(Edge* edge) {
+    
+    list<INetworkMonitor*>::iterator nm_it;
+    for(nm_it = _net_mon.begin(); nm_it != _net_mon.end(); nm_it++) {
+      (*nm_it)->preEdgeAdd(edge);
+    }
 
+    bool success = false;
     if( edge_set.count(edge) == 0 ) {
       //This is a new edge:
      
@@ -61,20 +67,38 @@ bool Network::add(Edge* edge) {
 	_node_to_edges[edge->first].insert(edge);
 	_node_to_edges[edge->second].insert(edge);
       }
-      return result.second;
+      success = result.second;
     }
     else {
-      return false;
+      success = false;
     }
+    for(nm_it = _net_mon.begin(); nm_it != _net_mon.end(); nm_it++) {
+      (*nm_it)->postEdgeAdd(edge, success);
+    }
+    return success;
 }
 
 bool Network::add(Node* node) {
+    list<INetworkMonitor*>::iterator nm_it;
+    for(nm_it = _net_mon.begin(); nm_it != _net_mon.end(); nm_it++) {
+      (*nm_it)->preNodeAdd(node);
+    }
     pair<NodePSet::iterator, bool> result;
     result = node_set.insert(node);
-    if(result.second == true) {
+    bool success = result.second;
+    if(success) {
         incrementNodeRefCount(node);
     }
+    for(nm_it = _net_mon.begin(); nm_it != _net_mon.end(); nm_it++) {
+      (*nm_it)->postNodeAdd(node, success);
+    }
     return result.second;
+}
+
+void Network::add(INetworkMonitor* nm)
+{
+  _net_mon.push_back(nm);
+  nm->postAdd(this);
 }
 
 void Network::clear() {
@@ -1595,8 +1619,14 @@ int Network::remove(const Edge& edge) {
 }
 
 int Network::remove(Edge* e_p) {
+  list<INetworkMonitor*>::iterator nm_it;
+  for(nm_it = _net_mon.begin(); nm_it != _net_mon.end(); nm_it++) {
+    (*nm_it)->preEdgeRemove(e_p);
+  }
   int return_val = edge_set.erase( e_p );
+  bool success = false;
   if( return_val != 0) { 
+    success = true;
     connection_map[e_p->first].erase(e_p->second);
     connection_map[e_p->second].erase(e_p->first);
     _node_to_edges[e_p->first].erase(e_p);
@@ -1604,12 +1634,21 @@ int Network::remove(Edge* e_p) {
     //remove a reference to the edge:
     decrementEdgeRefCount(e_p);
   }
+  for(nm_it = _net_mon.begin(); nm_it != _net_mon.end(); nm_it++) {
+    (*nm_it)->postEdgeRemove(e_p, success );
+  }
   return return_val;
 }
 
 int Network::remove(Node* node) {
+  list<INetworkMonitor*>::iterator nm_it;
+  for(nm_it = _net_mon.begin(); nm_it != _net_mon.end(); nm_it++) {
+    (*nm_it)->preNodeRemove(node);
+  }
   int removed_edges = 0;
+  bool success = false;
   if( node_set.erase(node) != 0) {
+    success = true;
     EdgeSet::iterator e_it;
     map<Node*, EdgeSet>::iterator ne_it = _node_to_edges.find(node);
     if( ne_it != _node_to_edges.end() ) {
@@ -1622,6 +1661,9 @@ int Network::remove(Node* node) {
     //Get rid of one of the references to this node, possibly deleting it.
     decrementNodeRefCount(node);
   }
+  for(nm_it = _net_mon.begin(); nm_it != _net_mon.end(); nm_it++) {
+    (*nm_it)->postNodeRemove(node, success);
+  }
   return removed_edges;
 }
 
@@ -1632,6 +1674,19 @@ int Network::remove(const NodePSet& nodes) {
         ret += remove(*it);
     }
     return ret;
+}
+
+void Network::remove(INetworkMonitor* nm) {
+  list<INetworkMonitor*>::iterator nmit;
+  for(nmit = _net_mon.begin(); nmit != _net_mon.end(); nmit++) {
+    if( *nmit == nm ) {
+      break;
+    }
+  }
+  if( nmit != _net_mon.end() ) {
+    //Just remove this guy:
+    _net_mon.erase(nmit);
+  }
 }
 
 int Network::removeAndCluster(Node* n) {
