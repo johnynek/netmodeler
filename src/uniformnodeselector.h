@@ -20,8 +20,8 @@ class UniformNodeSelector : public INodeSelector, public INetworkMonitor {
     UniformNodeSelector(Random& rand) : _rand(rand) { }
     virtual void selectFrom(Network* net) { net->add(this); }
     virtual void postAdd(Network* net);
-    virtual void postNodeAdd(Node* add, bool success);
-    virtual void postNodeRemove(Node* rem, bool success);
+    virtual void postNodeAdd(Node* add);
+    virtual void postNodeRemove(Node* rem);
     virtual Node* select();
     virtual Node* select(Node* avoid);
 

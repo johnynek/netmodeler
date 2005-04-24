@@ -10,18 +10,15 @@ void UniformNodeSelector::postAdd(Network* net)
   _nodes.insert( _nodes.begin(), _my_net->getNodes().begin(), _my_net->getNodes().end() );
 }
 
-void UniformNodeSelector::postNodeAdd(Node* add, bool success)
+void UniformNodeSelector::postNodeAdd(Node* add)
 {
-  if( success ) {
     //This is a new node:
     _nodes.push_back( add );
-  }
 }
 
-void UniformNodeSelector::postNodeRemove(Node* add, bool success)
+void UniformNodeSelector::postNodeRemove(Node* add)
 {
   //Remove this node:
-  if( success ) {
     vector<Node*>::iterator nit;
     for(nit = _nodes.begin(); nit != _nodes.end(); nit++) {
       if( *nit == add ) {
@@ -29,7 +26,6 @@ void UniformNodeSelector::postNodeRemove(Node* add, bool success)
         break;
       }
     }
-  }
 }
 
 Node* UniformNodeSelector::select()

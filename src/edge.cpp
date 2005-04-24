@@ -1,5 +1,6 @@
 #include "edge.h"
 #include <algorithm>
+#include <iostream>
 #include <sstream>
 
 using namespace Starsky;
@@ -65,6 +66,7 @@ void Edge::setWeight(double a_weight)
 }
 
 std::string Edge::toString() const {
+  //std::cout << "About to call Edge::toString" << std::endl;
   std::stringstream out;
   out << first->toString() << " : " <<
 	 second->toString();

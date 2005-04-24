@@ -26,13 +26,13 @@ class INetworkMonitor {
      */
     virtual void postAdd(Network* net) { };
     virtual void preNodeAdd(Node* newnode) { };
-    virtual void postNodeAdd(Node* newnode, bool success) { };
+    virtual void postNodeAdd(Node* newnode) { };
     virtual void preNodeRemove(Node* node) { };
-    virtual void postNodeRemove(Node* node, bool success) { };
+    virtual void postNodeRemove(Node* node) { };
     virtual void preEdgeAdd(Edge* newedge) { };
-    virtual void postEdgeAdd(Edge* newedge, bool success) { };
+    virtual void postEdgeAdd(Edge* newedge) { };
     virtual void preEdgeRemove(Edge* edge) { };
-    virtual void postEdgeRemove(Edge* edge, bool success) { };
+    virtual void postEdgeRemove(Edge* edge) { };
 };
 
 }

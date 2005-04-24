@@ -1,3 +1,5 @@
+.PHONY : netmodeler.h
+
 netmodeler.h : 
 	rm -f netmodeler.h;
 	ls *.h | sed -e 's/\(.*\)/#include "\1"/' > netmodeler.h
@@ -46,6 +48,7 @@ edge.cpp \
 edge.h \
 edgefactory.h \
 edgerewirer.h edgerewirer.cpp \
+edgeswapper.h edgeswapper.cpp \
 emailnetwork.cpp \
 emailnetwork.h \
 exppreference.cpp \
@@ -146,5 +149,4 @@ weightednetwork.h \
 weightednetwork.cpp \
 weightednetworkfactory.h weightednetworkfactory.cpp
 
-.PHONY : netmodeler.h
 

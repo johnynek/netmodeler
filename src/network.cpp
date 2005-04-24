@@ -42,14 +42,13 @@ bool Network::add(const Edge& e) {
 
 bool Network::add(Edge* edge) {
     
-    list<INetworkMonitor*>::iterator nm_it;
-    for(nm_it = _net_mon.begin(); nm_it != _net_mon.end(); nm_it++) {
-      (*nm_it)->preEdgeAdd(edge);
-    }
-
     bool success = false;
     if( edge_set.count(edge) == 0 ) {
       //This is a new edge:
+      list<INetworkMonitor*>::iterator nm_it;
+      for(nm_it = _net_mon.begin(); nm_it != _net_mon.end(); nm_it++) {
+        (*nm_it)->preEdgeAdd(edge);
+      }
      
       //Account for the edges and nodes
       pair< EdgeSet::iterator, bool> result;
@@ -68,17 +67,19 @@ bool Network::add(Edge* edge) {
 	_node_to_edges[edge->second].insert(edge);
       }
       success = result.second;
+      //Tell the network monitors
+      for(nm_it = _net_mon.begin(); nm_it != _net_mon.end(); nm_it++) {
+        (*nm_it)->postEdgeAdd(edge);
+      }
     }
     else {
       success = false;
-    }
-    for(nm_it = _net_mon.begin(); nm_it != _net_mon.end(); nm_it++) {
-      (*nm_it)->postEdgeAdd(edge, success);
     }
     return success;
 }
 
 bool Network::add(Node* node) {
+  if( node_set.find(node) == node_set.end() ) {
     list<INetworkMonitor*>::iterator nm_it;
     for(nm_it = _net_mon.begin(); nm_it != _net_mon.end(); nm_it++) {
       (*nm_it)->preNodeAdd(node);
@@ -90,9 +91,14 @@ bool Network::add(Node* node) {
         incrementNodeRefCount(node);
     }
     for(nm_it = _net_mon.begin(); nm_it != _net_mon.end(); nm_it++) {
-      (*nm_it)->postNodeAdd(node, success);
+      (*nm_it)->postNodeAdd(node);
     }
     return result.second;
+  }
+  else {
+    //The node was already there:
+  }
+  return false;
 }
 
 void Network::add(INetworkMonitor* nm)
@@ -1619,36 +1625,42 @@ int Network::remove(const Edge& edge) {
 }
 
 int Network::remove(Edge* e_p) {
-  list<INetworkMonitor*>::iterator nm_it;
-  for(nm_it = _net_mon.begin(); nm_it != _net_mon.end(); nm_it++) {
-    (*nm_it)->preEdgeRemove(e_p);
-  }
-  int return_val = edge_set.erase( e_p );
-  bool success = false;
-  if( return_val != 0) { 
-    success = true;
-    connection_map[e_p->first].erase(e_p->second);
-    connection_map[e_p->second].erase(e_p->first);
-    _node_to_edges[e_p->first].erase(e_p);
-    _node_to_edges[e_p->second].erase(e_p);
-    //remove a reference to the edge:
-    decrementEdgeRefCount(e_p);
-  }
-  for(nm_it = _net_mon.begin(); nm_it != _net_mon.end(); nm_it++) {
-    (*nm_it)->postEdgeRemove(e_p, success );
+  EdgeSet::iterator eit = edge_set.find(e_p);
+  int return_val = 0;
+  if( eit != edge_set.end() ) {
+    //This edge is in the network	  
+    list<INetworkMonitor*>::iterator nm_it;
+    for(nm_it = _net_mon.begin(); nm_it != _net_mon.end(); nm_it++) {
+      (*nm_it)->preEdgeRemove(e_p);
+    }
+    return_val = edge_set.erase( e_p );
+    if( return_val != 0) { 
+      connection_map[e_p->first].erase(e_p->second);
+      connection_map[e_p->second].erase(e_p->first);
+      _node_to_edges[e_p->first].erase(e_p);
+      _node_to_edges[e_p->second].erase(e_p);
+    
+      for(nm_it = _net_mon.begin(); nm_it != _net_mon.end(); nm_it++) {
+        (*nm_it)->postEdgeRemove(e_p);
+      }
+      //remove a reference to the edge:
+      //This should be done last, other wise the postEdgeRemove may get
+      //a deleted pointer
+      decrementEdgeRefCount(e_p);
+    }
   }
   return return_val;
 }
 
 int Network::remove(Node* node) {
-  list<INetworkMonitor*>::iterator nm_it;
-  for(nm_it = _net_mon.begin(); nm_it != _net_mon.end(); nm_it++) {
-    (*nm_it)->preNodeRemove(node);
-  }
   int removed_edges = 0;
-  bool success = false;
-  if( node_set.erase(node) != 0) {
-    success = true;
+  NodePSet::iterator nit = node_set.find(node);
+  if( nit != node_set.end() ) {
+    list<INetworkMonitor*>::iterator nm_it;
+    for(nm_it = _net_mon.begin(); nm_it != _net_mon.end(); nm_it++) {
+      (*nm_it)->preNodeRemove(node);
+    }
+    node_set.erase(node);
     EdgeSet::iterator e_it;
     map<Node*, EdgeSet>::iterator ne_it = _node_to_edges.find(node);
     if( ne_it != _node_to_edges.end() ) {
@@ -1658,11 +1670,11 @@ int Network::remove(Node* node) {
     }
     _node_to_edges.erase(node);
     connection_map.erase(node);
+    for(nm_it = _net_mon.begin(); nm_it != _net_mon.end(); nm_it++) {
+      (*nm_it)->postNodeRemove(node);
+    }
     //Get rid of one of the references to this node, possibly deleting it.
     decrementNodeRefCount(node);
-  }
-  for(nm_it = _net_mon.begin(); nm_it != _net_mon.end(); nm_it++) {
-    (*nm_it)->postNodeRemove(node, success);
   }
   return removed_edges;
 }

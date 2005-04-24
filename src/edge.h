@@ -37,6 +37,12 @@ namespace Starsky {
      */
     virtual bool connects (Node * start, Node * end) const;
     /**
+     * @return true if this node is in this edge
+     */
+    virtual bool contains(Node* n) const {
+      return ((first == n) || (second == n));
+    };
+    /**
      * @return first if passed second, second if passed first, and 0 otherwise
      */
     Node * getOtherNode (Node * start) const;
