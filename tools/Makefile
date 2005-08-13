@@ -1,5 +1,5 @@
 PROGS =  p2pmodeler spamgraph comdot graph_deg_dist hoodofmax \
-	triangleman merger comtree compsplit bpsim noisycom
+	triangleman merger comtree compsplit bpsim noisycom trianglefilter
 LIBPROGS = comgraph
 LIBS = optionparser.o
 NMDIR = ../src
@@ -13,4 +13,4 @@ all : $(LIBS) $(LIBPROGS) $(PROGS)
 % : %.cpp $(LIBNM) $(LIBS)
 	g++ -O2 -o $@ $< -I$(NMDIR) $(LIBNM) $(LIBS) -lm
 clean :
-	rm $(PROGS)
+	rm $(PROGS) *.o

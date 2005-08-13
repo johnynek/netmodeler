@@ -1,4 +1,4 @@
-Netmodelet now uses the autoconf and automake build system.
+Netmodeler uses the autoconf and automake build system.
 
 You should be able to run ./configure && make to compile all the code and the
 test program netmodeler.  After that, you are on your own!

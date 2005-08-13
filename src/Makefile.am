@@ -134,6 +134,8 @@ spatialnode.cpp \
 spatialnode.h \
 superstring.cpp \
 superstring.h \
+trianglemapper.h \
+trianglemapper.cpp \
 trustgraphmatrix.h \
 trustgraphmatrix.cpp \
 uniformattachnet.h \
