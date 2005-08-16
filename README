@@ -1,7 +1,18 @@
 Netmodeler uses the autoconf and automake build system.
 
-You should be able to run ./configure && make to compile all the code and the
-test program netmodeler.  After that, you are on your own!
+There is a script called bootstrap.sh which should allow you to build
+everything (for those of us that have not bothered to understand
+autoconf).
+
+After running the bootstrap code, you may need to go into the src
+directory and type
+
+make netmodeler.h
+
+(Obviously the above is purely due to the author's autoconf/automake
+ignorance).
+
+After that, you are on your own!
 
 To rebuild some of the make files you may need to run bootstrap.sh
 (or the programs in that shell in that order).

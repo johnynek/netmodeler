@@ -18,14 +18,14 @@ void INetworkPartitioner::deletePartition(set<Network*>* part)
   delete part;
 }
 
-double INetworkPartitioner::modularityOf(set<Network*>& partition,
+double INetworkPartitioner::modularityOf(set<Network*>* partition,
 		                         const Network& orig)
 {
 
   //Now net_vec indexes the communities
   map<Node*, Network*> node_community;
   set<Network*>::const_iterator netit;
-  for(netit = partition.begin(); netit != partition.end(); netit++)
+  for(netit = partition->begin(); netit != partition->end(); netit++)
   {
     Network::NodePSet::const_iterator nit;
     const Network::NodePSet& nodes = (*netit)->getNodes();
@@ -51,10 +51,10 @@ double INetworkPartitioner::modularityOf(set<Network*>& partition,
   }
   //Normalize e_ij:
   set<Network*>::const_iterator netit2;
-  for(netit = partition.begin(); netit != partition.end(); netit++)
+  for(netit = partition->begin(); netit != partition->end(); netit++)
   {
     Network* ni = *netit;
-    for(netit2 = partition.begin(); netit2 != partition.end(); netit2++)
+    for(netit2 = partition->begin(); netit2 != partition->end(); netit2++)
     {
       Network* nj = *netit2;
       e_ij[ni][nj] /= e_total;
@@ -62,11 +62,11 @@ double INetworkPartitioner::modularityOf(set<Network*>& partition,
   }
   //Make a_i;
   map<Network*, double> a_i;
-  for(netit = partition.begin(); netit != partition.end(); netit++)
+  for(netit = partition->begin(); netit != partition->end(); netit++)
   {
     Network* ni = *netit;
     a_i[ni] = 0.0;
-    for(netit2 = partition.begin(); netit2 != partition.end(); netit2++)
+    for(netit2 = partition->begin(); netit2 != partition->end(); netit2++)
     {
       Network* nj = *netit2;
       a_i[ni] += e_ij[ni][nj];
@@ -75,7 +75,7 @@ double INetworkPartitioner::modularityOf(set<Network*>& partition,
   //We don't neccesarily start at Q=0;
   double q = 0.0;
   //for(int i = 0; i < e_ij.size(); i++) {
-  for(netit = partition.begin(); netit != partition.end(); netit++)
+  for(netit = partition->begin(); netit != partition->end(); netit++)
   {
     Network* i = *netit;
     q += e_ij[i][i] - a_i[i] * a_i[i];
@@ -85,7 +85,7 @@ double INetworkPartitioner::modularityOf(set<Network*>& partition,
 	
 }
 
-long INetworkPartitioner::distance(std::set<Network*>& A, std::set<Network*>& B,
+long INetworkPartitioner::distance(std::set<Network*>* A, std::set<Network*>* B,
 		        long& norm_a, long& norm_b)
 {
   //First we make some data structures:
@@ -93,7 +93,7 @@ long INetworkPartitioner::distance(std::set<Network*>& A, std::set<Network*>& B,
   set<Network*>::iterator nit;
   Network::NodePSet all_nodes;
   //Make the a_map
-  FOREACH(nit, A) {
+  FOREACH(nit, (*A)) {
     Network::NodePSet::iterator nodeit;
     FOREACH( nodeit, (*nit)->getNodes() ) {
       a_map[ *nodeit ] = *nit;
@@ -101,7 +101,7 @@ long INetworkPartitioner::distance(std::set<Network*>& A, std::set<Network*>& B,
     }
   }
   //Make the b_map
-  FOREACH(nit, B) {
+  FOREACH(nit, (*B)) {
     Network::NodePSet::iterator nodeit;
     FOREACH( nodeit, (*nit)->getNodes() ) {
       b_map[ *nodeit ] = *nit;

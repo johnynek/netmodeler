@@ -33,7 +33,7 @@ void printCommunities(AgglomPart* ap, ostream& out, string prefix, const Network
       //cout << "Getting best split"<< endl;
       set< Network* >* comms = ap->getCommunity(net, step, joins);
       //Double check the modularity:
-      double qmod = ap->modularityOf(*comms, net);
+      double qmod = ap->modularityOf(comms, net);
       cout << "mod: " << qmod << endl;
       //cout << "Got best split"<< endl;
       vector<Network*> vcoms;

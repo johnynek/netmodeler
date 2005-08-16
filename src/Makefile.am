@@ -86,6 +86,7 @@ network.cpp \
 network.h \
 networkfactory.h networkfactory.cpp \
 newmancom.h newmancom.cpp \
+nullpart.h \
 node.h \
 node.cpp \
 nodefactory.h nodefactory.cpp \

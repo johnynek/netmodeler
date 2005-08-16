@@ -20,7 +20,7 @@ class INetworkPartitioner {
    * Interface which Community finding algorithms
    * can subclass
    */
-   double modularityOf(std::set<Network*>& partition, const Network& orig);
+   double modularityOf(std::set<Network*>* partition, const Network& orig);
    /**
     * The caller of this function should delete this memory
     * when done (Network* and set<>*)
@@ -37,7 +37,7 @@ class INetworkPartitioner {
     * If one set of nodes is larger than the other, the matrix is 0
     * for any missing nodes.
     */
-   virtual long distance(std::set<Network*>& A, std::set<Network*>& B,
+   virtual long distance(std::set<Network*>* A, std::set<Network*>* B,
 		        long& norm_a, long& norm_b);
 };
 	
