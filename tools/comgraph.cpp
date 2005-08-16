@@ -8,8 +8,13 @@
 using namespace std;
 using namespace Starsky;
 
+#define DEBUG 0
+
 void printCommunities(AgglomPart* ap, ostream& out, string prefix, const Network& net) {
     stringstream community;
+#ifdef DEBUG
+    cout << prefix << endl;
+#endif
     community << prefix << ".";
     //Print out the communities:
     vector< pair<int, int> > joins;
@@ -21,8 +26,9 @@ void printCommunities(AgglomPart* ap, ostream& out, string prefix, const Network
 	      " join(" << joins[i].first << ", " << joins[i].second << ")" << endl;;
     }
     cout << "stepmax: " << step << endl;
-    */
-    if( q_t[step] > 0.25 ) {
+   */
+   if( q_t[step] > 0.25 ) {
+   // if( true ) {
       out << "#" << prefix << "=" << q_t[step] << endl;
       //cout << "Getting best split"<< endl;
       set< Network* >* comms = ap->getCommunity(net, step, joins);
@@ -84,7 +90,7 @@ int main(int argc, char* argv[]) {
   mit = popts.find("iterations");
   if( mit != popts.end() ) {
     //We have this option:
-    iterations = atoi( popts["iteration"].c_str() );
+    iterations = atoi( popts["iterations"].c_str() );
   }
   int seed = -1;
   mit = popts.find("seed");
@@ -105,12 +111,10 @@ int main(int argc, char* argv[]) {
      */
   AgglomPart* comfinder = 0;
   if( popts["method"] == "Newman" ) {
-    NewmanCom nm;
-    comfinder = &nm;
+    comfinder = new NewmanCom();
   }
   else {
-    RandAgPart rap(r, popts["method"] ,prob);
-    comfinder = &rap;
+    comfinder = new RandAgPart(r, popts["method"] ,prob);
   }
   
   //Here we can choose what kind of network to use:
@@ -159,5 +163,6 @@ int main(int argc, char* argv[]) {
   cp.deletePartition(comms);
   delete nf;
   delete net;
+  delete comfinder;
   return 1;
 }
