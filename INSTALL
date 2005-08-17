@@ -1,0 +1,20 @@
+There is no "installing" netmodeler as of yet.  Perhaps someone will
+make a shared library build of libnetmod, and we will all celebrate,
+but in the mean time, it is all static builds all from the build
+directory.
+
+To write your own code you just use any parts you would like, then using the
+compiler, link to the netmodlib.a.  For g++ (the GNU C++ compiler), you could
+do the following:
+
+First compile your my.cpp:
+g++ -c my.cpp -I /path/to/headers/
+Then link it:
+g++ -o test my.o /path/to/library/libnetmod.a
+
+now, the executible "test" should be your code.
+
+You may need to give a complete path to the headers (which is represented in
+the above example as /path/to/headers/) and you may need to give the complete
+path to the netmodlib.a file (which is represented above as
+/path/to/library/).

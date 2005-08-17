@@ -14,9 +14,6 @@ ignorance).
 
 After that, you are on your own!
 
-To rebuild some of the make files you may need to run bootstrap.sh
-(or the programs in that shell in that order).
-
 The above should make the netmodlib.a library and the netmodeler executable from
 the main.cpp in the main library.  This main.cpp probably is not exactly what
 you want.  Check the examples directory for simpler examples.
@@ -36,6 +33,19 @@ You may need to give a complete path to the headers (which is represented in
 the above example as /path/to/headers/) and you may need to give the complete
 path to the netmodlib.a file (which is represented above as
 /path/to/library/).
+
+======CODE DOCUMENTATION======
+
+The source code is annotated with doxygen (Javadoc) style comments.  Not all
+of the code is properly documented, but much of it is.  To produce this
+documentation, go into the doc directory, and type:
+
+doxygen netmodeler.doxy
+
+Of course, you will need doxygen installed.  This will produce HTML and latex
+documentation that should help you get an idea of the structure of the code.
+If you are lost, I recommend looking at the software in the tools directory
+for examples of code that does something useful.
 
 Good Luck,
 POB
