@@ -8,7 +8,22 @@
 using namespace std;
 using namespace Starsky;
 
+#define FOREACH(it, col) for(it = col.begin(); it != col.end(); it++)
+
 #define DEBUG 0
+
+long expected_comnorm(set<Network*>* part)
+{
+  set<Network*>::iterator pit;
+  long nodes = 0, norm = 0;
+  int temp_node;
+  FOREACH(pit, (*part)) {
+    temp_node = (*pit)->getNodes().size();
+    nodes += temp_node;
+    norm += temp_node * temp_node;
+  }
+  return (norm - nodes)/2;
+}
 
 void printCommunities(AgglomPart* ap, ostream& out, string prefix, const Network& net) {
     stringstream community;
@@ -27,11 +42,22 @@ void printCommunities(AgglomPart* ap, ostream& out, string prefix, const Network
     }
     cout << "stepmax: " << step << endl;
    */
-   if( q_t[step] > 0.25 ) {
-   // if( true ) {
+   //if( q_t[step] > 0.25 ) {
+   if( net.getNodes().size() > 1 ) {
       out << "#" << prefix << "=" << q_t[step] << endl;
       //cout << "Getting best split"<< endl;
       set< Network* >* comms = ap->getCommunity(net, step, joins);
+#if 1
+      //Compute the distance to the Newman partition:
+      NewmanCom ncom;
+      set<Network*>* newman_c = ncom.partition( net );
+      long n_m, c_m;
+      long dist = ncom.distance(newman_c, comms, n_m, c_m);
+      out << "#|C| = " << c_m << endl << "#|N| = " << n_m << endl << "#|N-C| = " << dist << endl;
+      out << "#Exp(|C|) = " << expected_comnorm(comms) << endl << "#Exp(|N|) = "
+              << expected_comnorm(newman_c) << endl;
+      ncom.deletePartition(newman_c);
+#endif
       //Double check the modularity:
       double qmod = ap->modularityOf(comms, net);
       cout << "mod: " << qmod << endl;
@@ -59,31 +85,38 @@ void printCommunities(AgglomPart* ap, ostream& out, string prefix, const Network
         }
         out << endl;
 	//Recurse:
-	printCommunities(ap, out, this_com.str(), *this_comnet);
+	//printCommunities(ap, out, this_com.str(), *this_comnet);
       }
       //Free up the memory
       ap->deletePartition(comms);
     }
 }
 
+
 int main(int argc, char* argv[]) {
 
-  if( argc < 4 ) {
-    cout << "usage: " << argv[0]
-	 << " input outfile method [iterations] [seed] [prob]" << endl;
-    return 0;
-  }
   OptionParser op;
-  vector<string> opts;
+  
   //Here are the default ordering of options:
-  opts.push_back("input");
-  opts.push_back("outfile");
-  opts.push_back("method");
+  vector<string> reqs;
+  //This are required:
+  reqs.push_back("input");
+  reqs.push_back("outfile");
+  reqs.push_back("method");
+  vector<string> opts;
+  //These are optional:
   opts.push_back("iterations");
   opts.push_back("seed");
   opts.push_back("prob");
-
-  map<string, string> popts = op.getOpts(argc, argv, opts);
+  
+  map<string, string> popts;
+  try { 
+    popts = op.getOpts(argc, argv, reqs, opts);
+  }
+  catch (exception x) {
+    cout << "usage: " << argv[0] << op.getUsageString(reqs,opts) << endl;
+    return -1;
+  } 
   map<string,string>::iterator mit;
   
   int iterations = 1;
@@ -144,6 +177,8 @@ int main(int argc, char* argv[]) {
   vcoms.insert(vcoms.begin(), comms->begin(), comms->end());
   //Sort the vector
   sort(vcoms.begin(), vcoms.end(), networkptr_gt());
+  //We also want to compare the output to the Newman:
+  NewmanCom ncom;
   while(iterations-- > 0 ) {
     stringstream name;
     name << popts["outfile"] << "_com_" << popts["method"] << "." << iterations;
@@ -156,7 +191,13 @@ int main(int argc, char* argv[]) {
       stringstream com;
       com << community++;
       Network* this_component = *comit;
+      
+      
+      //Recursively print the communities
       printCommunities(comfinder, out, com.str(), *this_component );
+      //Print Newman:
+      out << "#Newman::" << endl;
+      printCommunities(&ncom, out, com.str(), *this_component );
     }
   }
   //Delete the memory we allocated:

@@ -2,6 +2,9 @@
 
 //#define DEBUG
 
+//This is a hack so I don't have to keep typing the same line over and over:
+#define FOREACH(it, col) for(it = col.begin(); it != col.end(); it++)
+
 using namespace std;
 using namespace Starsky;
 
@@ -61,12 +64,9 @@ double RandAgPart::getNextJoin(const Network& net,
     int com1 = -1;
     int com2 = -1;
 
-    const Network::EdgeSet& edge_set = net.getEdges();
     map<Node*, int>::const_iterator com1_it, com2_it;
     Network::EdgeSet::const_iterator e_it;
-    for(e_it = edge_set.begin();
-        e_it != edge_set.end();
-        e_it++) {
+    FOREACH(e_it, net.getEdges() ) {
       com1_it = node_community.find( (*e_it)->first );
       com1 = com1_it->second;
       com2_it = node_community.find( (*e_it)->second );
@@ -106,17 +106,18 @@ double RandAgPart::getNextJoin(const Network& net,
      * Thus, q(j) >= 0.  Then we select this join
      * with probability proportional to q(j).
      */
-    const Network::EdgeSet& edge_set = net.getEdges();
     map<Node*, int>::const_iterator com1_it, com2_it;
-    Network::EdgeSet::const_iterator e_it;
     int com1, com2;
     double min_q, tmp_delta;
-    double total_q = 0.0;
     int joins = 0;
     bool got_first = false;
-    for(e_it = edge_set.begin();
-        e_it != edge_set.end();
-        e_it++) {
+    /*
+     * We make a map which tells us the change in modularity
+     * for each possible (edge mediated) join
+     */
+    map< pair<int, int> , double> delta_q_matrix;
+    Network::EdgeSet::const_iterator e_it;
+    FOREACH(e_it, net.getEdges() ) {
       com1_it = node_community.find( (*e_it)->first );
       com1 = com1_it->second;
       com2_it = node_community.find( (*e_it)->second );
@@ -124,52 +125,46 @@ double RandAgPart::getNextJoin(const Network& net,
       
       //Don't join a community with itself
       if( com1 != com2 ) {
-        tmp_delta = 2 * (e_ij[com1][com2] - a_i[com1] * a_i[com2] );
-        if( (!got_first) || ( tmp_delta < min_q ) ) {
-	  min_q = tmp_delta;
-	  got_first = true;
-        }
-	joins++;
+	pair<int, int> this_pair = pair<int,int>( std::min(com1,com2), std::max(com1,com2) );
+	if( delta_q_matrix.find( this_pair ) == delta_q_matrix.end() ) {
+          //This is a new pair:
+          tmp_delta = 2 * (e_ij[com1][com2] - a_i[com1] * a_i[com2] );
+	  delta_q_matrix[ this_pair ] = tmp_delta;
+	  if( (!got_first) || ( tmp_delta < min_q ) ) {
+	    min_q = tmp_delta;
+	    got_first = true;
+          }
+	  else {
+            //This is not the minimum
+	  }
+	}
+	else {
+          //We have already seen this pair, ignore it this time.
+	}
       }
     }
-    //Now we shift all the values by the minimum value:
-    total_q = 0.0;
-    for(e_it = edge_set.begin();
-        e_it != edge_set.end();
-        e_it++) {
-      com1_it = node_community.find( (*e_it)->first );
-      com1 = com1_it->second;
-      com2_it = node_community.find( (*e_it)->second );
-      com2 = com2_it->second;
-      
-      //Don't join a community with itself
-      if( com1 != com2 ) {
-        tmp_delta = 2 * (e_ij[com1][com2] - a_i[com1] * a_i[com2] );
-	total_q += pow(tmp_delta - min_q, _param);
-      }
+    //Now we have done all the looping through the edges we need, and
+    //we know the cost of joining every pair of communities.
+    
+    //Now we shift all the values by the minimum value
+    //And compute the weighted total
+    double total_q = 0.0;
+    map< pair<int,int> , double>::iterator jit;
+    FOREACH(jit, delta_q_matrix) {
+      total_q += pow( jit->second - min_q, _param);  
     }
+    
     double q_rand = total_q * _rand.getDouble01(); 
     double q_samp = 0.0;
     //When we pass the join that puts q_samp > q_rand, we stop:
-    for(e_it = edge_set.begin();
-        e_it != edge_set.end();
-        e_it++) {
-      com1_it = node_community.find( (*e_it)->first );
-      com1 = com1_it->second;
-      com2_it = node_community.find( (*e_it)->second );
-      com2 = com2_it->second;
-      
-      //Don't join a community with itself
-      if( com1 != com2 ) {
-        tmp_delta = 2 * (e_ij[com1][com2] - a_i[com1] * a_i[com2] );
-	q_samp += pow(tmp_delta - min_q, _param);
-	if( q_samp > q_rand ) {
-          //This is the pair of communities to join
-  	  if( com1 < com2 ) { join1 = com1; join2 = com2; }
-	  else { join1 = com2; join2 = com1; }
-	  delta_q = tmp_delta;
-          break;
-	}
+    FOREACH(jit, delta_q_matrix) {
+      q_samp += pow( jit->second - min_q, _param);  
+      if( q_samp > q_rand ) {
+	pair<int, int> the_join = jit->first;
+        join1 = the_join.first;
+	join2 = the_join.second;
+	delta_q = jit->second;
+	break;
       }
     }
     //Now we have the communities:
