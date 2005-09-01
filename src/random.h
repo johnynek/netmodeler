@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define starsky__random_h
 
 #include <stdexcept>
+#include <vector>
 
 namespace Starsky {
 
@@ -45,6 +46,33 @@ class Random {
     void setBoolTrueBias(double p);
     virtual bool getBool();
     virtual bool getBool(double p) {return (getDouble01() < p); }
+
+    /**
+     * Shuffle a vector
+     * The first element is start, the
+     * last element is end.
+     * @param start the first element to shuffle
+     * @param end the last element
+     */
+    template <class T>
+    void shuffle(std::vector<T>& coll, int start, int end)
+    {
+      for(int i = start; i < end; i++) {
+        int swap_pos = getInt(end, i);
+        T temp = coll[i];
+        coll[i] = coll[swap_pos];
+        coll[swap_pos] = temp;
+      }
+    }
+    
+    /**
+     * Shuffle a whole vector
+     */
+    template <class T>
+    void shuffle(std::vector<T>& coll)
+    {
+      shuffle(coll, 0, coll.size() - 1);
+    }
 
   protected:
       int _imin, _imax;

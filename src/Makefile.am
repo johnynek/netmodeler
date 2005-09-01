@@ -31,6 +31,7 @@ debianpackagenode.cpp \
 debianpackagenode.h \
 degreelawrandomnetwork.cpp \
 degreelawrandomnetwork.h \
+degreelawnetfac.h degreelawnetfac.cpp \
 degreepreferencefunction.h \
 degreeprobabilityfunction.h \
 directededge.cpp \

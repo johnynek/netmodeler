@@ -1087,6 +1087,34 @@ const Network::EdgeSet& Network::getEdges(Node* node) const {
     return _empty_edgeset;
 }
 
+Edge* Network::getEdge(Node* from, Node* to) const {
+  if( (0 == from) || (0 == to) ) {
+    return 0;
+  }
+  int df = getDegree(from);
+  int dt = getDegree(to);
+  if( (df == 0) || (dt == 0) ) {
+    //One of them has no edges:
+    return 0;
+  }
+  //Get the edges of the node with the smaller degree
+  Node* check = from;
+  if( df > dt ) {
+    check = to;
+  }
+  map<Node*, EdgeSet>::const_iterator it;
+  it = _node_to_edges.find(check);
+  const EdgeSet& eds = it->second;
+  EdgeSet::const_iterator eit = eds.begin();
+  for(eit = eds.begin(); eit != eds.end(); eit++)
+  {
+    if( (*eit)->connects( from,  to ) ) {
+      return *eit;
+    }
+  }
+  return 0; 
+}
+
 map< pair<int,int>, int > Network::getEdgeDist() const {
   map<pair<int,int>, int > result;
   EdgeSet::const_iterator e_it;

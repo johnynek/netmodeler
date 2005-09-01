@@ -332,6 +332,12 @@ class Network {
 	virtual const EdgeSet& getEdges(Node* node) const;
 	virtual const EdgeSet& getEdges() const;
 
+        /**
+         * @param from the node the edge starts at
+         * @param to the node the edge ends at
+         * @return the edge that goes between these nodes, null if no edge.
+         */
+        virtual Edge* getEdge(Node* from, Node* to) const;
 	/**
 	 * @return a map such that result[pair<int,int>(i,j)] = number of edges which
 	 * go from degree i to degree j plus the number that go from j to i
