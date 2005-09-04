@@ -21,7 +21,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "powerlawprobabilityfunction.h"
 
+#include <iostream>
+
 using namespace Starsky;
+using namespace std;
 
 PowerLawProbabilityFunction::PowerLawProbabilityFunction(double expon,
 		                                         int min,
@@ -30,9 +33,15 @@ PowerLawProbabilityFunction::PowerLawProbabilityFunction(double expon,
 								    _max(max)
 {
     int i;
+    int steps = 0;
     double sum = 0.0;
     for(i = _min; i < _max; i++) {
-        sum += pow((double)i, _expon);
+	double this_val = pow((double)i, _expon);
+        sum += this_val;
+	if( (steps % 10) == 0 ) {
+          //Every hundred steps add value:
+	  _cdf_to_idx[ sum ] = i;
+	}
     }
     _coeff = 1.0/sum;
 }
@@ -43,14 +52,31 @@ double PowerLawProbabilityFunction::getProbabilityOf(int deg) const {
     }
     return 0.0;
 }
-int PowerLawProbabilityFunction::getRandomDegree(double prob) const {
+int PowerLawProbabilityFunction::getRandomDegree(double prob)  {
     double p_over_c = prob / _coeff;
-    int i = _min;
-    double sum = pow((double)i, _expon);
+    map<double, int>::const_iterator cit = _cdf_to_idx.upper_bound(p_over_c);
+    //This is a new upper bound:
+    if( cit != _cdf_to_idx.begin() ) {
+      //Back up one...
+      cit--;
+    }
+    double sum = cit->first;
+    int i = cit->second;
+    int steps = 0;
     while( (sum < p_over_c) && ( i < _max) ) {
+	//std::cout << "i: " << i << " sum: " << sum << std::endl;
 	++i;
         sum += pow((double)i, _expon);
+	steps++;
     }
+    if( steps > 4 ) {
+       //Now insert this value so we can look up faster:
+      _cdf_to_idx[ sum ] = i;
+    }
+#if 0
+    std::cout << "p_over_c: " << p_over_c << " sum: " << sum
+	      << " idx: " << i << std::endl;
+#endif
     return i;
 }
 

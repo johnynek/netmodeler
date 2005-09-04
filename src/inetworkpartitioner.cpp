@@ -39,6 +39,21 @@ void INetworkPartitioner::deletePartition(set<Network*>* part)
   delete part;
 }
 
+Network* INetworkPartitioner::getLargest(set<Network*>* part) {
+
+  set<Network*>::const_iterator it;
+  Network* ret_val = 0;
+  FOREACH(it, (*part))
+  {
+    Network* this_net = *it;
+    networkptr_gt cmp;
+    if( (ret_val == 0) || cmp(this_net, ret_val) ) {
+      ret_val = this_net;
+    }
+  }
+  return ret_val;
+}
+
 double INetworkPartitioner::modularityOf(set<Network*>* partition,
 		                         const Network& orig)
 {

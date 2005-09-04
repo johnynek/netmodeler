@@ -47,7 +47,7 @@ class ExpProbabilityFunction : public DegreeProbabilityFunction {
 				    int max_deg = 0x7FFFFFFE);
 	
 	double getProbabilityOf(int deg) const;
-	int getRandomDegree(double prob) const;
+	int getRandomDegree(double prob);
 	int minDegree() const { return _min; }
 	int maxDegree() const { return _max; }
     protected:

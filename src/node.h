@@ -38,7 +38,7 @@ namespace Starsky {
   public:
       Node();
       Node(const std::string& s) { _name = s; }
-      virtual ~Node() { };
+      virtual ~Node();
       /**
        * @return a string suitable for printing
        */

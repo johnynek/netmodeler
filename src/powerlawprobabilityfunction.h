@@ -24,7 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "degreeprobabilityfunction.h"
 #include <cmath>
-#include <vector>
+#include <map>
 
 namespace Starsky {
 
@@ -46,7 +46,7 @@ class PowerLawProbabilityFunction : public DegreeProbabilityFunction {
 				    int max_deg = 0x7FFFFFFF);
 	
 	double getProbabilityOf(int deg) const;
-	int getRandomDegree(double prob) const;
+	int getRandomDegree(double prob);
 	int minDegree() const;
 	int maxDegree() const;
     protected:
@@ -55,8 +55,7 @@ class PowerLawProbabilityFunction : public DegreeProbabilityFunction {
 	int _min;
 	int _max;
 	//The below is used to do efficient look up of the cdf of a given degree
-	std::vector<int> _frac_to_deg;
-	std::vector<double> _frac_to_cdf;
+	std::map<double, int> _cdf_to_idx;
 };
 	
 }

@@ -46,6 +46,7 @@ class NetworkFactory {
     virtual ~NetworkFactory();
    
     virtual Network* create() { return 0; }
+    virtual void deleteNet(Network* net) { delete net; }
     /**
      * Read from a file.
      */

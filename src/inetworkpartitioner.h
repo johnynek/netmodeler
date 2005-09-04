@@ -25,6 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <set>
 #include <map>
 #include <network.h>
+#include <netfunctors.h>
 
 namespace Starsky {
 
@@ -37,6 +38,12 @@ class INetworkPartitioner {
 
   public:
    virtual void deletePartition(std::set<Network*>*  part);
+
+   /**
+    * @return the largest partition in the set.
+    */
+   Network* getLargest(std::set<Network*>* part);
+   
   /**
    * Interface which Community finding algorithms
    * can subclass
@@ -45,6 +52,7 @@ class INetworkPartitioner {
    /**
     * The caller of this function should delete this memory
     * when done (Network* and set<>*)
+    * deletePartition does this for you.
     */
    virtual std::set<Network*>* partition(const Network& input) = 0;
    

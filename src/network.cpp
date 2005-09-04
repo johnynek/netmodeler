@@ -32,6 +32,8 @@ const Network::EdgeSet Network::_empty_edgeset;
 map<Node*, int> Network::_node_ref_count;
 map<Edge*, int> Network::_edge_ref_count;
 
+//#define DEBUG
+
 Network::Network()  {
 
 }
@@ -41,6 +43,9 @@ Network::Network(const Network& net) {
 }
 
 Network::~Network() {
+#ifdef DEBUG
+    cout << "In Network::~Network() about to clear()" << endl;
+#endif
     clear();
 }
 
@@ -100,6 +105,9 @@ bool Network::add(Edge* edge) {
 }
 
 bool Network::add(Node* node) {
+#ifdef DEBUG
+  cout << "Network(" << this << ") adding Node: " << node << endl;
+#endif
   if( node_set.find(node) == node_set.end() ) {
     list<INetworkMonitor*>::iterator nm_it;
     for(nm_it = _net_mon.begin(); nm_it != _net_mon.end(); nm_it++) {
@@ -131,11 +139,20 @@ void Network::add(INetworkMonitor* nm)
 void Network::clear() {
     //Delete all the memory
     NodePSet::iterator i;
+#ifdef DEBUG 
+    cout << "About to decrement all nodes" << endl;
+#endif
     for(i=node_set.begin(); i != node_set.end(); i++ ) {
+#ifdef DEBUG
+      cout << "Decrementing: " << *i << endl;
+#endif
       decrementNodeRefCount( *i );
     }
     node_set.clear();
 
+#ifdef DEBUG
+    cout << "About to decrement all edges" << endl;
+#endif
     EdgeSet::iterator j;
     for(j=edge_set.begin(); j != edge_set.end(); j++) {
       decrementEdgeRefCount( *j );
@@ -169,7 +186,13 @@ int Network::decrementNodeRefCount(Node* node) {
         ref_it->second = ref_it->second - 1;
         ret = ref_it->second;
 	if( ref_it->second == 0) {
+#ifdef DEBUG
+          cout << "About to delete: " << node << " : " << node->toString() << endl;
+#endif
           delete node;
+#ifdef DEBUG
+          cout << "deleted node: " << node << endl;
+#endif
 	  _node_ref_count.erase( ref_it );
 	}
     }
@@ -1298,11 +1321,10 @@ Network* Network::getSubNet(const NodePSet& nodes) const {
   map<Node*, EdgeSet>::const_iterator map_it;
   EdgeSet::const_iterator e_it;
   Network* out = new Network();
-  Network& output = *out;
   for( n_it = nodes.begin();
        n_it != nodes.end();
        n_it++) {
-    output.add( *n_it );
+    out->add( *n_it );
     map_it = _node_to_edges.find( *n_it );
     if( map_it != _node_to_edges.end() ) {
       //Add the neighbors:
@@ -1312,7 +1334,7 @@ Network* Network::getSubNet(const NodePSet& nodes) const {
         Node* other = (*e_it)->getOtherNode( *n_it);
         if( nodes.find( other ) != nodes.end() ) {
 	  //Add the edge (using the same memory)
-          output.add( *e_it );
+          out->add( *e_it );
         }
       }
     }
@@ -1527,10 +1549,16 @@ int Network::incrementNodeRefCount(Node* node) {
     if( ref_it != _node_ref_count.end() ) {
       if( ref_it->second == 0 ) { cerr << "going from 0 -> 1:node:"<< node << endl; } 
       ref_it->second = ref_it->second + 1;
+#ifdef DEBUG
+      cout << "Incrementing: " << node << " count: " << ref_it->second << endl;
+#endif
       return ref_it->second;
     }
     else {
       _node_ref_count[node] = 1;
+#ifdef DEBUG
+      cout << "Incrementing: " << node << " count: 1" << endl;
+#endif
       return 1;
     } 
     return -1;

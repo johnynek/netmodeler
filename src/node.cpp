@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
 #include "node.h"
+#include <iostream>
 using namespace Starsky;
 
 //Initialize the node count to zero
@@ -31,4 +32,10 @@ Node::Node()
   s << _node_count;
   _node_count++;
   _name = s.str();
+  //std::cout << "Node Constructor: " << this << " " << toString() << std::endl;
+}
+
+Node::~Node()
+{
+  //std::cout << "Node Destructor: " << this << std::endl;
 }

@@ -41,7 +41,7 @@ class DegreeProbabilityFunction {
 	 * @param prob a random cdf value (0.0,1.0)
 	 * @return the smallest degree with cdf > prob
 	 */
-	virtual int getRandomDegree(double prob) const = 0;
+	virtual int getRandomDegree(double prob) = 0;
 	/**
 	 * @return minimum degree with p > 0
 	 */

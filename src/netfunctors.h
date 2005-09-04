@@ -59,20 +59,31 @@ struct node_i_func : public std::unary_function<Node*, int>
 {
   public:
     node_i_func(Network* net, NodeIntMember mem) : sum(0), calls(0),
-						   _func(mem), _net(net)
+						   _func(mem), _net(net),
+						   maxNode(0)
     {
     
     }
     int sum;
     int calls;
+    Node* maxNode;
+    int maxVal;
     NodeIntMember _func;
     Network* _net;
     
     int operator()(Node* n)
     {
-      calls++;
       int val = (_net->*_func)(n);
+      if( calls == 0 ) {
+        maxNode = n;
+	maxVal = val;
+      }
+      else if( maxVal < val ) {
+        maxNode = n;
+        maxVal = val;
+      }
       sum += val;
+      calls++;
       return val;
     }
 
@@ -99,13 +110,14 @@ struct node_d_func : public std::unary_function<Node*, double>
     int calls;
     
     double _power;
+    double maxVal;
+    Node* maxNode;
     NodeIntMember _ifunc;
     NodeDoubleMember _dfunc;
     Network* _net;
     
     double operator()(Node* n)
     {
-      calls++;
       double val;
       if( _dfunc == 0 ) {
         val = (double)(_net->*_ifunc)(n);
@@ -114,6 +126,15 @@ struct node_d_func : public std::unary_function<Node*, double>
         val = (_net->*_dfunc)(n);
       }
       val = pow(val, _power);
+      if( calls == 0 ) {
+        maxNode = n;
+	maxVal = val;
+      }
+      else if( maxVal < val ) {
+        maxNode = n;
+        maxVal = val;
+      }
+      calls++;
       sum += val;
       return val;
     }

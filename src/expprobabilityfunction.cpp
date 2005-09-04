@@ -40,6 +40,6 @@ double ExpProbabilityFunction::getProbabilityOf(int deg) const {
     }
     return 0.0;
 }
-int ExpProbabilityFunction::getRandomDegree(double prob) const {
-    return _min + floor( _coeff3 * log(1.0 - _coeff2 * prob) );
+int ExpProbabilityFunction::getRandomDegree(double prob)  {
+    return _min + (int)floor( _coeff3 * log(1.0 - _coeff2 * prob) );
 }
