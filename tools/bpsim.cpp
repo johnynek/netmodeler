@@ -37,7 +37,6 @@ using namespace Starsky;
 
 int main(int argc, char* argv[])
 {
-  OptionParser op;
   vector<string> reqs;
   vector<string> opts;
 
@@ -47,38 +46,21 @@ int main(int argc, char* argv[])
   opts.push_back("perceps");
   opts.push_back("bigkmax");
   opts.push_back("indep");
-  map<string, string> popts;
-  map<string, string>::iterator mit;
+  OptionParser op(reqs, opts);
   try {
-    popts = op.getOpts(argc, argv, reqs, opts);
+    op.parse(argc, argv);
   }
   catch (exception x) {
-    cout << "usage: " << argv[0] << op.getUsageString(reqs,opts) << endl;
+    cout << "usage: " << argv[0] << op.getUsageString() << endl;
     return -1;
   }
-  int max_nodes = atoi( popts["maxnodes"].c_str() );
-  int count = atoi( popts["iterations"].c_str() );
+  int max_nodes = op.getIntOpt("maxnodes", -1);
+  int count = op.getIntOpt("iterations", -1 );
   //Here are the optional ones:
-  mit = popts.find("exp");
-  double exp = 2.0;
-  if( mit != popts.end() ) {
-    exp = atof( mit->second.c_str() ); 
-  }
-  double eps = 1.0; //q = 2q_c 
-  mit = popts.find("perceps");
-  if( mit != popts.end() ) {
-    eps = atof( mit->second.c_str() ); 
-  }
-  bool bigkmax = false;
-  mit = popts.find("bigkmax");
-  if( mit != popts.end() ) {
-    bigkmax = atoi( mit->second.c_str() ) > 0;
-  }
-  bool indep = false;
-  mit = popts.find("indep");
-  if( mit != popts.end() ) {
-    indep = atoi( mit->second.c_str() ) > 0;
-  }
+  double exp = op.getDoubleOpt("exp", 2.0);
+  double eps = op.getDoubleOpt("perceps", 1.0); //q = 2q_c 
+  bool bigkmax = op.getBoolOpt("bigkmax",false);
+  bool indep = op.getBoolOpt("indep",false);
   cout << "#command:\t";
   for(int i = 0; i < argc; i++) {
     cout << argv[i] << " ";

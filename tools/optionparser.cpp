@@ -27,6 +27,51 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 using namespace std;
 using namespace Starsky;
 
+OptionParser::OptionParser(std::vector<std::string>& req_keys,
+                 std::vector<std::string>& opts)
+{
+  _reqs = req_keys;
+  _opt = opts;
+}
+
+bool OptionParser::getBoolOpt(string opt, bool def)
+{
+  bool ret_val = def;
+  map<string, string>::iterator mit = _options.find(opt);
+  if( mit != _options.end() ) {
+    string val = mit->second;
+    if( (val== "true") || (val == "True") || (val == "TRUE") ) {
+      ret_val = true;
+    }
+    else {
+      ret_val = atoi( val.c_str() ) > 0;
+    }
+  }
+  return ret_val;
+}
+
+double OptionParser::getDoubleOpt(string opt, double def)
+{
+  double ret_val = def;
+  map<string, string>::iterator mit = _options.find(opt);
+  if( mit != _options.end() ) {
+    string val = mit->second;
+    ret_val = atof( val.c_str() );
+  }
+  return ret_val;
+}
+
+int OptionParser::getIntOpt(string opt, int def)
+{
+  int ret_val = def;
+  map<string, string>::iterator mit = _options.find(opt);
+  if( mit != _options.end() ) {
+    string val = mit->second;
+    ret_val = atoi( val.c_str() );
+  }
+  return ret_val;
+}
+
 map<string, string> OptionParser::getOpts(int argc, char* argv[])
 {
   vector<string> empty;
@@ -99,4 +144,14 @@ string OptionParser::getUsageString(std::vector<std::string>& req_keys,
   for(int i = 0; i < opts.size(); i++)
     ss << " [" << opts[i] << "] ";
   return ss.str();
+}
+
+string OptionParser::getUsageString()
+{
+  return getUsageString(_reqs, _opt);
+}
+
+void OptionParser::parse(int argc, char* argv[])
+{
+  _options = getOpts(argc, argv, _reqs, _opt);	
 }

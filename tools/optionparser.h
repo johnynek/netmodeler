@@ -50,26 +50,56 @@ class OptionException : public std::exception {
 class OptionParser {
 
   public:
-    std::map<std::string, std::string> getOpts(int argc, char* argv[]);
+    /**
+     * Constructor for using the "non-static" mode of this class.
+     */
+    OptionParser(std::vector<std::string>& req_keys,
+                    std::vector<std::string>& opts);
+   
+    /**
+     * return the boolean value of the option opt if it
+     * was given, else return the default_value.
+     * 1, TRUE, True, true count as true, all else false (if given).
+     */
+    bool getBoolOpt(std::string opt, bool default_value);
+    double getDoubleOpt(std::string opt, double default_value);
+    /**
+     * Returns the value of the option if it was given, if not
+     * it returns the default value
+     */
+    int getIntOpt(std::string name, int default_value);
+    
+    static std::map<std::string, std::string> getOpts(int argc, char* argv[]);
     /**
      * @param pos, this contains the name of the i^th unnamed option_key
      */
-    std::map<std::string, std::string> getOpts(int argc,
+    static std::map<std::string, std::string> getOpts(int argc,
 		                               char* argv[],
 					       std::vector<std::string>& pos);
     /**
      * @param req_keys the keys we are required to have, else we throw exception
      * @param opts options that are not required.
      */
-    std::map<std::string, std::string> getOpts(int argc,
+    static std::map<std::string, std::string> getOpts(int argc,
 		                               char* argv[],
 					       std::vector<std::string>& req_keys,
 					       std::vector<std::string>& opts);
     /**
      * Returns a string that explains the usage
      */
-    std::string getUsageString(std::vector<std::string>& req_keys,
+    static std::string getUsageString(std::vector<std::string>& req_keys,
 			       std::vector<std::string>& opts);
+    std::string getUsageString();
+    /**
+     * After initializing the object, you call this method
+     * to parse the options.
+     * @throws OptionException if there are missing required options.
+     */
+    void parse(int argv, char* argv[]);
+  protected:
+    std::map<std::string, std::string> _options;
+    std::vector<std::string> _reqs;
+    std::vector<std::string> _opt; ///Optional options.
 };
 
 }

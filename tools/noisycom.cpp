@@ -33,8 +33,6 @@ using namespace Starsky;
 
 int main(int argc, char* argv[]) {
 
-  OptionParser op;
-
   vector<string> reqs;
   //Here are the default ordering of options:
   reqs.push_back("input");
@@ -43,11 +41,11 @@ int main(int argc, char* argv[]) {
   vector<string> opts;
   map<string, string> popts;
   try { 
-    popts = op.getOpts(argc, argv, reqs, opts);
+    popts = OptionParser::getOpts(argc, argv, reqs, opts);
   }
   catch(exception x) {
     cerr << x.what() << endl;
-    cout << "usage: " << argv[0] << op.getUsageString(reqs,opts) << endl;
+    cout << "usage: " << argv[0] << OptionParser::getUsageString(reqs,opts) << endl;
     return 1;
   }
   Ran1Random ran;

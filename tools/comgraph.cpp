@@ -116,8 +116,6 @@ void printCommunities(AgglomPart* ap, ostream& out, string prefix, const Network
 
 int main(int argc, char* argv[]) {
 
-  OptionParser op;
-  
   //Here are the default ordering of options:
   vector<string> reqs;
   //This are required:
@@ -132,10 +130,10 @@ int main(int argc, char* argv[]) {
   
   map<string, string> popts;
   try { 
-    popts = op.getOpts(argc, argv, reqs, opts);
+    popts = OptionParser::getOpts(argc, argv, reqs, opts);
   }
   catch (exception x) {
-    cout << "usage: " << argv[0] << op.getUsageString(reqs,opts) << endl;
+    cout << "usage: " << argv[0] << OptionParser::getUsageString(reqs,opts) << endl;
     return -1;
   } 
   map<string,string>::iterator mit;
