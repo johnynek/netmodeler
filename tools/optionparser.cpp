@@ -103,7 +103,7 @@ map<string, string> OptionParser::getOpts(int argc, char* argv[],
         string key = arg.substr(0, eqpos);
 	string value = arg.substr(eqpos + 1, string::npos);
 	result[key] = value;
-	cout << key << " -> " << value << endl;
+	//cout << key << " -> " << value << endl;
       }
       else {
         result[arg] = "";
