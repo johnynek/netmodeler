@@ -36,6 +36,19 @@ class PercolationMapper : public INetworkMapper {
      * we keep each node with probability site_p
      */
     PercolationMapper(Random& rand, double bond_p, double site_p = 1.0);
+
+    /**
+     * Returns the expected theshold of an infinite random
+     * graph with the same degree distribution as the given
+     * graph.
+     * @return <k>/<k(k-1)>
+     */
+    static double getExpectedThreshold(Network* net) {
+      double k1 = net->getDegreeMoment(1);
+      double k2 = net->getDegreeMoment(2);
+      return (k1/(k2 - k1));
+    }
+    
     /**
      * This "percolates" the given network
      * modifying it in place.

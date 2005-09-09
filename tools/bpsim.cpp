@@ -89,7 +89,11 @@ int main(int argc, char* argv[])
     int edges_comp = 0;
     int pre_perc_edges = 0;
     int k_max = nodes;
-    if( ! bigkmax ) {
+    if( bigkmax ) {
+      k_max = (int)pow((double)nodes,1.0/(exp-1.0));
+    }
+    else {
+      //Small k_max
       k_max = (int)pow((double)nodes,1.0/exp);
     }
     PowerLawProbabilityFunction pl(-1.0*exp,2, k_max);
