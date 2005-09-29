@@ -63,7 +63,7 @@ const Network::NodePSet PrefDelCompAttNetwork::getRemoveNodes()
   NodePSet removenodes;
   bool flag=false;
 
-  if( _rand.getBool( _del_p ) && (node_set.size() > 1000)) {
+  if( _rand.getBool( _del_p ) && (getNodeSize() > 1000)) {
       Node * nit;
       nit = findPartnerFor(0); 
 	if (nit){
@@ -82,12 +82,13 @@ const Network::NodePSet PrefDelCompAttNetwork::getRemoveNodes()
 
     int node;// = _rand.getInt(node_set.size() - 1);
     for (int jj=0;jj<_totaldelete;jj++){
-	    if( _rand.getBool( _uniform_del_p ) && (node_set.size() > 2000)) 
+	    if( _rand.getBool( _uniform_del_p ) && (getNodeSize() > 2000)) 
 	    {
-		 node = _rand.getInt(node_set.size() - 1);
-		 nit = node_set.begin();
-		 while( node-- > 0) { nit++; }
-		 removenodes.insert(*nit);
+		 node = _rand.getInt(getNodeSize() - 1);
+		 NodeIterator ni = getNodeIterator();
+		 ni.moveNext();
+		 while( node-- > 0) { ni.moveNext(); }
+		 removenodes.insert(ni.current());
 		 flag=true;
 	    }
     }

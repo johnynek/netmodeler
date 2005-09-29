@@ -37,22 +37,15 @@ namespace Starsky {
   class Node {
   public:
       Node();
-      Node(const std::string& s) { _name = s; }
+      Node(const std::string& s);
       virtual ~Node();
       /**
        * @return a string suitable for printing
        */
-      virtual std::string toString() const {
-        if( _name != "" ) {
-          return _name;
-	}
-	std::stringstream s;
-	s << "n" << this;
-        return s.str();
-      }
+      virtual std::string toString() const;
   protected:
       static int _node_count;
-      std::string _name;
+      std::string* _name;
   };
 
 }

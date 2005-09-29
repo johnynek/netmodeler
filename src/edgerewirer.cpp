@@ -64,14 +64,12 @@ void EdgeRewirer::map(Network* net)
   }
   _startsel->selectFrom( net );
 
-  const Network::EdgeSet& edges = net->getEdges();
-  Network::EdgeSet::const_iterator eit;
   set<Edge*> edges_to_rewire;
-  FOREACH(eit, edges)
-  {
+  EdgeIterator ei = net->getEdgeIterator();
+  while( ei.moveNext() ) {
     if( _rand.getBool(_prob) ) {
       //Rewire this edge:
-      edges_to_rewire.insert( *eit );
+      edges_to_rewire.insert( ei.current() );
     }
   }
   set<Edge*>::iterator reit;

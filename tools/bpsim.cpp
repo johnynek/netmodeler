@@ -108,19 +108,19 @@ int main(int argc, char* argv[])
       double q = q_c * (1.0 + eps);
       INetworkMapper* bp = new PercolationMapper(ran, q);
    
-      pre_perc_edges += net->getEdges().size();
-      node_i_func out = net->forEachNode(node_i_func(net, &Network::getDegree) );
-      max_deg = out.maxVal; 
+      pre_perc_edges += net->getEdgeSize();
+      //node_i_func out = net->forEachNode(node_i_func(net, &Network::getDegree) );
+      //max_deg = out.maxVal; 
       bp->map(net);
       //Here are the number of edges that remain after percolation
-      edges += net->getEdges().size();
+      edges += net->getEdgeSize();
       //Get the components:
       set<Network*>* comps = cp.partition(*net);
       //Here are the number of nodes in the largest component
       Network* largest = cp.getLargest( comps );
-      size += largest->getNodes().size();
+      size += largest->getNodeSize();
       //Here are the number of edges in the largest component.
-      edges_comp += largest->getEdges().size();
+      edges_comp += largest->getEdgeSize();
       cp.deletePartition(comps);
       nf->deleteNet(net);
       delete bp;
@@ -132,7 +132,9 @@ int main(int argc, char* argv[])
     double ave_pre_perc_edges = (double)pre_perc_edges/(double)count;
     cout << nodes << "\t" << ave_size << "\t"
 	 << ave_edge << "\t" << ave_edge_comp
-	 << "\t" << ave_pre_perc_edges << "\t" << k_max << "\t" << max_deg << endl;
+	 << "\t" << ave_pre_perc_edges << "\t" << k_max << "\t"
+	 //<< max_deg
+	 << endl;
     delete nf;
   }
   return 0;

@@ -39,7 +39,7 @@ long expected_comnorm(set<Network*>* part)
   long nodes = 0, norm = 0;
   int temp_node;
   FOREACH(pit, (*part)) {
-    temp_node = (*pit)->getNodes().size();
+    temp_node = (*pit)->getNodeSize();
     nodes += temp_node;
     norm += temp_node * temp_node;
   }
@@ -64,7 +64,7 @@ void printCommunities(AgglomPart* ap, ostream& out, string prefix, const Network
     cout << "stepmax: " << step << endl;
    */
    //if( q_t[step] > 0.25 ) {
-   if( net.getNodes().size() > 1 ) {
+   if( net.getNodeSize() > 1 ) {
       out << "#" << prefix << "=" << q_t[step] << endl;
       //cout << "Getting best split"<< endl;
       set< Network* >* comms = ap->getCommunity(net, step, joins);
@@ -99,10 +99,9 @@ void printCommunities(AgglomPart* ap, ostream& out, string prefix, const Network
         out << this_com.str();
         Network::NodePSet::const_iterator comnodeit;
 	Network* this_comnet = *comit;
-        for(comnodeit = this_comnet->getNodes().begin();
-	    comnodeit != this_comnet->getNodes().end();
-	    comnodeit++) {
-          out << " " << (*comnodeit)->toString();
+	NodeIterator ni = this_comnet->getNodeIterator();
+	while( ni.moveNext() ) {
+          out << " " << ni.current()->toString();
         }
         out << endl;
 	//Recurse:

@@ -28,14 +28,39 @@ int Node::_node_count = 0;
 
 Node::Node()
 {
+#if 1
+  _name = 0;
+#else
   std::stringstream s;
   s << _node_count;
   _node_count++;
   _name = s.str();
+#endif
   //std::cout << "Node Constructor: " << this << " " << toString() << std::endl;
 }
 
 Node::~Node()
 {
   //std::cout << "Node Destructor: " << this << std::endl;
+  if( _name != 0 ) {
+    delete _name;
+    _name = 0;
+  }
 }
+
+Node::Node(const std::string& s)
+{
+  _name = new std::string();
+  *_name = s;
+}
+
+std::string Node::toString() const {
+  if( _name != 0 ) {
+    return *_name;
+  }
+  std::stringstream s;
+  s << "n" << this;
+  return s.str();
+}
+
+

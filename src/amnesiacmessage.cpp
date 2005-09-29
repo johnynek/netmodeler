@@ -50,23 +50,27 @@ void AmnesiacMessage::visit(Node* n, Network& _my_net) {
    while( j != to_visit.end() ) {
        if( j->second > 0 ) {
            //We don't forward messages with 0 TTL and we never forward TTL == -1
-           neighbors = _my_net.getNeighbors( j->first );
-           n_count = neighbors.size();
+	   Network* star = _my_net.getEdges( j->first );
+	   n_count = star->getEdgeSize();
 	   //See if we have any neighbors to go to:
 	   if( n_count > 0 ) {
-	     _rand.setIntRange(n_count - 1);
 	     //Get a random edge
-	     rand_neighbor = _rand.getInt();
-	     i = neighbors.begin();
+	     rand_neighbor = _rand.getInt(n_count - 1);
+	     EdgeIterator ei = star->getEdgeIterator();
+	     ei.moveNext();
 	     for(int k = 0; k < rand_neighbor; k++) {
-	         i++;
+               ei.moveNext();
 	     }
+	     //We have selected a random neighbor (via a random edge):
+	     Node* rand_neigh = ei.current()->getOtherNode( j->first ); 
 	     //We know the TTL was > 0, so new_ttl is a legitimate number
 	     new_ttl = j->second - 1; 
-	     to_visit.insert( pair<Node*,int>(*i,new_ttl) ); 
+	     to_visit.insert( pair<Node*,int>(rand_neigh,new_ttl) ); 
 	     //We must cross one edge to visit the above node:
 	     _crossed_edges++;
 	   }
+	   //Get rid of these neighbors:
+	   delete star;
 	   last_node = j->first;
        }
        //This will invalidate the j iterator:

@@ -76,14 +76,19 @@ map<double, int> EmailNetwork::getInternalNodeOutStrengthDist(){
 
 void EmailNetwork::removeSmallComponents(){
 
+#ifndef HIDE_STL
      set<DirectedNetwork> components = this->DirectedNetwork::getUndirectedComponents();
+#else
+     ///\todo FIXME
+     set<DirectedNetwork> components;
+#endif
      set<DirectedNetwork>::iterator comp_it;
 
      int size = 0;
      int max_size = 0;
 
      for( comp_it = components.begin(); comp_it != components.end(); comp_it++ ){
-	     size = comp_it->getNodes().size();
+	     size = comp_it->getNodeSize();
 	     if(size > max_size){
 		     max_size = size;
 	     }
@@ -91,9 +96,12 @@ void EmailNetwork::removeSmallComponents(){
      
 
      for( comp_it = components.begin(); comp_it != components.end(); comp_it++ ){
-	     size = comp_it->getNodes().size();
+	     size = comp_it->getNodeSize();
 	     if(size < max_size){
-	       this->Network::remove( (*comp_it).getNodes() );
+               NodeIterator ni = comp_it->getNodeIterator();
+               while( ni.moveNext() ) {
+	         this->Network::remove( ni.current() );
+               }
 	     }
      }
 	    
@@ -124,11 +132,11 @@ void EmailNetwork::printOutDegStrengthMap(std::ostream& out){
 
 void EmailNetwork::removeSinkNodes()
 {
-  Network::NodePSet nodes = this->getNodes();
-  Network::NodePSet::const_iterator i;
-  for(i = nodes.begin(); i != nodes.end(); i++) {
-    if(this->getOutStrength(*i) == 0.0 )
-      this->remove(*i);
+  NodeIterator ni = this->getNodeIterator();
+  while( ni.moveNext() ) {
+    Node* this_node = ni.current();
+    if(this->getOutStrength(this_node) == 0.0 )
+      this->remove(this_node);
   }
   
 }
@@ -143,6 +151,8 @@ void EmailNetwork::setInternalNodes(NodePSet& nodes) {
 }
 
 void EmailNetwork::setInternalNodes() {
+    NodePSet node_set;
+    fillNodePSet(node_set);
     setInternalNodes(node_set);
 }
 
@@ -156,5 +166,7 @@ void EmailNetwork::setInternalOutNodes(NodePSet& nodes) {
 }
 
 void EmailNetwork::setInternalOutNodes() {
+    NodePSet node_set;
+    fillNodePSet(node_set);
     setInternalOutNodes(node_set);
 }

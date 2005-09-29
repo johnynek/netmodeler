@@ -41,15 +41,13 @@ int AgglomPart::getCommunities(const Network& net, std::vector<double>& q_t,
 {
   //Which community does a given node belong to:
   map<Node*, int> node_community;
-  const Network::NodePSet& node_set = net.getNodes();
 
   //Initialize everything here:
   Network::NodePSet::const_iterator n_it;
   int community = 0;
-  for(n_it = node_set.begin();
-      n_it != node_set.end();
-      n_it++) {
-    node_community[ *n_it ] = community;
+  NodeIterator ni = net.getNodeIterator();
+  while( ni.moveNext() ) {
+    node_community[ ni.current() ] = community;
     community++;
   }
   //initialize e_ij:
@@ -57,11 +55,11 @@ int AgglomPart::getCommunities(const Network& net, std::vector<double>& q_t,
   //community i to j (it is symmetric).
   vector< vector<double> > e_ij;
   vector< vector<double> >::iterator it;
-  e_ij.resize( node_set.size() );
+  e_ij.resize( net.getNodeSize() );
   for( it = e_ij.begin();
        it != e_ij.end();
        it++) {
-    it->resize( node_set.size() );
+    it->resize( net.getNodeSize() );
   }
   //Initialize e_ij
   for(int i = 0; i < e_ij.size(); i++) {
@@ -69,29 +67,27 @@ int AgglomPart::getCommunities(const Network& net, std::vector<double>& q_t,
       e_ij[i][j] = 0.0;
     }
   }
-  const Network::EdgeSet& edge_set = net.getEdges();
-  Network::EdgeSet::const_iterator e_it;
   int com1, com2;
   double e_total = 0.0;
   //This is the only difference in the wieghted version of the algorithm:
   if( _weighted == false ) {
-    for(e_it = edge_set.begin();
-      e_it != edge_set.end();
-      e_it++) {
-      com1 = node_community[ (*e_it)->first ];
-      com2 = node_community[ (*e_it)->second ];
+    EdgeIterator ei = net.getEdgeIterator();
+    while( ei.moveNext() ) {
+      Edge* this_edge = ei.current();
+      com1 = node_community[ (this_edge)->first ];
+      com2 = node_community[ (this_edge)->second ];
       e_ij[com1][com2] += 1.0;
       e_ij[com2][com1] += 1.0;
       e_total += 2.0;
     }
   }
   else {
-    for(e_it = edge_set.begin();
-      e_it != edge_set.end();
-      e_it++) {
-      double weight = (*e_it)->getWeight();
-      com1 = node_community[ (*e_it)->first ];
-      com2 = node_community[ (*e_it)->second ];
+    EdgeIterator ei = net.getEdgeIterator();
+    while( ei.moveNext() ) {
+      Edge* this_edge = ei.current();
+      double weight = (this_edge)->getWeight();
+      com1 = node_community[ (this_edge)->first ];
+      com2 = node_community[ (this_edge)->second ];
       e_ij[com1][com2] += weight;
       e_ij[com2][com1] += weight;
       e_total += weight + weight;
@@ -181,16 +177,13 @@ int AgglomPart::getCommunities(const Network& net, std::vector<double>& q_t,
 set<Network*>* AgglomPart::getCommunity(const Network& net, int step,
 		    const std::vector< std::pair<int, int> >& joins)
 {
-  const Network::NodePSet& node_set = net.getNodes();
   //Remake the node_community structure:
   int community = 0;
   vector<Network::NodePSet> comm_node;
-  comm_node.resize( node_set.size() );
-  Network::NodePSet::const_iterator n_it;
-  for(n_it = node_set.begin();
-      n_it != node_set.end();
-      n_it++) {
-    comm_node[community++].insert( *n_it );
+  comm_node.resize( net.getNodeSize() );
+  NodeIterator ni = net.getNodeIterator();
+  while( ni.moveNext() ) {
+    comm_node[community++].insert( ni.current() );
   }
   /**
    * Recreate the step with the best structure:

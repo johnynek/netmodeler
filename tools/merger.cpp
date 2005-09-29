@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
     int k_max = rit->first;
     double k_ave = net->getDegreeMoment(1);
     double k2_ave = net->getDegreeMoment(2);
-    cout << net->getNodes().size() << "\t"
+    cout << net->getNodeSize() << "\t"
 	 << k_ave << "\t"
 	 << k2_ave << "\t"
 	 << k_max << endl;

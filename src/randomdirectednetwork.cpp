@@ -40,10 +40,14 @@ void RandomDirectedNetwork::create(int nodes, double p) {
     }
 
     set<Node*>::iterator i,j;
-    for(i = node_set.begin();i != node_set.end(); i++) {
-      for(j=node_set.begin(); j != node_set.end(); j++) {
+    NodeIterator ni = getNodeIterator();
+    NodeIterator nj = getNodeIterator();
+    while( ni.moveNext() ) {
+      while( nj.moveNext() ) {
         if( _rand_gen.getBool() ) {
-          add(DirectedEdge(*i,*j));
+          Node* nodei = ni.current();
+	  Node* nodej = nj.current();
+          add(DirectedEdge(nodei,nodej));
 	}
       }
     }

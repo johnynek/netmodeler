@@ -59,14 +59,14 @@ int main(int argc, char* argv[]) {
        Network* this_net = *comp_it;
        Network::NodePSet::const_iterator n_it;
        int kmax = 0;
-       for(n_it = this_net->getNodes().begin();
-	   n_it != this_net->getNodes().end();
-	   n_it++) {
-         if( kmax < this_net->getDegree( *n_it ) ) {
-           kmax = this_net->getDegree( *n_it );
+       NodeIterator ni = this_net->getNodeIterator();
+       while( ni.moveNext() ) {
+	 Node* this_node = ni.current();
+         if( kmax < this_net->getDegree( this_node ) ) {
+           kmax = this_net->getDegree( this_node );
 	 }
        }
-       int size = this_net->getNodes().size();
+       int size = this_net->getNodeSize();
        if( size > min_size ) {
          if( this_net->getClusterCoefficient() > min_cc ) {
 	   //Ham:
@@ -99,17 +99,17 @@ int main(int argc, char* argv[]) {
   //Print out the nodes in each spamg and hamg
   Network::NodePSet::const_iterator nit;
   for(comp_it = spamg.begin(); comp_it != spamg.end(); comp_it++) {
-    for(nit = (*comp_it)->getNodes().begin();
-	nit != (*comp_it)->getNodes().end();
-	nit++) {
-      spam << (*nit)->toString() << endl;
+    NodeIterator ni2 = (*comp_it)->getNodeIterator();
+    while( ni2.moveNext() ) {
+      Node* this_node = ni2.current();
+      spam << this_node->toString() << endl;
     }
   }
   for(comp_it = hamg.begin(); comp_it != hamg.end(); comp_it++) {
-    for(nit = (*comp_it)->getNodes().begin();
-	nit != (*comp_it)->getNodes().end();
-	nit++) {
-      ham << (*nit)->toString() << endl;
+    NodeIterator ni2 = (*comp_it)->getNodeIterator();
+    while( ni2.moveNext() ) {
+      Node* this_node = ni2.current();
+      ham << this_node->toString() << endl;
     }
   }
   //Delete the memory:

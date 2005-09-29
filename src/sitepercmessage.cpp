@@ -52,18 +52,19 @@ void SitePercMessage::visit(Node* n, Network& net)
         //Here are all the nodes at this distance:
         for( a_it = tv_it->second.begin(); a_it != tv_it->second.end(); a_it++) {
 	  if( _rand.getBool(_prob) ) {
-            for( n_it = net.getNeighbors(*a_it).begin();
-                 n_it != net.getNeighbors(*a_it).end();
-                 n_it++) {
-
-                if( _visited_nodes.find( *n_it ) == _visited_nodes.end() ) {
+            NodeIterator* ni = net.getNeighborIterator( *a_it );
+	    while( ni->moveNext() ) {
+              Node* this_neigh = ni->current();
+                if( _visited_nodes.find( this_neigh ) == _visited_nodes.end() ) {
                     //We have not seen this one yet.
-                    to_visit[this_distance].insert( *n_it );
-                    _visited_nodes.insert( *n_it );
+                    to_visit[this_distance].insert( this_neigh );
+                    _visited_nodes.insert( this_neigh );
                 }
             }
+	    delete ni;
+	    ni = 0;
 	    //We must cross all neighbor edges except the one we came in on
-	    _crossed_edges += net.getNeighbors(*a_it).size() - 1;
+	    _crossed_edges += net.getDegree(*a_it) - 1;
 	  }//end of if-loop for _prob
         }
         to_visit.erase(tv_it);

@@ -34,14 +34,14 @@ PercolationMapper::PercolationMapper(Random& rand,
 
 void PercolationMapper::map(Network* net)
 {
-  const Network::NodePSet& ns = net->getNodes();
   Network::NodePSet ndel_set;
-  Network::NodePSet::const_iterator nit;
-  for(nit = ns.begin(); nit != ns.end(); nit++)
+  NodeIterator ni = net->getNodeIterator();
+  while( ni.moveNext() ) 
   {
+    Node* this_node = ni.current();
     //getBool returns true with probability of the argument
     if( !_rand.getBool( _site_p ) ) {
-      ndel_set.insert( *nit );
+      ndel_set.insert( this_node );
     }
   }
   Network::NodePSet::iterator dnit;
@@ -54,13 +54,13 @@ void PercolationMapper::map(Network* net)
   ndel_set.clear();
 
   //Do the same thing for the edges: 
-  const Network::EdgeSet& es = net->getEdges();
-  Network::EdgeSet::const_iterator e_itc;
   Network::EdgeSet del_set;
-  for(e_itc = es.begin(); e_itc != es.end(); e_itc++) {
+  EdgeIterator ei = net->getEdgeIterator();
+  while( ei.moveNext() ) {
+    Edge* this_edge = ei.current();
     if( !_rand.getBool( _bond_p ) ) {
       //We delete this one:
-      del_set.insert( *e_itc );
+      del_set.insert( this_edge );
     }
   }
   //Actually remove the edges:

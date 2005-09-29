@@ -31,9 +31,8 @@ GraphMatrix::GraphMatrix(const Network& network):_network(network)
 EdgeDirection GraphMatrix::IncidenceMatrixElement(Node* i, Node* j)
 {
   enum EdgeDirection ret_val = NO_EDGE;
-  const Network::ConnectedNodePSet& neighbors = _network.getNeighbors(i);
-  Network::ConnectedNodePSet::const_iterator k = neighbors.find( j );
-  if( k != neighbors.end() ) 
+  Edge* e = _network.getEdge(i,j);
+  if( e != 0 ) 
   {
     ///@todo make sure this will work for directed graphs
     ret_val = UNDIR;
@@ -47,8 +46,7 @@ double GraphMatrix::TransitionProbabilityMatrixElement(Node* i, Node* j)
   enum EdgeDirection edge_relationship = IncidenceMatrixElement(i,j);
   if (UNDIR == edge_relationship)
   {
-    const Network::ConnectedNodePSet& neighbors = _network.getNeighbors(i);
-    prob = 1.0/( (double)(neighbors.size()) );
+    prob = 1.0/( (double)_network.getDegree(i));
   }
   return prob;
 }

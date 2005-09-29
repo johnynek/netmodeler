@@ -30,14 +30,17 @@ MergeNetwork::MergeNetwork(const Network& seed,
 {
   Network::operator=(seed);
   //We need to fill up the node vector:
-  _node_vec.insert(_node_vec.begin(), node_set.begin(), node_set.end() );
+  NodeIterator ni = getNodeIterator();
+  while( ni.moveNext() ) {
+    _node_vec.push_back( ni.current() );
+  }
 }
 
 void MergeNetwork::incrementTime(int steps)
 {
   while( steps-- > 0) {
     //Get the current number of nodes that we can connect to
-    int nodes = node_set.size();
+    int nodes = getNodeSize();
     int index0 = _rand.getInt(nodes - 1);
     //Don't choose the previous node:
     int index1 = _rand.getInt(nodes - 2);
@@ -47,14 +50,17 @@ void MergeNetwork::incrementTime(int steps)
     //Give index0 all index1's neighbors:
     Node* n0 = _node_vec[index0];
     Node* n1 = _node_vec[index1];
-    const ConnectedNodePSet& neighbors = getNeighbors(n1);
-    ConnectedNodePSet::const_iterator n_it;
-    for(n_it = neighbors.begin(); n_it != neighbors.end(); n_it++)
+    Network* neighbors = getNeighbors(n1);
+    NodeIterator ni = neighbors->getNodeIterator();
+    while( ni.moveNext() ) 
     {
-      if( n0 != *n_it ) {
-        add( Edge(n0, *n_it) );
+      Node* this_node = ni.current();
+      if( n0 != this_node ) {
+        add( Edge(n0, this_node) );
       }
     }
+    delete neighbors;
+    neighbors = 0;
     //Remove all n1's edges:
     EdgeSet e = _node_to_edges[n1];
     EdgeSet::iterator e_it;

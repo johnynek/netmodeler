@@ -51,7 +51,7 @@ Network* WeightedNetworkFactory::create(istream& in)
     if( result.size() == 1 ) { //There was no neighbors
       continue;
     }
-    const Network::EdgeSet& edges = net->getEdges(first);
+    EdgeIterator* ei = net->getEdgeIterator(first);
     //There is a list of second nodes:
     result = result[1].split(" ");
     vector<SuperString>::iterator sit;
@@ -64,9 +64,11 @@ Network* WeightedNetworkFactory::create(istream& in)
       //Find any existing edge for this Node:
       Network::EdgeSet::const_iterator e_it;
       Edge* existing = 0;
-      for(e_it = edges.begin(); e_it != edges.end(); e_it++) {
-        if( (*e_it)->connects(first, second) ) {
-          existing = *e_it;
+      ei->reset();
+      while( ei->moveNext() ) {
+        Edge* this_edge = ei->current();
+        if( this_edge->connects(first, second) ) {
+          existing = this_edge;
 	  break;
 	}
       }
@@ -98,6 +100,8 @@ Network* WeightedNetworkFactory::create(istream& in)
       }
       delete e;
     }
+    delete ei;
+    ei = 0;
   }
   return net;
 }

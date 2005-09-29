@@ -30,8 +30,8 @@ void printInfo(Network& my_net)
         cout << "#assortativity: " << my_net.getAssortativity() << endl
              << "#cluster coeff: " << my_net.getClusterCoefficient() << endl
              << "#transitivity: " << my_net.getTransitivity() << endl
-             << "#nodes: " << my_net.getNodes().size() << endl
-             << "#edges: " << my_net.getEdges().size() << endl
+             << "#nodes: " << my_net.getNodeSize() << endl
+             << "#edges: " << my_net.getEdgeSize() << endl
              << "#<k>: " << my_net.getDegreeMoment(1) << endl
              << "#<k^2>: " << my_net.getDegreeMoment(2) << endl
              << "#H(degs): " << my_net.getDegreeEntropy() << endl

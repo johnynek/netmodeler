@@ -42,7 +42,6 @@ DebianNode* DebianDependencyNetwork::getNodeByName(const string& name) const {
 double DebianDependencyNetwork::getSizeAssortativity() const {
 
   //See eq. 25 in cond-mat/0209450
-  Network::EdgeSet::const_iterator i = edge_set.begin();
   DirectedEdge* d_e;
   DebianNode *start = 0, *end = 0;
   int j,k;
@@ -54,9 +53,10 @@ double DebianDependencyNetwork::getSizeAssortativity() const {
   sum_jk = 0.0;
   sum_j2 = 0.0;
   sum_k2 = 0.0;
-  for(; i != edge_set.end(); i++) {
+  EdgeIterator ei = getEdgeIterator();
+  while( ei.moveNext() ) {
     //We need "remaining degree" for this calculation
-    d_e = dynamic_cast<DirectedEdge*>(*i);
+    d_e = dynamic_cast<DirectedEdge*>( ei.current() );
     //Make sure that j has the start node:
     if( d_e->pointsFirstToSecond() ) {
 	//Here we use fancy C++ features:
@@ -75,7 +75,7 @@ double DebianDependencyNetwork::getSizeAssortativity() const {
     sum_j2 += (double)(j * j);
     sum_k2 += (double)(k * k);
   }
-  double r, m_inv = 1.0 / (double)(edge_set.size());
+  double r, m_inv = 1.0 / (double)(getEdgeSize());
 
   /**
    *
@@ -95,7 +95,6 @@ double DebianDependencyNetwork::getSizeAssortativity() const {
 double DebianDependencyNetwork::getLibAssortativity() const {
 
   //See eq. 25 in cond-mat/0209450
-  Network::EdgeSet::const_iterator i;
   DebianNode *start = 0, *end = 0;
   DirectedEdge* d_e;
   
@@ -105,9 +104,10 @@ double DebianDependencyNetwork::getLibAssortativity() const {
   
   bool start_lib, end_lib;
   
-  for(i = edge_set.begin(); i != edge_set.end(); i++) {
+  EdgeIterator ei = getEdgeIterator();
+  while( ei.moveNext() ) {
     //We need "remaining degree" for this calculation
-    d_e = dynamic_cast<DirectedEdge*>(*i);
+    d_e = dynamic_cast<DirectedEdge*>( ei.current() );
     //Make sure that j has the start node:
     if( d_e->pointsFirstToSecond() ) {
 	start = dynamic_cast<DebianNode*>(d_e->first);
@@ -139,7 +139,7 @@ double DebianDependencyNetwork::getLibAssortativity() const {
   double sum_aibi = (double)a_i[0] * (double) b_i[0]
 	                + (double)a_i[1] * (double) b_i[1];
   
-  double r, m_inv = 1.0 / (double)(edge_set.size());
+  double r, m_inv = 1.0 / (double)(getEdgeSize());
 
   /**
    *

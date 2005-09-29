@@ -32,7 +32,10 @@ UniformAttachNet::UniformAttachNet(const Network& seed,
 {
     Network::operator=(seed);
     //Load the nodes into a vector
-    _nodes.insert( _nodes.begin(), getNodes().begin(), getNodes().end() ); 
+    NodeIterator ni = getNodeIterator();
+    while( ni.moveNext() ) {
+      _nodes.push_back( ni.current() );
+    }
 }
 
 bool UniformAttachNet::add(Node* n)
@@ -45,12 +48,11 @@ Node* UniformAttachNet::findPartnerFor(Node* n)
 {
     //Don't include the neighbors:
     NodePSet::const_iterator nit;
-    const NodePSet& neighbors = getNeighbors(n);
     int index = _rand.getInt( _nodes.size() - 1 );
     Node* partner = _nodes[ index ];
     int attempts = _nodes.size();
     while( ((partner == n)
-           || (neighbors.find(partner) != neighbors.end() ))
+           || (getEdge(partner,n) != 0 ))
 	   && (attempts > 0) )
     {
       index = (index + 1) % _nodes.size();

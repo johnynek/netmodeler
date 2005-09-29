@@ -42,7 +42,9 @@ class DirectedNetwork : public Network {
 	DirectedNetwork(std::istream& in);
 	bool add(const Edge& e);
 	double getAssortativity() const;
+#ifndef HIDE_STL
 	const EdgeSet& getEdges() const;
+#endif
 	Edge* getEdgePtr(const Edge& aEdge) const;
 	std::map<int, int> getInDegreeDist(const NodePSet& nodes) const;
 	std::map<int, int> getInDegreeDist() const;
@@ -52,7 +54,6 @@ class DirectedNetwork : public Network {
 	int getOutDegree(Node* node) const;
 	int getOutSize(){ return out_node_set.size();}  
 	void moveIntoUndirectedNetwork(Network& net);
-	void printEdges(std::ostream& out) const;	
 	void printTo(std::ostream& out) const;
 	int remove(const Edge& edge);
 	int remove(Edge* edge);
@@ -83,6 +84,7 @@ class DirectedNetwork : public Network {
 	 */
   double getOutDegreeMoment(int m) const;
 				
+#ifndef HIDE_STL
 	/**
 	 * @return all nodes that share a directededge that terminates at
 	 * the given(argument) node.
@@ -99,7 +101,7 @@ class DirectedNetwork : public Network {
 	const ConnectedNodePSet& getOutNeighbors(Node* node) const;
 
 	std::set<DirectedNetwork> getUndirectedComponents() const;
-
+#endif
 	/**
 	 * @param in the input file stream, must be in the format start node : end node
 	 */
@@ -119,10 +121,6 @@ class DirectedNetwork : public Network {
 	NodePSet out_node_set;
 
 	virtual bool add(Edge* aEdge);
-	//connection_map which is inherited from Network
-	//is used to store the out degrees.  The below is
-	//used to store in degrees.
-	std::map<Node*, ConnectedNodePSet > in_connection_map;
 };
 	
 }

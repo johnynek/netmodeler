@@ -36,7 +36,10 @@ CallawayNetwork::CallawayNetwork(const Network& seed,
 {
     Network::operator=(seed);
     //We need to fill up the node vector:
-    _node_vec.insert(_node_vec.begin(), node_set.begin(), node_set.end() );
+    NodeIterator ni = getNodeIterator();
+    while( ni.moveNext() ) {
+      _node_vec.push_back( ni.current() );
+    }
 }
 
 
@@ -48,7 +51,7 @@ void CallawayNetwork::incrementTime(int steps) {
       {  
           _node_vec.push_back( new_node );
           //Get the current number of nodes that we can connect to
-          int nodes = node_set.size();
+          int nodes = getNodeSize();
           //With some probability add an edge:
           if( (nodes > 1) && _rand.getBool(_p) ) {
 	    int index_i = 0, index_j = 0;

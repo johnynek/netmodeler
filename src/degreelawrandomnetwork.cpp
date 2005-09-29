@@ -38,23 +38,24 @@ DegreeLawRandomNetwork::DegreeLawRandomNetwork(int nodes,
 
     //Holds a Node* to for each "stub", or degree, in the network.
     vector<Node*> stub_set;
-    Network::NodePSet::const_iterator n_it;
     int degs = 0;
  if(node_deg_indep) {
     double r_d = 0.0;
     //Randomly generate degrees for each node
-    for(n_it = getNodes().begin(); n_it != getNodes().end(); n_it++) {
+    NodeIterator ni = getNodeIterator();
+    while( ni.moveNext() ) {
 	r_d = _rand.getDouble01();
         degs = _dpf.getRandomDegree( r_d );
 	while( degs-- > 0 ) {
-            stub_set.push_back(*n_it);
+            stub_set.push_back( ni.current() );
 	}
     }
   }
   else {
     //Give each node a degree from the degree function:
     int max_deg = _dpf.maxDegree();
-    n_it = getNodes().begin();
+    NodeIterator ni = getNodeIterator();
+    ni.moveNext();
     int nodes_to_assign = nodes;
     int temp_n;
     int stub = 0;
@@ -85,10 +86,10 @@ DegreeLawRandomNetwork::DegreeLawRandomNetwork(int nodes,
 	nodes_to_assign -= temp_n;
 	while(temp_n-- > 0) {
 	  for(int i = 0; i < degs; i++) {
-            stub_set.push_back(*n_it);
+            stub_set.push_back( ni.current() );
 	    //cout << "Made stub: " << stub++ << " nodes to assign" << nodes_to_assign << endl;
 	  }
-	  n_it++;
+	  ni.moveNext();
 	}
       }
     }

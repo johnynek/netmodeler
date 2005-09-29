@@ -62,10 +62,14 @@ void VazquezDirectedNetwork::incrementTime(int steps) {
 	for(a_it = d_it->second.begin(); a_it != d_it->second.end(); a_it++) {
             if( _rand.getBool() ) {
 		//Connect to all the neighbors:
-                connect_to.insert( getNeighbors( *a_it).begin(),
-				   getNeighbors( *a_it).end() );
-		depth_map[this_depth].insert( getNeighbors( *a_it).begin(),
-				              getNeighbors( *a_it).end() );
+		NodeIterator* ni = getNeighborIterator( *a_it );
+		while( ni->moveNext() ) {
+	          Node* this_neighbor = ni->current();
+                  connect_to.insert( this_neighbor );
+		  depth_map[this_depth].insert( this_neighbor );
+		}
+		delete ni;
+		ni = 0;
 	    }
 	}
 	//We have processed this entire depth, move on

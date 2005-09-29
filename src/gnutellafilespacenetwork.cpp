@@ -66,22 +66,24 @@ map<double,int> GnutellaFileSpaceNetwork::getContentWeights() const {
   for( it = content.begin(); it != content.end(); it++) {
     node_neighbors = 0;
     query_neighbors = 0;
-    for(nit = getNeighbors(*it).begin();
-	nit != getNeighbors(*it).end();
-	nit++) {
+    Network* neigh = getNeighbors(*it);
+    NodeIterator ni = neigh->getNodeIterator();
+    while(ni.moveNext()) {
+      Node* this_node = ni.current();
       mit = _type_to_node_map.find(node_type);
       if(mit != _type_to_node_map.end()) {
-	if( mit->second.find(*nit) != mit->second.end()) {
+	if( mit->second.find(this_node) != mit->second.end()) {
            ++node_neighbors;
 	}
       }
       mit = _type_to_node_map.find(query_type);
       if(mit != _type_to_node_map.end()) {
-	if( mit->second.find(*nit) != mit->second.end()) {
+	if( mit->second.find(this_node) != mit->second.end()) {
            ++query_neighbors;
 	}
       } 
     }
+    delete neigh;
     weights[ ((double)node_neighbors)/((double)query_neighbors) ]++;
   }
   return weights;

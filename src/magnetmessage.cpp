@@ -55,29 +55,30 @@ void MagnetMessage::visit(Node* n, Network& net)
 	     a_it++)
 	{
             //Now look for a random node to go to:
-	    const Network::ConnectedNodePSet& neighbors
-		    = net.getNeighbors( *a_it );
+	    Network* neighbors = net.getNeighbors( *a_it );
 	    //Make sure there are some neighbors to go to:
-	    if( neighbors.size() > 0 ) {
+	    if( neighbors->getNodeSize() > 0 ) {
 	      Node* vnode = 0;
 	      if( _rand.getBool( _p ) ) {
                 //select the neighbor with maximum degree
-		n_it = neighbors.begin();
-		int max_deg = net.getDegree(*n_it);
+		int max_deg = -1;
 		vnode = *n_it;
-		while( n_it++ != neighbors.end() ) {
-                  if(max_deg < net.getDegree(*n_it)) {
-                    max_deg = net.getDegree(*n_it);
-		    vnode = *n_it;
+		NodeIterator ni = neighbors->getNodeIterator();
+		while( ni.moveNext() ) {
+	          Node* this_node = ni.current();
+                  if(max_deg < net.getDegree( this_node )) {
+                    max_deg = net.getDegree( this_node );
+		    vnode = this_node;
 		  }
 		}
 	      }
 	      else {
                 //select a random node:
-	        rand_node = _rand.getInt( neighbors.size() - 1 );
-	        n_it = neighbors.begin();
-	        while( rand_node-- > 0 ) { n_it++; }
-		vnode = *n_it;
+	        rand_node = _rand.getInt( neighbors->getNodeSize() - 1 );
+		NodeIterator ni = neighbors->getNodeIterator();
+		ni.moveNext();
+	        while( rand_node-- > 0 ) { ni.moveNext(); }
+		vnode = ni.current();
 	      }
 	      //Visit the randomly selected node:
 	      to_visit[this_distance].insert( vnode );
@@ -85,6 +86,8 @@ void MagnetMessage::visit(Node* n, Network& net)
 	      //We must cross exactly one edge to visit the above node:
 	      _crossed_edges++;
 	    }
+	    delete neighbors;
+	    neighbors = 0;
         }
         to_visit.erase(tv_it);
         tv_it = to_visit.begin();

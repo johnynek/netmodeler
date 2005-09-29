@@ -46,18 +46,19 @@ void BroadcastMessage::visit(Node* n, Network& net)
         this_distance = tv_it->first + 1;
         //Here are all the nodes at this distance:
         for( a_it = tv_it->second.begin(); a_it != tv_it->second.end(); a_it++) {
-            for( n_it = net.getNeighbors(*a_it).begin();
-                 n_it != net.getNeighbors(*a_it).end();
-                 n_it++) {
-
-                if( _visited_nodes.find( *n_it ) == _visited_nodes.end() ) {
+            Network* neighbors = net.getNeighbors(*a_it);
+            NodeIterator ni = neighbors->getNodeIterator();
+            while( ni.moveNext() ) {
+              Node* this_node = ni.current();
+                if( _visited_nodes.find( this_node ) == _visited_nodes.end() ) {
                     //We have not seen this one yet.
-                    to_visit[this_distance].insert( *n_it );
-                    _visited_nodes.insert( *n_it );
+                    to_visit[this_distance].insert( this_node );
+                    _visited_nodes.insert( this_node );
                 }
             }
 	    //We must cross all neighbor edges except the one we came in on
-	    _crossed_edges += net.getNeighbors(*a_it).size() - 1;
+	    _crossed_edges += neighbors->getNodeSize() - 1;
+            delete neighbors;
         }
         to_visit.erase(tv_it);
         tv_it = to_visit.begin();

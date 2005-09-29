@@ -30,42 +30,41 @@ set<Network*>* ComponentPart::partition(const Network& input)
     Network* tmp_net = 0;
     
     Network::NodePSet to_check, checked;
-    Network::NodePSet::const_iterator i;
     Network::NodePSet::iterator check_it;
     
-    Network::ConnectedNodePSet::const_iterator n_it;
-    
-    Network::EdgeSet tmp_edges;
-    Network::EdgeSet::const_iterator e_it;
-    
     //For all nodes
-    const Network::NodePSet& node_set = input.getNodes();
-    for(i = node_set.begin(); i != node_set.end(); i++) {
+    NodeIterator nit = input.getNodeIterator();
+    while( nit.moveNext() ) {
+        Node* nodei = nit.current();
 	//Check to make sure we have not already identified this component:
-	if( checked.find( *i ) == checked.end() ) {
-            to_check.insert( *i );
+	if( checked.find( nodei ) == checked.end() ) {
+            to_check.insert( nodei );
             check_it = to_check.begin();
 	    //Here we make a new component:
 	    tmp_net = new Network();
             while( check_it != to_check.end() ) {
 		tmp_net->add( *check_it );
-                tmp_edges = input.getEdges( *check_it );
-	        for(e_it = tmp_edges.begin(); e_it != tmp_edges.end(); e_it++) {
-                    tmp_net->add( *e_it );
+		Network* tmp_edges = input.getEdges( *check_it );
+		EdgeIterator ei = tmp_edges->getEdgeIterator();
+		while( ei.moveNext() ) {
+                    tmp_net->add( ei.current() );
 	        }
-	        for(n_it = input.getNeighbors( *check_it ).begin();
-		    n_it != input.getNeighbors( *check_it ).end();
-		    n_it++) {
-		    if( checked.find( *n_it ) == checked.end() ) {
-                      to_check.insert( *n_it );
+		delete tmp_edges;
+		Network* neighbors = input.getNeighbors( *check_it );
+		NodeIterator ni = neighbors->getNodeIterator();
+		while( ni.moveNext() ) {
+	            Node* this_node = ni.current();
+		    if( checked.find( this_node ) == checked.end() ) {
+                      to_check.insert( this_node );
 		    }
 		    //Else we have already checked this one.
 	        }
+		delete neighbors;
 	        checked.insert( *check_it );
                 to_check.erase( check_it );
 	        check_it = to_check.begin();
             }
-	    checked.insert( *i );
+	    checked.insert( nodei );
 	    //We have reached the entire component, go to the next.
 	    out->insert( tmp_net );
         }

@@ -51,7 +51,6 @@ class NPartiteNetwork : public Network {
 	     * @return reference to the set of nodes of this type
 	     */
 	    virtual const NodePSet& getNodes(int type) const;
-	    virtual const NodePSet& getNodes() const { return node_set; }
 	    /**
 	     * @param node the node to remove
 	     * @return the number of edges removed by this removal

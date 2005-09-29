@@ -26,20 +26,24 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 using namespace std;
 using namespace Starsky;
 
-void printEdges(const Network::EdgeSet& print,
+void printEdges(const Network& net,
 		Network::EdgeSet& printed,
 		const string& attributes)
 {
-  Network::EdgeSet::const_iterator e_it;
-  for(e_it = print.begin(); e_it != print.end(); e_it++) {
-    if( printed.count( *e_it ) == 0 ) {
-      Node* start = (*e_it)->first;
-      Node* end = (*e_it)->second;
+  EdgeIterator eit = net.getEdgeIterator();
+  while( eit.moveNext() ) {
+    Edge* this_edge = eit.current();
+    if( printed.count( this_edge ) == 0 ) {
+      Node* start = this_edge->first;
+      Node* end = this_edge->second;
       cout << start->toString() << " -- " << end->toString()
 	   << " " << attributes << ";" << endl;
     }
   }
-  printed.insert(print.begin(), print.end());
+  eit.reset();
+  while( eit.moveNext() ) {
+    printed.insert( eit.current() );
+  }
 }
 
 void printCommunities(AgglomPart& ap, string prefix, const Network& net,
@@ -94,7 +98,7 @@ void printCommunities(AgglomPart& ap, string prefix, const Network& net,
       int color = depth % 3;
       attributes << "color=" << colors[ color ] << ",";
       attributes << "style=" << styles[ style ] << "]";
-      printEdges(net.getEdges(), printed_edges, attributes.str());
+      printEdges(net, printed_edges, attributes.str());
     }
     out << "color = blue;" << endl
 	<< "label = \"" << prefix << "\";" << endl;
@@ -118,7 +122,7 @@ int main(int argc, char* argv) {
     Network* this_net = *comp_it;
     printCommunities(comfinder, com.str(), *this_net, cout, printed_edges, 1);
   }
-  printEdges(my_net.getEdges(), printed_edges, "[len=16, color=green]");
+  printEdges(my_net, printed_edges, "[len=16, color=green]");
   cout << "}" << endl;
   return 1;
 }

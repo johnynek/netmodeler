@@ -40,13 +40,12 @@ MessageBuiltNetwork::MessageBuiltNetwork(int nodes,
         this_node = new Node();
 	Network::add(this_node);
 	NodePSet::const_iterator nit;
-	for( nit = node_set.begin();
-	     nit != node_set.end();
-	     nit++)
+	NodeIterator ni = getNodeIterator();
+	while(ni.moveNext()) 
 	{
 	  //We have to make sure not to add loops:
-	  if(this_node != *nit) {
-            Network::add( Edge(this_node, *nit) );
+	  if( this_node != ni.current() ) {
+            Network::add( Edge(this_node, ni.current()) );
 	  }
 	}
     }
@@ -72,16 +71,17 @@ Node* MessageBuiltNetwork::findPartnerFor(Node* start)
   Node* begin = start;
   NodePSet::const_iterator nit;
   int rn;
-  if( getNeighbors(start).size() == 0 ) {
+  if( getDegree(start) == 0 ) {
     //start does not have any neighbors, so start at random
-    nit = node_set.begin();
-    rn = _rand.getInt( node_set.size() - 1);
+    rn = _rand.getInt( getNodeSize() - 1);
     if( has(start) ) { rn--; }
-    while( rn-- > 0 ) { nit++; }
-    if( *nit == start ) { nit++; }
+    NodeIterator ni = getNodeIterator();
+    ni.moveNext();
+    while( rn-- > 0 ) { ni.moveNext(); }
+    if( ni.current() == start ) { ni.moveNext(); }
     
     //Now we change our start node:
-    begin = *nit;
+    begin = ni.current();
   }
   //Start at the start, and visit the nodes.
   _message.forgetVisitedNodes();
@@ -94,7 +94,7 @@ Node* MessageBuiltNetwork::findPartnerFor(Node* start)
   {
       //If this node is not where we started or one of our neighbors,
       //increment the count.
-      if( (*nit != start) && (getNeighbors(start).count(*nit) == 0) )
+      if( (*nit != start) && (getEdge(start, *nit) == 0) )
       {
         num++;
       }
@@ -108,7 +108,7 @@ Node* MessageBuiltNetwork::findPartnerFor(Node* start)
   rn = _rand.getInt(num-1);
   nit = _message.getVisitedNodes().begin();
   //If this is one of the nodes we should not connect to, go on
-  while( (*nit == start) || (getNeighbors(start).count(*nit) != 0) )
+  while( (*nit == start) || (getEdge(start, *nit) != 0) )
   {
     nit++;
   }
@@ -117,7 +117,7 @@ Node* MessageBuiltNetwork::findPartnerFor(Node* start)
   {
     nit++;
     //Skip all the nodes that we are connected to:
-    while( (*nit == start) || (getNeighbors(start).count(*nit) != 0) )
+    while( (*nit == start) || (getEdge(start, *nit) != 0) )
     {
       nit++;
     }

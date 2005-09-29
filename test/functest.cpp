@@ -38,8 +38,8 @@ int main(int argc, char* argv[])
         cout << "#assortativity: " << my_net.getAssortativity() << endl
              << "#cluster coeff: " << my_net.getClusterCoefficient() << endl
              << "#transitivity: " << my_net.getTransitivity() << endl
-             << "#nodes: " << my_net.getNodes().size() << endl
-             << "#edges: " << my_net.getEdges().size() << endl
+             << "#nodes: " << my_net.getNodeSize() << endl
+             << "#edges: " << my_net.getEdgeSize() << endl
              << "#<k>: " << my_net.getDegreeMoment(1) << endl
              << "#<k^2>: " << my_net.getDegreeMoment(2) << endl
              << "#H(degs): " << my_net.getDegreeEntropy() << endl
@@ -47,6 +47,7 @@ int main(int argc, char* argv[])
              << "#H(e_ij): " << my_net.getEdgeEntropy().second << endl
              << "#EdgeMI: " << my_net.getEdgeMutualInfo() << endl;
 
+#ifndef HIDE_STL
   node_deg deg = my_net.forEachNode( node_deg(&my_net) );
   cout << "sum: " << deg.sum/2 << " calls: " << deg.calls << endl;
   node_i_func out = my_net.forEachNode(
@@ -60,4 +61,5 @@ int main(int argc, char* argv[])
   cout << "sum : " << out.sum <<  endl;
   cout << "calls: " << out.calls << endl;
   cout << "cc: " << cc.average() << endl;
+#endif
 }

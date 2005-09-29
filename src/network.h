@@ -22,10 +22,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef starsky__network_h
 #define starsky__network_h
 
-
+#define HIDE_STL
 
 #include "node.h"
+#include "nodeiterator.h"
 #include "edge.h"
+#include "edgeiterator.h"
 #include "inetworkmonitor.h"
 #include "superstring.h"
 #include <set>
@@ -38,7 +40,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <algorithm>
 
 namespace Starsky {
-
 	
 /**
  * This handles all the general algorithms on undirected graphs.
@@ -104,6 +105,7 @@ class Network {
 	 * Empties the network and deletes all the Node*
 	 */
 	virtual void clear();
+#ifndef HIDE_STL
 	/**
 	 * Use STL algorithm for_each on all the nodes
 	 */
@@ -120,6 +122,7 @@ class Network {
 	{
           return for_each(edge_set.begin(), edge_set.end(), fun);
         }
+#endif
         /**
 	 * This measures the correlation of degrees at either ends of edges.
 	 * @see cond-mat/0205405
@@ -152,15 +155,6 @@ class Network {
 	
 	///get the Average Cluster Coefficient as a function of Degree
 	std::map<int, double> getCCvsDegree() const;
-	/**
-	 * If node1 and node2 are elements of a connected component G, 
-	 * then getMinCut returns the set of edges that disconnects G into
-	 * G1 and G2, which contain node1 and node2 respectively.  The cutset
-	 * must be chosen such that the sum the weights of the edges in the 
-	 * cutset are minimal. 
-	 * @returns a minimal-weight cutset between node1 and node2.  
-	 */
-	const EdgeSet& getMinCut(Node* node1,Node* node2) const;
 	/**
 	 * @param node the node to compute the cluster coefficient for.
 	 * @return the clustering coefficient (1.0 to 0.0).
@@ -325,19 +319,36 @@ class Network {
 	 * This function basically calls the getEDgeBetweennessFor on each Node in the network
 	 */
 	Edge* getEdgeBetweenness(std::map<Edge*, double>& betweenness) const;
+#ifndef HIDE_STL
 	/**
 	 * when calling getEdges() or getEdges(0) return the set of all edges.
 	 * @return the edges that a given Node is an endpoint of
 	 */
 	virtual const EdgeSet& getEdges(Node* node) const;
 	virtual const EdgeSet& getEdges() const;
-
+#endif
+        /**
+         * @return a network that contains the edges in this network which
+         * have one end with node
+         * This is the star network (tree) with node in the center
+         */
+        virtual Network* getEdges(Node* node) const;
         /**
          * @param from the node the edge starts at
          * @param to the node the edge ends at
          * @return the edge that goes between these nodes, null if no edge.
          */
         virtual Edge* getEdge(Node* from, Node* to) const;
+
+	/**
+	 * @return an iterator to loop through the edges with
+	 */
+	EdgeIterator getEdgeIterator() const;
+	
+	/**
+	 * @return an iterator to all edges connected to a given node
+	 */
+	EdgeIterator* getEdgeIterator(Node* n) const;
 	/**
 	 * @return a map such that result[pair<int,int>(i,j)] = number of edges which
 	 * go from degree i to degree j plus the number that go from j to i
@@ -362,18 +373,43 @@ class Network {
 	 */
 	virtual Edge* getEdgePtr(const Edge& edge) const;
 	/**
+	 * @return the number of edges in the network
+	 */
+	int getEdgeSize() const;
+	/**
 	 * Get the expected transitivity in the random model,
 	 * given the degree distribution
 	 */
 	virtual double getExpectedTransitivity() const;
+#ifndef HIDE_STL
 	/**
 	 * @return all neighbors of a given node
 	 */
 	const ConnectedNodePSet& getNeighbors(Node* node) const;
+#else
+	/**
+	 * @return a node iterator that iterates over a node's neighbors
+	 */
+	virtual NodeIterator* getNeighborIterator(Node* node) const;
+        /**
+         * @return a network which only contains the nodes
+         * which are neighbors of the given node, and no edges
+         */
+        Network* getNeighbors(Node* node) const;
+        /**
+         * Get the neighborhood of a node, all nodes, and edges between
+         * those nodes.
+         * This includes the node argument:
+         */
+        Network* getNeighborhood(Node* node) const;
+#endif
+
+#ifndef HIDE_STL
 	/**
 	 * @return the nodes whose distance is <= d)
 	 */
 	NodePSet getNeighborhood(Node* node, int distance) const;
+#endif
 	/**
 	 * count the number of nth neighbors for each node, and see how often
 	 * each count appears.
@@ -385,6 +421,12 @@ class Network {
 	 * same as above except with a given set of nodes to consider.
 	 */
 	virtual std::map<int, int> getNthNeighborDist(const NodePSet& nodes, int nth) const;
+
+	/**
+	 * Return a NodeIterator that can iterator through all the nodes
+	 */
+	NodeIterator getNodeIterator() const;
+#ifndef HIDE_STL
 	/**
 	 * @return a copy of the set<Node*> of all nodes.  Notice,
 	 * that if these Nodes might point no
@@ -392,6 +434,11 @@ class Network {
 	 * do reference counting).
 	 */
 	virtual const NodePSet& getNodes() const;
+#endif
+	/**
+	 * @return the number of nodes
+	 */
+	int getNodeSize() const;
 	/**
 	 * Get a subgraph of this graph using only the given nodes.
 	 * The edges in the returned graph are all the edges
@@ -430,9 +477,17 @@ class Network {
 	 */
 	virtual int getWedgeCount() const;
 	/**
-	 * @return true if the network has this edge
+	 * @return true if the network has an equivalent edge
 	 */
 	virtual bool has(const Edge& edge) const;
+        /**
+         * Note that has(e) and has(&e) might not return the same thing,
+         * one asks if a particular pointer is in the network, the other
+         * asks if an EQUIVALENT edge is in the network.
+         *
+         * @return true if the network has this exact pointer to an edge
+         */
+        virtual bool has(Edge* edge) const;
 	/**
 	 * @return true if this node is in the network
 	 */
@@ -480,9 +535,17 @@ class Network {
 	 * reference counts for Node*s and Edge*s 
 	 */
 	virtual Network& operator=(const Network& aNet);
+#if 0
 	virtual	bool Network::Merge(const Network& aNet, int aStart);
+#endif
 
     protected:
+        /**
+         * This is a transitional function which should
+         * be removed after de-STL-ization
+         * @param ns fill this up with all the nodes
+         */
+        void fillNodePSet(NodePSet& ns) const;
 	/**
 	 * This is used by the constructor which
 	 * takes the istream input.  It should
@@ -492,6 +555,7 @@ class Network {
 	virtual void readFrom(std::istream& in);
 
   virtual void readFromGDL(std::istream& in);
+#ifndef HIDE_STL
 	    /**
 	     * Just a set which holds pointers to all nodes in the network
 	     */
@@ -505,10 +569,13 @@ class Network {
 	     * of Node* that it is connected to.
 	     */
 	    std::map<Node*, ConnectedNodePSet > connection_map;
+#endif
             /**
 	     * Holds the edges each node is involved with:
 	     */
 	    std::map<Node*, EdgeSet> _node_to_edges;
+	    //This is the total number of edges:
+	    int _edge_count;
 	    /**
 	     * Holds all the network monitors:
 	     */
@@ -535,6 +602,39 @@ class Network {
 	    int decrementNodeRefCount(Node* node);
 	    static std::map<Node*, int> _node_ref_count;
 	    static std::map<Edge*, int> _edge_ref_count;
+
+	    /**
+	     * Here are some inner classes to implement some interators
+	     */
+	    class NeighborIterator : NodeIterator {
+	      public: 
+                virtual Node* current();
+	        virtual bool moveNext();
+	        virtual void reset();
+		friend class Network;
+	      protected:
+	        Node* _neighbors_of;  //This is the node that we are looking at neighbors of
+		EdgeSet::const_iterator _eit; //Iterator for the edges of this node
+		EdgeSet::const_iterator _beg;
+		EdgeSet::const_iterator _end;
+		bool _moved_to_first; //Start before the first
+	    };
+	    /**
+	     * This allows us ot iterate over the edges connected to a node
+	     */
+	    class NeighborEdgeIterator : EdgeIterator {
+	      public: 
+                virtual Edge* current();
+	        virtual bool moveNext();
+	        virtual void reset();
+		friend class Network;
+	      protected:
+	        Node* _neighbors_of;  //This is the node that we are looking at neighbors of
+		EdgeSet::const_iterator _eit; //Iterator for the edges of this node
+		EdgeSet::const_iterator _beg;
+		EdgeSet::const_iterator _end;
+		bool _moved_to_first; //Start before the first
+	    };
   };
 
 }

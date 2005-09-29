@@ -35,14 +35,15 @@ SpatialNetwork::SpatialNetwork(int nodes,
         add(new SpatialNode(rand,_dim));
     }
 
-    NodePSet::iterator n_it1, n_it2;
     SpatialNode *start_node = 0, *end_node = 0;
     priority_queue<double> dist_queue;
     multimap<double, SpatialNode*> dist_to_node;
     multimap<double, SpatialNode*>::iterator mm_it;
     double this_dist = 0.0;
     
-    for( n_it1 = node_set.begin(); n_it1 != node_set.end(); n_it1++) {
+    NodeIterator ni1 = getNodeIterator();
+    while( ni1.moveNext() ) {
+	start_node = dynamic_cast<SpatialNode*>( ni1.current() );
 	while( dist_queue.empty() == false) {
             dist_queue.pop();	
 	}
@@ -55,10 +56,10 @@ SpatialNetwork::SpatialNetwork(int nodes,
 	    dist_to_node.insert( pair<double,SpatialNode*>(this_dist,end_node) );
 	}
 	
-	start_node = dynamic_cast<SpatialNode*>(*n_it1);
 	if( start_node != 0 ) {
-	  for(n_it2 = node_set.begin(); n_it2 != node_set.end(); n_it2++) {
-            end_node = dynamic_cast<SpatialNode*>(*n_it2);
+          NodeIterator ni2 = getNodeIterator();
+	  while( ni2.moveNext() ) {
+            end_node = dynamic_cast<SpatialNode*>( ni2.current() );
 	    if( (start_node != end_node) && (end_node != 0) ) {
               this_dist = start_node->getDistanceTo( end_node );
 	      if( this_dist > 0 ) {

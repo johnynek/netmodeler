@@ -41,17 +41,19 @@ int main(int argc, char* argv[]) {
   Network::NodePSet::iterator n_it;
   int max = -1;
   Node* max_n = 0;
-  for(n_it = net.getNodes().begin();
-      n_it != net.getNodes().end();
-      n_it++) {
-    if( net.getDegree(*n_it) == 2 ) {
-      max = net.getDegree(*n_it);
-      max_n = *n_it;
+  NodeIterator ni = net.getNodeIterator();
+  while( ni.moveNext() ) {
+    Node* this_node = ni.current();
+    if( net.getDegree(this_node) == 2 ) {
+      max = net.getDegree(this_node);
+      max_n = this_node;
       break;
     }
   }
 
-  Network* subgraph = net.getSubNet( net.getNeighborhood(max_n, distance) );
+  //Network* subgraph = net.getSubNet( net.getNeighborhood(max_n, distance) );
+  ///\todo FIXME
+  Network* subgraph = 0;
   subgraph->printTo(cout);
   delete subgraph;
   return 1;

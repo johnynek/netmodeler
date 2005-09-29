@@ -54,14 +54,15 @@ PrefDelCompNetwork::PrefDelCompNetwork(const Network& seed,
 
 const Network::NodePSet PrefDelCompNetwork::getRemoveNodes()
 {
-  if( _rand.getBool( _del_p ) && (node_set.size() > 1)) {
+  if( _rand.getBool( _del_p ) && (getNodeSize() > 1)) {
     NodePSet::const_iterator nit;
 
-    int node = _rand.getInt(node_set.size() - 1);
-    nit = node_set.begin();
-    while( node-- > 0) { nit++; }
+    int node = _rand.getInt(getNodeSize() - 1);
+    NodeIterator ni = getNodeIterator();
+    ni.moveNext();
+    while( node-- > 0) { ni.moveNext(); }
     NodePSet removenodes;
-    removenodes.insert(*nit);
+    removenodes.insert(ni.current());
     return removenodes;
   }
   return _empty_nodeset;

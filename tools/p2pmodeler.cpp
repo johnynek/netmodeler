@@ -71,7 +71,7 @@ int main(int argc, char* argv[]) {
        cout << "The components have the following sizes: ";
        for(comp_it = net_set->begin(); comp_it != net_set->end(); comp_it++){
 	 net = *(comp_it);
-	 cout << net->getNodes().size() << " ";
+	 cout << net->getNodeSize() << " ";
        }
        //Free the memory here:
        cp.deletePartition(net_set);
@@ -84,16 +84,17 @@ int main(int argc, char* argv[]) {
      }
      cout << endl;
      //use the biggest connected component;
-     cout << "#nodes: " << net->getNodes().size() << endl 
-          << "#edges: " << net->getEdges().size() << endl
+     cout << "#nodes: " << net->getNodeSize() << endl 
+          << "#edges: " << net->getEdgeSize() << endl
 	  << "#<k>: " << net->getDegreeMoment(1) << endl
 	  << "#<k^2>: " << net->getDegreeMoment(2) << endl;
      cout << "#ttl p hit_rate edges_crossed nodes_reached" << endl;
      //Put the nodes into a vector so we can randomly select them easier:
      node_vector.clear();
-     node_vector.insert(node_vector.begin(),
-		        net->getNodes().begin(),
-			net->getNodes().end() );
+     NodeIterator ni = net->getNodeIterator();
+     while( ni.moveNext() ) {
+       node_vector.push_back( ni.current() );
+     }
      r3.setIntRange( node_vector.size() - 1);
      
      Message* query = 0;

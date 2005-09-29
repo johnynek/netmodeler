@@ -39,14 +39,16 @@ void RandomNetwork::create(int nodes, double p) {
         add( new Node() );
     }
 
-    set<Node*>::iterator i,j;
-    i = node_set.begin();
-    for(;i != node_set.end(); i++) {
-      j = i;
-      j++;
-      for(; j != node_set.end(); j++) {
+    NodeIterator ni = getNodeIterator();
+    NodeIterator nj;
+    while( ni.moveNext() ) {
+      //Start at nodei
+      nj = ni;
+      while( nj.moveNext() ) {
         if( _rand_gen.getBool() ) {
-          add( Edge(*i,*j) );
+          Node* nodei = ni.current();
+	  Node* nodej = nj.current();
+          add( Edge(nodei,nodej) );
 	}
       }
     }

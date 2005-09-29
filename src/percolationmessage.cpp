@@ -56,19 +56,22 @@ void PercolationMessage::visit(Node* n, Network& net) {
         //Here are all the nodes at this distance:
         for( a_it = tv_it->second.begin(); a_it != tv_it->second.end(); a_it++) {
             //Now do each randomly:
-            for( n_it = net.getNeighbors(*a_it).begin();
-	         n_it != net.getNeighbors(*a_it).end();
-                 n_it++) {
+	    Network* neighbors = net.getNeighbors(*a_it);
+	    NodeIterator ni = neighbors->getNodeIterator();
+	    while( ni.moveNext() ) {
+		Node* neigh = ni.current();
                 if( _rand.getBool(_prob) ) {
 		  //We must cross exactly one edge to see if we visit this node
 		  _crossed_edges++;
-	          if(_visited_nodes.find( *n_it ) == _visited_nodes.end()) {
+	          if(_visited_nodes.find( neigh ) == _visited_nodes.end()) {
                     //We have not seen this one yet.
-                    to_visit[this_distance].insert( *n_it );
-                    _visited_nodes.insert( *n_it );
+                    to_visit[this_distance].insert( neigh );
+                    _visited_nodes.insert( neigh );
                   }
 		}
             }
+	    delete neighbors;
+	    neighbors = 0;
         }
         to_visit.erase(tv_it);
         tv_it = to_visit.begin();

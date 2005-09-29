@@ -38,9 +38,11 @@ RandAgPart::RandAgPart(Random& rand, RandAgPart::Method meth, double param):
 void RandAgPart::initRandomCom(const Network& net) {
   _com_order.clear();
   _com_to_node.clear();
-  const Network::NodePSet& node_set = net.getNodes();
-  _com_to_node.insert(_com_to_node.begin(), node_set.begin(), node_set.end());
-  int count = node_set.size();
+  NodeIterator ni = net.getNodeIterator();
+  while( ni.moveNext() ) {
+    _com_to_node.push_back( ni.current() );
+  }
+  int count = net.getNodeSize();
   _com_order.resize( count );
   for(int i = 0; i < count; i++) {
     _com_order[i] = i;
@@ -86,11 +88,12 @@ double RandAgPart::getNextJoin(const Network& net,
     int com2 = -1;
 
     map<Node*, int>::const_iterator com1_it, com2_it;
-    Network::EdgeSet::const_iterator e_it;
-    FOREACH(e_it, net.getEdges() ) {
-      com1_it = node_community.find( (*e_it)->first );
+    EdgeIterator ei = net.getEdgeIterator();
+    while( ei.moveNext() ) {
+      Edge* this_edge = ei.current();
+      com1_it = node_community.find( this_edge->first );
       com1 = com1_it->second;
-      com2_it = node_community.find( (*e_it)->second );
+      com2_it = node_community.find( this_edge->second );
       com2 = com2_it->second;
       
       //Don't join a community with itself, and make sure this edge
@@ -137,11 +140,12 @@ double RandAgPart::getNextJoin(const Network& net,
      * for each possible (edge mediated) join
      */
     map< pair<int, int> , double> delta_q_matrix;
-    Network::EdgeSet::const_iterator e_it;
-    FOREACH(e_it, net.getEdges() ) {
-      com1_it = node_community.find( (*e_it)->first );
+    EdgeIterator ei = net.getEdgeIterator();
+    while( ei.moveNext() ) {
+      Edge* this_edge = ei.current();
+      com1_it = node_community.find( this_edge->first );
       com1 = com1_it->second;
-      com2_it = node_community.find( (*e_it)->second );
+      com2_it = node_community.find( this_edge->second );
       com2 = com2_it->second;
       
       //Don't join a community with itself

@@ -36,15 +36,15 @@ PrefAtNetwork::PrefAtNetwork(int nodes,
     //Make a totally connected network of size seeds:
     Node* new_node;
     int i;
-    NodePSet::const_iterator n_it;
     for(i = 0; i < seeds; i++) {
         new_node = new Node();
 	Network::add( new_node );
-	for(n_it = node_set.begin(); n_it != node_set.end(); n_it++) {
+	NodeIterator ni = getNodeIterator();
+	while( ni.moveNext() ) {
 	    //We have to make sure we are not adding a loop,
 	    //since the node will be in the node set
-	    if( new_node != *n_it ) {
-	      Network::add( Edge( new_node, *n_it) );
+	    if( new_node != ni.current() ) {
+	      Network::add( Edge( new_node, ni.current() ) );
 	    }
 	}
     }
@@ -67,15 +67,15 @@ PrefAtNetwork::PrefAtNetwork(int nodes,
     //Make a totally connectioned network of size seeds:
     Node* new_node;
     int i;
-    NodePSet::const_iterator n_it;
     for(i = 0; i < seeds; i++) {
         new_node = new Node();
 	Network::add( new_node );
-	for(n_it = node_set.begin(); n_it != node_set.end(); n_it++) {
+	NodeIterator ni = getNodeIterator();
+	while( ni.moveNext() ) {
 	    //We have to make sure we are not adding a loop,
 	    //since the node will be in the node set
-	    if( new_node != *n_it ) {
-	      Network::add( Edge( new_node, *n_it) );
+	    if( new_node != ni.current() ) {
+	      Network::add( Edge( new_node, ni.current()) );
 	    }
 	}
     }
@@ -144,12 +144,9 @@ bool PrefAtNetwork::add(Edge* new_edge) {
 void PrefAtNetwork::computePrefCount()
 {
     pref_count = 0.0;
-    NodePSet::const_iterator nit;
-    for(nit = node_set.begin();
-	nit != node_set.end();
-	nit++)
-    {
-      pref_count += _pref.evaluate( getDegree(*nit) );
+    NodeIterator ni = getNodeIterator();
+    while( ni.moveNext() ) {
+      pref_count += _pref.evaluate( getDegree( ni.current() ) );
     }
 }
 
@@ -162,30 +159,30 @@ Node* PrefAtNetwork::findPartnerFor(Node* n)
       max_pref -= _pref.evaluate( getDegree(n) );
     }
     //Don't include the neighbors:
-    NodePSet::const_iterator nit;
-    const NodePSet& neighbors = getNeighbors(n);
-    for( nit = neighbors.begin();
-	 nit != neighbors.end();
-	 nit++)
+    Network* neighbors = getNeighbors(n);
+    NodeIterator ni = neighbors->getNodeIterator();
+    while(ni.moveNext())
     {
-      max_pref -= _pref.evaluate( getDegree(*nit) );
+      max_pref -= _pref.evaluate( getDegree( ni.current() ) );
     }
     double frac = _rand.getDouble01();
     //We are looking for a random fraction of max_pref
     double this_degree_sum = frac * max_pref;
     double this_count = 0.0;
     //Go through all the nodes selecting preferentially.
-    nit = node_set.begin();
     Node* partner = 0;
-    while( (nit != node_set.end()) && (this_count < this_degree_sum))
+    ni = getNodeIterator();
+    while(ni.moveNext() && (this_count < this_degree_sum))
     {
+      Node* this_node = ni.current();
       //Skip our self (n) and our neighbors
-      if((*nit != n) && (neighbors.find(*nit) == neighbors.end()) ) {
-        this_count += _pref.evaluate( getDegree(*nit) );
-	partner = *nit;
+      if((this_node != n) && (!neighbors->has(this_node)) ) {
+        this_count += _pref.evaluate( getDegree( this_node ) );
+	partner = this_node;
       }
-      nit++;
     }
+    delete neighbors;
+    neighbors = 0;
     if( partner == n) { cerr << "n(" << n << ") == partner" << endl;}
     if( partner == 0) { cerr << "Could not find a partner for n: " << n << endl; }
     return partner;

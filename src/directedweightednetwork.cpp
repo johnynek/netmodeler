@@ -48,47 +48,21 @@ bool DirectedWeightedNetwork::add(Edge* aEdge) {
 	if( has(*d_edge) == true) {
      //We don't add edges twice, we will increment its weight
      //Note that Joe has added the following lines
-      EdgeSet::iterator e_it;
-      e_it = edge_set.find(d_edge);
-     
-      if(e_it != edge_set.end() ){
-	      double curr_weight = (*e_it)->getWeight();
-	      (*e_it)->setWeight(curr_weight + 1.0);
+      Edge* e = getEdge(d_edge->first, d_edge->second);
+      if( e != 0 ) {
+        e->setWeight( e->getWeight() + 1.0 );
+      }
+      else {
+        e = getEdge( d_edge->first, d_edge->second );
+        if( e != 0 ) {
+          e->setWeight( e->getWeight() + 1.0 );
+        }
       }
       //end of Joe's modification	
     return false;
   }
-  
-  Node  *start, *end;
-
-  if( d_edge->pointsFirstToSecond() ) {
-    start = d_edge->first;
-	  end = d_edge->second;
-  }
-  else {
-    start = d_edge->second;
-	  end = d_edge->first;
-  }
-  
-	//Account for the edges and nodes
-  pair< Network::EdgeSet::iterator, bool> result;
-    
-  result = edge_set.insert( d_edge );
-  if( result.second == true ) {
-    //This is a new edge:
-    incrementEdgeRefCount( d_edge );
-    if( node_set.insert(start).second ) {
-      incrementNodeRefCount( start );
-    }
-    if( node_set.insert(end).second ) {
-      incrementNodeRefCount( end );
-    }
-    connection_map[start].insert(end);
-    _node_to_edges[start].insert( d_edge );
-    in_connection_map[end].insert(start);
-    _node_to_edges[end].insert( d_edge );
-	}  
-	return result.second;
+  //Else this is the regular directed add:
+  return DirectedNetwork::add(aEdge); 
 }
 
 double DirectedWeightedNetwork::getAverageWeight(Node* node) const{
@@ -149,21 +123,14 @@ map<int, double> DirectedWeightedNetwork::getOutDegtoAverageStrengthMap(const No
 }
 
 map<int, double> DirectedWeightedNetwork::getOutDegtoAverageStrengthMap() const {
+  NodePSet out_node_set;
+  fillNodePSet(out_node_set);
   return getOutDegtoAverageStrengthMap(out_node_set);
 }
 
 double DirectedWeightedNetwork::getDirectedWeight(Node* start, Node* end) const{
         
   	//Make sure that these nodes point to one another:
-		map<Node*, ConnectedNodePSet>::const_iterator it;
-		it = connection_map.find(start);
-		if( it == connection_map.end() || it->second.count(end) == 0) {
-    	return 0.0;
-		}
-		it = in_connection_map.find(end);
-		if( it == in_connection_map.end() || it->second.count(start) == 0) {
-    	return 0.0;
-		}
 		EdgeSet::const_iterator eit1, eit2;
 		const EdgeSet& e1 = _node_to_edges.find(start)->second;
 		const EdgeSet& e2 = _node_to_edges.find(end)->second;
@@ -200,14 +167,20 @@ map<double, int> DirectedWeightedNetwork::getEdgeWeightDist(const EdgeSet& edges
 }
 
 map<double, int> DirectedWeightedNetwork::getEdgeWeightDist() const {
+  EdgeSet edge_set;
+  EdgeIterator ei = getEdgeIterator();
+  while( ei.moveNext() ) {
+    edge_set.insert( ei.current() );
+  }
   return getEdgeWeightDist( edge_set );
 }
 
 double DirectedWeightedNetwork::getInStrength(Node* node) const{
 
-  EdgeSet es = Network::getEdges(node);
   double var = 0.0;
   EdgeSet::const_iterator i;
+  map<Node*, EdgeSet>::const_iterator neit = _node_to_edges.find(node);
+  const EdgeSet& es = neit->second;
   for(i = es.begin(); i != es.end(); i++){
     DirectedEdge* d_edge = dynamic_cast<DirectedEdge*>(*i);
     //the following if statement makes sure that only an out edge is counted
@@ -237,6 +210,8 @@ map<double, int> DirectedWeightedNetwork::getNodeOutStrengthDist(NodePSet& nodes
 }
 
 map<double, int> DirectedWeightedNetwork::getNodeOutStrengthDist(){
+  NodePSet out_node_set;
+  fillNodePSet(out_node_set);
   return getNodeOutStrengthDist(out_node_set);
 }
 
@@ -269,6 +244,8 @@ double DirectedWeightedNetwork::getOutDegAverageStrengthCoefficient(NodePSet& no
 }
 
 double DirectedWeightedNetwork::getOutDegAverageStrengthCoefficient(){
+  NodePSet out_node_set;
+  fillNodePSet(out_node_set);
   return getOutDegAverageStrengthCoefficient(out_node_set);
 }
 
@@ -310,14 +287,17 @@ double DirectedWeightedNetwork::getOutDegStrengthCoefficient(NodePSet& nodes){
 
 
 double DirectedWeightedNetwork::getOutDegStrengthCoefficient(){
+  NodePSet out_node_set;
+  fillNodePSet(out_node_set);
   return getOutDegStrengthCoefficient(out_node_set);
 }
 
 double DirectedWeightedNetwork::getOutStrength(Node* node) const{
 
-  EdgeSet es = Network::getEdges(node);
   double var = 0.0;
   EdgeSet::const_iterator i;
+  map<Node*, EdgeSet>::const_iterator neit = _node_to_edges.find(node);
+  const EdgeSet& es = neit->second;
   for(i = es.begin(); i != es.end(); i++){
     DirectedEdge* d_edge = dynamic_cast<DirectedEdge*>(*i);
     //the following if statement makes sure that only an out edge is counted
@@ -328,6 +308,8 @@ double DirectedWeightedNetwork::getOutStrength(Node* node) const{
 }
 
 double DirectedWeightedNetwork::getOutStrengthMoment(int m) const{
+  NodePSet out_node_set;
+  fillNodePSet(out_node_set);
   getOutStrengthMoment(m, out_node_set);
 }
 
@@ -353,6 +335,8 @@ double DirectedWeightedNetwork::getOutStrengthMoment(int m, const NodePSet& node
 }    
 
 double DirectedWeightedNetwork::getOutAverageStrengthMoment(int m) const{
+  NodePSet out_node_set;
+  fillNodePSet(out_node_set);
   getOutAverageStrengthMoment(m, out_node_set);
 }
 
@@ -399,28 +383,32 @@ void DirectedWeightedNetwork::printOutDegStrengthPlot(NodePSet& nodes, ostream& 
 }
 
 void DirectedWeightedNetwork::printOutDegStrengthPlot(ostream& out){
+  NodePSet out_node_set;
+  fillNodePSet(out_node_set);
   printOutDegStrengthPlot(out_node_set, out);
 }
 
 void DirectedWeightedNetwork::printInZeros(ostream& out) const{
     out << "#The following nodes have indegree zero" << endl;
-    NodePSet::const_iterator i;
-    for(i = node_set.begin(); i != node_set.end(); i++){
-	    if(getInDegree(*i) == 0){
-		    out << (*i)->toString() << endl;
-	    }
+    NodeIterator ni = getNodeIterator();
+    while( ni.moveNext() ) {
+      Node* this_node = ni.current();
+      if(getInDegree(this_node) == 0) {
+        out << this_node->toString() << endl;
+      }
     }
 }
 
 void DirectedWeightedNetwork::printOutZeros(ostream& out) const{
     out << "#The following nodes have outdegree zero" << endl;
     NodePSet::const_iterator i;
-    for(i = node_set.begin(); i != node_set.end(); i++){
-	    if(getOutDegree(*i) == 0){
-		    out << (*i)->toString() << endl;
-	    }
+    NodeIterator ni = getNodeIterator();
+    while( ni.moveNext() ) {
+      Node* this_node = ni.current();
+      if(getOutDegree(this_node) == 0){
+        out << (this_node)->toString() << endl;
+      }
     }
-
 }
 
 void DirectedWeightedNetwork::printOutStrengthDist(std::ostream& out){
@@ -447,8 +435,10 @@ void DirectedWeightedNetwork::printOutDegStrengthMap(std::ostream& out){
 
 void DirectedWeightedNetwork::printWeights(std::ostream& out) const{
     EdgeSet::const_iterator i;
-    for(i = edge_set.begin(); i != edge_set.end(); i++){
-	    out << (*i)->toString() << " with weight = " << (*i)->getWeight() << endl;
+    EdgeIterator ei = getEdgeIterator();
+    while( ei.moveNext() ) {
+      Edge* this_edge = ei.current();
+      out << this_edge->toString() << " with weight = " << this_edge->getWeight() << endl;
     }
 }
 

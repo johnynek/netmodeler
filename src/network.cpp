@@ -35,7 +35,7 @@ map<Edge*, int> Network::_edge_ref_count;
 //#define DEBUG
 
 Network::Network()  {
-
+  _edge_count = 0;
 }
 
 Network::Network(const Network& net) {
@@ -69,7 +69,7 @@ bool Network::add(const Edge& e) {
 bool Network::add(Edge* edge) {
     
     bool success = false;
-    if( edge_set.count(edge) == 0 ) {
+    if( !has(edge) ) {
       //This is a new edge:
       list<INetworkMonitor*>::iterator nm_it;
       for(nm_it = _net_mon.begin(); nm_it != _net_mon.end(); nm_it++) {
@@ -77,28 +77,26 @@ bool Network::add(Edge* edge) {
       }
      
       //Account for the edges and nodes
-      pair< EdgeSet::iterator, bool> result;
-      result = edge_set.insert(edge);
-      if ( result.second == true ) {
-	//This is a new edge, so bump the ref count:
-	incrementEdgeRefCount(edge);
-	//make sure these nodes are in the network
-	add(edge->first);
-	add(edge->second);
-         
-        connection_map[edge->first].insert(edge->second);
-        connection_map[edge->second].insert(edge->first);
 
-	_node_to_edges[edge->first].insert(edge);
-	_node_to_edges[edge->second].insert(edge);
-      }
-      success = result.second;
+      //This is a new edge, so bump the ref count:
+      incrementEdgeRefCount(edge);
+      //make sure these nodes are in the network
+      add(edge->first);
+      add(edge->second);
+         
+      _node_to_edges[edge->first].insert(edge);
+      _node_to_edges[edge->second].insert(edge);
+      //Increment the edge count:
+      _edge_count++;
+      
       //Tell the network monitors
       for(nm_it = _net_mon.begin(); nm_it != _net_mon.end(); nm_it++) {
         (*nm_it)->postEdgeAdd(edge);
       }
+      success = true;
     }
     else {
+      //We already have this edge, don't add it again
       success = false;
     }
     return success;
@@ -108,21 +106,17 @@ bool Network::add(Node* node) {
 #ifdef DEBUG
   cout << "Network(" << this << ") adding Node: " << node << endl;
 #endif
-  if( node_set.find(node) == node_set.end() ) {
+  if( ! has(node) ) {
     list<INetworkMonitor*>::iterator nm_it;
     for(nm_it = _net_mon.begin(); nm_it != _net_mon.end(); nm_it++) {
       (*nm_it)->preNodeAdd(node);
     }
-    pair<NodePSet::iterator, bool> result;
-    result = node_set.insert(node);
-    bool success = result.second;
-    if(success) {
-        incrementNodeRefCount(node);
-    }
+    _node_to_edges[ node ] = _empty_edgeset;
+    incrementNodeRefCount(node);
     for(nm_it = _net_mon.begin(); nm_it != _net_mon.end(); nm_it++) {
       (*nm_it)->postNodeAdd(node);
     }
-    return result.second;
+    return true;
   }
   else {
     //The node was already there:
@@ -138,27 +132,24 @@ void Network::add(INetworkMonitor* nm)
 
 void Network::clear() {
     //Delete all the memory
-    NodePSet::iterator i;
 #ifdef DEBUG 
     cout << "About to decrement all nodes" << endl;
 #endif
-    for(i=node_set.begin(); i != node_set.end(); i++ ) {
+    NodeIterator ni = getNodeIterator();
+    while( ni.moveNext() ) {
 #ifdef DEBUG
-      cout << "Decrementing: " << *i << endl;
+      cout << "Decrementing: " << ni.current() << endl;
 #endif
-      decrementNodeRefCount( *i );
+      decrementNodeRefCount( ni.current() );
     }
-    node_set.clear();
 
 #ifdef DEBUG
     cout << "About to decrement all edges" << endl;
 #endif
-    EdgeSet::iterator j;
-    for(j=edge_set.begin(); j != edge_set.end(); j++) {
-      decrementEdgeRefCount( *j );
+    EdgeIterator ei = getEdgeIterator();
+    while(ei.moveNext()) {
+      decrementEdgeRefCount( ei.current() );
     }
-    connection_map.clear();
-    edge_set.clear();
     _node_to_edges.clear();
 }
 
@@ -203,6 +194,13 @@ int Network::decrementNodeRefCount(Node* node) {
     
 }
 
+void Network::fillNodePSet(NodePSet& ns) const {
+  NodeIterator ni = getNodeIterator();
+  while( ni.moveNext() ) {
+    ns.insert( ni.current() );
+  }
+}
+
 double Network::getAssortativity() const {
 
   /*
@@ -217,12 +215,13 @@ double Network::getAssortativity() const {
   sum_jk = 0;
   sum_j2 = 0;
   sum_k2 = 0;
-  EdgeSet::const_iterator i;
   //Add the neighbors:
-  for(i = edge_set.begin(); i != edge_set.end(); i++) { 
+  EdgeIterator ei = getEdgeIterator();
+  while( ei.moveNext() ) {
+    Edge* this_edge = ei.current();
     //We need "remaining degree" for this calculation
-    j = (double)(getDegree( (*i)->first ) - 1);
-    k = (double)(getDegree( (*i)->second ) - 1);
+    j = (double)(getDegree( (this_edge)->first ) - 1);
+    k = (double)(getDegree( (this_edge)->second ) - 1);
     //DEBUG:
     //cerr << "j: " << j << " k: " << k << endl;
     sum_j += j;
@@ -231,7 +230,7 @@ double Network::getAssortativity() const {
     sum_j2 += j * j;
     sum_k2 += k * k;
   }
-  double m_inv = 1.0 / (double)(edge_set.size());
+  double m_inv = 1.0 / (double)(getEdgeSize());
   double r, t;
 
   /*
@@ -258,20 +257,20 @@ double Network::getAssortativity() const {
 int Network::getAssociatedNumber(Node* aNode) const {
 
     /**
-     * \todogetDistance never returns -1, maybe we want to do so
+     * \todo getDistance never returns -1, maybe we want to do so
      * in networks with more than one component
      */
     return getDistance(aNode);
 }
 
 map<int, int> Network::getAssociatedNumberDist() const {
-    NodePSet::const_iterator n_it;
     int this_an;
     map<int, int> ret_val;
-    
-    for( n_it = node_set.begin(); n_it != node_set.end(); n_it++) {
-        this_an = getAssociatedNumber( *n_it );
-	ret_val[this_an] = ret_val[this_an] + 1;
+   
+    NodeIterator ni = getNodeIterator();
+    while( ni.moveNext() ) {
+      this_an = getAssociatedNumber( ni.current() );
+      ret_val[this_an] = ret_val[this_an] + 1;
     }
     return ret_val;
 }
@@ -282,7 +281,9 @@ double Network::getAverageDegree(const NodePSet& nodes) const {
 }
 
 double Network::getAverageDegree() const {
-    return getAverageDegree( node_set );
+    double dn = getNodeSize();
+    double de = getEdgeSize();
+    return 2.0 * de / dn;
 }
 
 vector<int> Network::getCCHist(int bins) const {
@@ -290,16 +291,17 @@ vector<int> Network::getCCHist(int bins) const {
     vector<int> ret_val;
     double this_cc;
     int this_bin;
-    NodePSet::const_iterator n_it;
     
     ret_val.resize(bins);
     for(int j = 0; j < bins; j++) {
         ret_val[j] = 0;
     }
     
-    for(n_it = node_set.begin(); n_it != node_set.end(); n_it++) {
-      if( getDegree( *n_it ) != 0 ) {
-        this_cc = getClusterCoefficient( *n_it );
+    NodeIterator ni = getNodeIterator();
+    while( ni.moveNext() ) {
+      Node* n = ni.current();
+      if( getDegree( n ) != 0 ) {
+        this_cc = getClusterCoefficient( n );
 	this_bin = (int)(this_cc * (double)bins);
 	if( this_cc < 1.0) {
 	  ret_val[this_bin] = ret_val[this_bin] + 1;
@@ -323,9 +325,11 @@ map<int, double> Network::getCCvsDegree() const {
     int degree;
     double cc;
     
-    for(n_it = node_set.begin(); n_it != node_set.end(); n_it++) {
-        cc = getClusterCoefficient( *n_it );
-	degree = getDegree( *n_it );
+    NodeIterator ni = getNodeIterator();
+    while( ni.moveNext() ) {
+      Node* n = ni.current();
+        cc = getClusterCoefficient( n );
+	degree = getDegree( n );
 	all_cc[degree].insert(cc);
     }
     double average;
@@ -352,20 +356,16 @@ double Network::getCCStdErr() const {
      */
     return 0.0;
   }
-  NodePSet::const_iterator n_it;
   double sigma2 = 0.0;
-  for(n_it = getNodes().begin(); n_it != getNodes().end(); n_it++) {
+  NodeIterator ni = getNodeIterator();
+  while( ni.moveNext() ) {
     Network tmp = *this;
-    tmp.remove( *n_it );
+    tmp.remove( ni.current() );
     double tmp_cc = tmp.getClusterCoefficient();
     sigma2 += (cc - tmp_cc) * (cc - tmp_cc);
   }
-  double n_count = (double)getNodes().size();
+  double n_count = (double)getNodeSize();
   return sqrt( (n_count - 1.0) * sigma2/n_count );
-}
-
-const Network::EdgeSet& Network::getMinCut(Node* node1,Node* node2) const {
-  ///\todo
 }
 
 #if 0
@@ -599,7 +599,9 @@ set<Network> Network::getComponents() const {
 
 double Network::getDegreeMoment(int m) const
 {
-  return getDegreeMoment(m,node_set);
+  NodePSet ns;
+  fillNodePSet(ns);
+  return getDegreeMoment(m,ns);
 }
 
 double Network::getDegreeMoment(int m, const NodePSet& nodes) const
@@ -624,7 +626,7 @@ double Network::getDegreeMoment(int m, const NodePSet& nodes) const
     return ave / (double)( nodes.size() );
 }
 
-
+#ifndef HIDE_STL
 const Network::ConnectedNodePSet& Network::getNeighbors(Node* node) const {
   map< Node*, ConnectedNodePSet >::const_iterator i = connection_map.find(node);
   if( i != connection_map.end() ) {
@@ -634,6 +636,42 @@ const Network::ConnectedNodePSet& Network::getNeighbors(Node* node) const {
     //returns an empty set
     return _empty_cnodeset;
   }
+}
+#endif
+
+NodeIterator* Network::getNeighborIterator(Node* n) const {
+  map<Node*, EdgeSet>::const_iterator neit = _node_to_edges.find(n);
+  if( neit == _node_to_edges.end() ) {
+    //No such edge:
+    return 0;
+  }
+  
+  Network::NeighborIterator* ni = new NeighborIterator();
+  ni->_beg = neit->second.begin();
+  ni->_end = neit->second.end();
+  ni->_neighbors_of = n;
+  ni->reset();
+  return ni;
+}
+
+Network* Network::getNeighbors(Node* node) const {
+  map<Node*, EdgeSet>::const_iterator it;
+  it = _node_to_edges.find(node);
+  Network* net = new Network();
+  if( it != _node_to_edges.end() ) {
+    EdgeSet::const_iterator eit;
+    //Add all the Nodes:
+    for( eit = it->second.begin();
+         eit != it->second.end();
+         eit++) {
+      //Add them in:
+      net->add( (*eit)->getOtherNode( node ) ); 
+    }
+  }
+  else {
+    //Return an empty network
+  }
+  return net;
 }
 
 double Network::getClusterCoefficient(Node* node) const {
@@ -711,7 +749,9 @@ double Network::getClusterCoefficient(const NodePSet& nodes) const {
 }
 
 double Network::getClusterCoefficient() const {
-    return getClusterCoefficient(node_set);
+    NodePSet ns;
+    fillNodePSet(ns);
+    return getClusterCoefficient(ns);
 }
 
 int Network::getDegree(Node* node) const {
@@ -745,7 +785,9 @@ map<int, int> Network::getDegreeDist(const NodePSet& nodes) const {
 }
 
 map<int, int> Network::getDegreeDist() const {
-  return getDegreeDist( node_set );
+  NodePSet ns;
+  fillNodePSet(ns);
+  return getDegreeDist( ns );
 }
 
 double Network::getDegreeEntropy() const {
@@ -756,8 +798,8 @@ double Network::getDegreeEntropy() const {
   for(deg_it = deg_dist.begin(); deg_it != deg_dist.end(); deg_it++) {
     entropy -= deg_it->second * log( (double)deg_it->second );
   }
-  entropy /= node_set.size();
-  entropy += log( (double)node_set.size() );
+  entropy /= getNodeSize();
+  entropy += log( (double)getNodeSize() );
   return entropy;
 }
 
@@ -781,7 +823,6 @@ int Network::getDistancesFrom(Node* start,
       weight = 1;
   to_visit.push(start);
   Node* tmp_node = 0;
-  NodePSet::const_iterator n_it;
   //Only go a certain depth:
   bool is_max_depth = (max_depth != -1);
   map<Node*, int>::iterator dit;
@@ -793,26 +834,28 @@ int Network::getDistancesFrom(Node* start,
     //Just stop if the distance is more than we should go
     if( is_max_depth && (distance > max_depth) ) { break; }
     neighbor_max_dist = 0;
-    for(n_it = getNeighbors(tmp_node).begin();
-	n_it != getNeighbors(tmp_node).end();
-	n_it++) {
-      dit = distances.find( *n_it );
+    Network* neighbors = getNeighbors(tmp_node);
+    NodeIterator neighit = neighbors->getNodeIterator();
+    while( neighit.moveNext() ) {
+      Node* n = neighit.current();
+      dit = distances.find( n );
       if( dit == distances.end() ) {
 	//We have not yet visited this node
-	distances[*n_it] = distance;
-	weights[*n_it] = weight;
-	to_visit.push( *n_it );
+	distances[n] = distance;
+	weights[n] = weight;
+	to_visit.push( n );
 	//update the maximum
 	max_dist = (max_dist < distance ) ? distance : max_dist;
       }
       else if( dit->second == distance ) {
         //There is more than one way to reach this node:
-	weights[*n_it] += weight;
+	weights[n] += weight;
       }
-      if( neighbor_max_dist < distances[*n_it] ) {
-        neighbor_max_dist = distances[*n_it];
+      if( neighbor_max_dist < distances[n] ) {
+        neighbor_max_dist = distances[n];
       }
     }
+    delete neighbors;
     /**
      * We check all the nodes at distance d before d+1 (breadth first)
      * so, once a distance is assigned it is never decreased
@@ -873,10 +916,9 @@ int Network::getDistanceDist(Node* start,
   NodePSet::const_iterator n_it;
   
   int max = getDistancesFrom(start, distances, weights, leaf_nodes);
-  for( n_it = getNodes().begin();
-       n_it != getNodes().end();
-       n_it++) {
-    dit = distances.find( *n_it );
+  NodeIterator ni = getNodeIterator();
+  while( ni.moveNext() ) {
+    dit = distances.find( ni.current() );
     if( dit == distances.end() ) {
       //This node is unreachable from start
       distribution[-1]++;
@@ -893,20 +935,18 @@ int Network::getDistanceDist(map<int, int>& distribution) const {
   map<Node*, int> distances, weights;
   map<Node*, int>::iterator dit;
   set<Node*> leaf_nodes;
-  NodePSet::const_iterator n_it;
-  NodePSet::const_iterator j_it;
   
   int max = -1,
       tmp_max,
       radius = 0;
-  for(j_it = getNodes().begin(); j_it != getNodes().end(); j_it++) {
-    tmp_max = getDistancesFrom(*j_it, distances, weights, leaf_nodes);
+  NodeIterator ni = getNodeIterator();
+  while( ni.moveNext() ) {
+    tmp_max = getDistancesFrom( ni.current(), distances, weights, leaf_nodes);
     max = (max < tmp_max) ? tmp_max : max;
     radius = (tmp_max < radius) ? tmp_max : radius;
-    for( n_it = getNodes().begin();
-         n_it != getNodes().end();
-         n_it++) {
-      dit = distances.find( *n_it );
+    NodeIterator mit = getNodeIterator();
+    while( mit.moveNext() ) {
+      dit = distances.find( mit.current() );
       if( dit == distances.end() ) {
         //This node is unreachable from start
         distribution[-1]++;
@@ -1064,14 +1104,12 @@ Edge* Network::getEdgeBetweennessFor(Node* target,
 
 Edge* Network::getEdgeBetweenness(map<Edge*, double>& betweenness) const {
   
-  NodePSet::const_iterator n_it;
   Edge* max_edge = 0;
   double max_between = 0.0, tmp_between = 0.0;
   map<Edge*, double> my_between;
-  for(n_it = getNodes().begin();
-      n_it != getNodes().end();
-      n_it++) {
-    max_edge = getEdgeBetweennessFor(*n_it, my_between);
+  NodeIterator ni = getNodeIterator();
+  while( ni.moveNext() ) {
+    max_edge = getEdgeBetweennessFor( ni.current(), my_between);
     /*
     cout << "source: " << (*n_it)->toString() << endl
 	 << "max edge: " << max_edge->toString() << endl
@@ -1093,6 +1131,8 @@ Edge* Network::getEdgeBetweenness(map<Edge*, double>& betweenness) const {
   return max_edge;
 }
 
+#ifndef HIDE_STL
+
 const Network::EdgeSet& Network::getEdges() const {
     return edge_set;
 }
@@ -1108,6 +1148,23 @@ const Network::EdgeSet& Network::getEdges(Node* node) const {
 	return i->second;
     }
     return _empty_edgeset;
+}
+
+#endif
+
+Network* Network::getEdges(Node* node) const {
+  Network* net = new Network();
+  map<Node*, EdgeSet>::const_iterator neit = _node_to_edges.find(node);
+  if( neit != _node_to_edges.end() ) {
+    EdgeSet::const_iterator eit;
+    for(eit = neit->second.begin();
+        eit != neit->second.end();
+        eit++) {
+      //Add all the edges:
+      net->add( *eit );
+    }
+  }
+  return net;
 }
 
 Edge* Network::getEdge(Node* from, Node* to) const {
@@ -1138,14 +1195,38 @@ Edge* Network::getEdge(Node* from, Node* to) const {
   return 0; 
 }
 
+EdgeIterator Network::getEdgeIterator() const
+{
+  EdgeIterator ei;
+  ei._begin = _node_to_edges.begin();
+  ei._end = _node_to_edges.end();
+  ei.reset();
+  return ei;
+}
+
+EdgeIterator* Network::getEdgeIterator(Node* n) const
+{
+  map<Node*, EdgeSet>::const_iterator neit = _node_to_edges.find(n);
+  if( neit == _node_to_edges.end() ) {
+    //No such edge:
+    return 0;
+  }
+  Network::NeighborEdgeIterator* ei = new Network::NeighborEdgeIterator(); 
+  ei->_beg = neit->second.begin();
+  ei->_end = neit->second.end();
+  ei->_neighbors_of = n;
+  ei->reset();
+  return ei;
+}
+
 map< pair<int,int>, int > Network::getEdgeDist() const {
   map<pair<int,int>, int > result;
-  EdgeSet::const_iterator e_it;
   int d1, d2;
-  for(e_it = edge_set.begin(); e_it != edge_set.end(); e_it++) {
-    if( *e_it ) { 
-     d1 = getDegree( (*e_it)->first );
-     d2 = getDegree( (*e_it)->second );
+  EdgeIterator ei = getEdgeIterator();
+  while( ei.moveNext() ) {
+     Edge* this_edge = ei.current();
+     d1 = getDegree( (this_edge)->first );
+     d2 = getDegree( (this_edge)->second );
      if( result.count( pair<int,int>(d1,d2) ) == 1) {
       result[ pair<int,int>(d1,d2) ] += 1;
      }
@@ -1158,7 +1239,6 @@ map< pair<int,int>, int > Network::getEdgeDist() const {
      else {
       result[ pair<int,int>(d2,d1) ] = 1;
      }
-   }
   }
   return result;
 }
@@ -1182,8 +1262,8 @@ pair<double,double> Network::getEdgeEntropy() const {
       h_ek -= it2->second * log( (double)it2->second );
     }
   }
-  h_ek /= (2 * edge_set.size());
-  h_ek += log( (double)2 * edge_set.size() );
+  h_ek /= (2 * getEdgeSize());
+  h_ek += log( (double)2 * getEdgeSize() );
  
   //Here is H(e_ij):
   double h_eij = 0.0;
@@ -1192,8 +1272,8 @@ pair<double,double> Network::getEdgeEntropy() const {
         h_eij -= it1->second * log( (double) it1->second );
       }
   }
-  h_eij /= (2 * edge_set.size());
-  h_eij += log( (double)2 * edge_set.size() );
+  h_eij /= (2 * getEdgeSize());
+  h_eij += log( (double)2 * getEdgeSize() );
 
   return pair<double,double>(h_ek, h_eij);
 }
@@ -1207,16 +1287,6 @@ double Network::getEdgeMutualInfo() const {
 
 Edge* Network::getEdgePtr(const Edge& edge) const {
     
-    //See that these guys actually connect to each other:
-    map<Node*, ConnectedNodePSet>::const_iterator it;
-    it = connection_map.find(edge.first);
-    if( it == connection_map.end() || it->second.count( edge.second ) == 0 ) {
-      return 0;
-    }
-    it = connection_map.find(edge.second);
-    if( it == connection_map.end() || it->second.count( edge.first ) == 0) {
-      return 0;
-    }
     //Find the ptr of the matching edge:
     map<Node*, EdgeSet>::const_iterator it1, it2;
     it1 = _node_to_edges.find(edge.first);
@@ -1245,11 +1315,15 @@ Edge* Network::getEdgePtr(const Edge& edge) const {
     return 0;
 }
 
+int Network::getEdgeSize() const {
+  return _edge_count;
+}
+
 double Network::getExpectedTransitivity() const {
   
   double k2, k, exp_cc;
-  int n = getNodes().size();
-  double edges = (double)getEdges().size();
+  int n = getNodeSize();
+  double edges = (double)getEdgeSize();
   map<int, int> degdist = getDegreeDist();
   map<int, int> degdist2 = degdist;
   map<int, int>::iterator degit,degit2;
@@ -1272,6 +1346,45 @@ double Network::getExpectedTransitivity() const {
 }
 
 
+Network* Network::getNeighborhood(Node* n) const {
+  map<Node*, EdgeSet>::const_iterator neit = _node_to_edges.find(n);
+  Network* net = new Network();
+  if( neit != _node_to_edges.end() ) {
+    EdgeSet::const_iterator e_it;
+    for(e_it = neit->second.begin();
+        e_it != neit->second.end();
+        e_it++) {
+      //Add all the edges which have this node in it.
+      net->add( *e_it );
+    }
+  }
+  //Iterate over these nodes:
+  NodeIterator ni = net->getNodeIterator();
+  while( ni.moveNext() ) {
+    Node* this_node = ni.current();
+    neit = _node_to_edges.find(this_node);
+    EdgeSet::const_iterator e_it;
+    for(e_it = neit->second.begin();
+        e_it != neit->second.end();
+        e_it++) {
+      //Here are all the edges of this_node
+      Edge* this_edge = *e_it;
+      if( net->has( this_edge->first ) && net->has( this_edge->second ) ) {
+        //Both of these nodes are in the network, add the edge:
+        net->add( this_edge );
+      }
+      else {
+        //One of these nodes are not in the network, don't add it.
+      }
+      //Now we have considered all the edges of this_node
+    }
+    //now we have considered all the nodes which are neighbors of n
+  }
+  return net;
+}
+
+#ifndef HIDE_STL
+
 Network::NodePSet Network::getNeighborhood(Node* node, int distance) const {
 
  map<Node*, int> distances, weights;
@@ -1287,8 +1400,24 @@ Network::NodePSet Network::getNeighborhood(Node* node, int distance) const {
  return result;
 }
 
+#endif
+
+NodeIterator Network::getNodeIterator() const {
+  NodeIterator ni;
+  ni._begin = _node_to_edges.begin();
+  ni._end = _node_to_edges.end();
+  ni.reset();
+  return ni;
+}
+
+#ifndef HIDE_STL
 const Network::NodePSet& Network::getNodes() const {
     return node_set;
+}
+#endif
+
+int Network::getNodeSize() const {
+  return _node_to_edges.size();
 }
 
 map<int, int> Network::getNthNeighborDist(const NodePSet& nodes, int nth) const {
@@ -1312,7 +1441,9 @@ map<int, int> Network::getNthNeighborDist(const NodePSet& nodes, int nth) const 
 }
 
 map<int, int> Network::getNthNeighborDist(int nth) const {
-  return getNthNeighborDist(node_set, nth);
+  NodePSet ns;
+  fillNodePSet(ns);
+  return getNthNeighborDist(ns, nth);
 }
 
 Network* Network::getSubNet(const NodePSet& nodes) const {
@@ -1348,6 +1479,7 @@ double Network::getTransitivity() const {
   return 3.0 * (double)triangles/(double)wedges;
 }
 
+#ifndef HIDE_STL
 int Network::getTriangles(Node* node) const {
     map<Node*, ConnectedNodePSet >::const_iterator i, j;
     ConnectedNodePSet::const_iterator k,l;
@@ -1386,6 +1518,22 @@ int Network::getTriangles(Node* node) const {
       return 0;
     }
 }
+#endif
+
+int Network::getTriangles(Node* n) const {
+  /*
+   * The number of triangles is the number of edges
+   * between the first neighbors of n.
+   * The neighborhood includes all nodes and edges that
+   * are distance 1 or less from n, so get the neighborhood
+   * and remove n
+   */
+  Network* hood = getNeighborhood(n);
+  hood->remove(n);
+  int triangles = hood->getEdgeSize();
+  delete hood;
+  return triangles;
+}
 
 int Network::getTriangles(Edge* this_edge) const {
 
@@ -1408,12 +1556,10 @@ int Network::getTriangles(Edge* this_edge) const {
         wedges++;
         //See if it is a triangle:
 	Node* other = (*e2_it)->getOtherNode(this_node);
-	map<Node*, ConnectedNodePSet>::const_iterator map_it;
-	map_it = connection_map.find(other);
-        if( map_it->second.find(other1) != map_it->second.end() ) {
-          //The "other" nodes are also connected.  This is a triangle:
-	  triangles++;
-	}
+        if( getEdge(other, other1) != 0 ) {
+          //There is an edge between other - other1
+          triangles++;
+        }
       }
     }
     //Look at the wedges from the other end:
@@ -1428,12 +1574,10 @@ int Network::getTriangles(Edge* this_edge) const {
         wedges++;
         //See if it is a triangle:
 	Node* other = (*e2_it)->getOtherNode(this_node);
-	map<Node*, ConnectedNodePSet>::const_iterator map_it;
-	map_it = connection_map.find(other);
-        if( map_it->second.find(other1) != map_it->second.end() ) {
-          //The "other" nodes are also connected.  This is a triangle:
-	  triangles++;
-	}
+        if( getEdge(other, other1) != 0 ) {
+          //There is an edge between other - other1
+          triangles++;
+        }
       }
     }
   //We saw the triangles 2 times, once
@@ -1457,8 +1601,9 @@ void Network::getTrianglesWedges(int& triangles, int& wedges) const {
   map<Node*, EdgeSet>::const_iterator emap_it;
   triangles = 0;
   wedges = 0;
-  for(e_it = edge_set.begin(); e_it != edge_set.end(); e_it++) {
-    Edge* this_edge = *e_it;
+  EdgeIterator ei = getEdgeIterator();
+  while( ei.moveNext() ) {
+    Edge* this_edge = ei.current();
     //Look at the wedges from one end:
     Node* this_node = this_edge->first;
     Node* other1 = this_edge->second;
@@ -1471,12 +1616,10 @@ void Network::getTrianglesWedges(int& triangles, int& wedges) const {
         wedges++;
         //See if it is a triangle:
 	Node* other = (*e2_it)->getOtherNode(this_node);
-	map<Node*, ConnectedNodePSet>::const_iterator map_it;
-	map_it = connection_map.find(other);
-        if( map_it->second.find(other1) != map_it->second.end() ) {
-          //The "other" nodes are also connected.  This is a triangle:
-	  triangles++;
-	}
+        if( getEdge(other, other1) != 0 ) {
+          //There is an edge between other - other1
+          triangles++;
+        }
       }
     }
     //Look at the wedges from the other end:
@@ -1491,12 +1634,10 @@ void Network::getTrianglesWedges(int& triangles, int& wedges) const {
         wedges++;
         //See if it is a triangle:
 	Node* other = (*e2_it)->getOtherNode(this_node);
-	map<Node*, ConnectedNodePSet>::const_iterator map_it;
-	map_it = connection_map.find(other);
-        if( map_it->second.find(other1) != map_it->second.end() ) {
-          //The "other" nodes are also connected.  This is a triangle:
-	  triangles++;
-	}
+        if( getEdge(other, other1) != 0 ) {
+          //There is an edge between other - other1
+          triangles++;
+        }
       }
     }
   }
@@ -1526,8 +1667,20 @@ bool Network::has(const Edge& edge) const {
     return ( 0 != getEdgePtr(edge));
 }
 
+bool Network::has(Edge* edge) const {
+  map<Node*, EdgeSet>::const_iterator neit = _node_to_edges.find( edge->first );
+  if( neit != _node_to_edges.end() ) {
+    //We have the first node, but do we have the edge:
+    return (neit->second.count( edge ) != 0 );
+  }
+  else {
+    //This network does not have the node, it can't have the edge:
+    return false;
+  }
+}
+
 bool Network::has(Node* node) const {
-    return (node_set.find(node) != node_set.end());
+    return (_node_to_edges.find(node) != _node_to_edges.end());
 }
 
 int Network::incrementEdgeRefCount(Edge* edge) {
@@ -1571,17 +1724,18 @@ void Network::printTo(ostream& out) const {
     * This a really simple format:
     * node : neighbor1 neighbor2 ... neighborN <newline>
     */
-  NodePSet::const_iterator i;
-  ConnectedNodePSet::const_iterator j;
-  map< Node*, ConnectedNodePSet >::const_iterator k;
-  for(i = node_set.begin(); i != node_set.end(); i++) {
-    k = connection_map.find( *i );
-    out << (*i)->toString() << " :";
-    if( k != connection_map.end() ) {
-      for(j = k->second.begin(); j != k->second.end(); j++) {
-        out << " " << (*j)->toString();
-      }
+  NodeIterator ni1 = getNodeIterator();
+  while( ni1.moveNext() ) {
+    Node* n1 = ni1.current();
+    //Print all its neighbors:
+    Network* neighbors = getNeighbors(n1);
+    NodeIterator ni2 = neighbors->getNodeIterator();
+    out << n1->toString() << " :";
+    while( ni2.moveNext() ) {
+      out << " " << ni2.current()->toString();
     }
+    delete neighbors;
+    //That's all the neighbors
     out << endl;
   }
 #endif
@@ -1702,51 +1856,48 @@ int Network::remove(const Edge& edge) {
 }
 
 int Network::remove(Edge* e_p) {
-  EdgeSet::iterator eit = edge_set.find(e_p);
-  int return_val = 0;
-  if( eit != edge_set.end() ) {
+  if( has( e_p ) ) {
     //This edge is in the network	  
     list<INetworkMonitor*>::iterator nm_it;
     for(nm_it = _net_mon.begin(); nm_it != _net_mon.end(); nm_it++) {
       (*nm_it)->preEdgeRemove(e_p);
     }
-    return_val = edge_set.erase( e_p );
-    if( return_val != 0) { 
-      connection_map[e_p->first].erase(e_p->second);
-      connection_map[e_p->second].erase(e_p->first);
-      _node_to_edges[e_p->first].erase(e_p);
-      _node_to_edges[e_p->second].erase(e_p);
-    
-      for(nm_it = _net_mon.begin(); nm_it != _net_mon.end(); nm_it++) {
-        (*nm_it)->postEdgeRemove(e_p);
-      }
-      //remove a reference to the edge:
-      //This should be done last, other wise the postEdgeRemove may get
-      //a deleted pointer
-      decrementEdgeRefCount(e_p);
+    _edge_count--;
+    _node_to_edges[e_p->first].erase(e_p);
+    _node_to_edges[e_p->second].erase(e_p);
+       
+    for(nm_it = _net_mon.begin(); nm_it != _net_mon.end(); nm_it++) {
+      (*nm_it)->postEdgeRemove(e_p);
     }
+    //remove a reference to the edge:
+    //This should be done last, other wise the postEdgeRemove may get
+    //a deleted pointer
+    decrementEdgeRefCount(e_p);
+    return 1;
   }
-  return return_val;
+  else {
+    //This node is not in the network:
+    return 0;
+  }
 }
 
 int Network::remove(Node* node) {
   int removed_edges = 0;
-  NodePSet::iterator nit = node_set.find(node);
-  if( nit != node_set.end() ) {
+  map<Node*, EdgeSet>::iterator ne_it = _node_to_edges.find(node);
+  if( ne_it != _node_to_edges.end() ) {
     list<INetworkMonitor*>::iterator nm_it;
+    //Let everybody know we are removing this node
     for(nm_it = _net_mon.begin(); nm_it != _net_mon.end(); nm_it++) {
       (*nm_it)->preNodeRemove(node);
     }
-    node_set.erase(node);
+    //Remove all the edges associated with the node
     EdgeSet::iterator e_it;
-    map<Node*, EdgeSet>::iterator ne_it = _node_to_edges.find(node);
-    if( ne_it != _node_to_edges.end() ) {
-      for(e_it = ne_it->second.begin(); e_it != ne_it->second.end(); e_it++) {
-        removed_edges += remove( *e_it );
-      }
+    for(e_it = ne_it->second.begin(); e_it != ne_it->second.end(); e_it++) {
+      removed_edges += remove( *e_it );
     }
+    //Remove the entry from the big table
     _node_to_edges.erase(node);
-    connection_map.erase(node);
+    //Let everyone know the edge is gone:
     for(nm_it = _net_mon.begin(); nm_it != _net_mon.end(); nm_it++) {
       (*nm_it)->postNodeRemove(node);
     }
@@ -1779,15 +1930,16 @@ void Network::remove(INetworkMonitor* nm) {
 }
 
 int Network::removeAndCluster(Node* n) {
-    const ConnectedNodePSet& set = getNeighbors(n);
-
-    //Connect all the neighbors
-    ConnectedNodePSet::iterator i,j;
-    for(i = set.begin(); i != set.end(); i++) {
-      for(j=i; j != set.end(); j++) {
-        add( Edge(*i,*j) );
+    Network* neighbors = getNeighbors(n);
+    NodeIterator ni, nj;
+    ni = getNodeIterator();
+    while( ni.moveNext() ) {
+      nj = getNodeIterator();
+      while( nj.moveNext() ) {
+        add( Edge( ni.current(), nj.current() ) );
       }
     }
+    delete neighbors;
     //Now return the node
     return remove(n);
 }
@@ -1803,24 +1955,18 @@ int Network::removeAndCluster(const NodePSet& nodes) {
 
 bool Network::operator<(const Network& aNet) const {
     //Make sure networks with smaller nodes are <
-    if( node_set.size() != aNet.node_set.size() ) {
-        return (node_set.size() < aNet.node_set.size());
+    if( getNodeSize() != aNet.getNodeSize() ) {
+        return (getNodeSize() < aNet.getNodeSize());
     }
     //okay, these two networks have the same number of nodes, but how about edges:
-    if( edge_set.size() != aNet.edge_set.size() ) {
-        return (edge_set.size() < aNet.edge_set.size() );
+    if( getEdgeSize() != aNet.getEdgeSize() ) {
+        return (getEdgeSize() < aNet.getEdgeSize() );
     }
     
     //If two networks are the same size,
     //but have different set of nodes, let the STL sort it out:
-    if( node_set != aNet.node_set ) {
-        return (node_set < aNet.node_set );
-    }
-    if (edge_set != aNet.edge_set ) {
-        return (edge_set < aNet.edge_set );
-    }
-    if ( connection_map != aNet.connection_map ) {
-        return (connection_map < aNet.connection_map);
+    if( _node_to_edges != aNet._node_to_edges ) {
+        return (_node_to_edges < aNet._node_to_edges );
     }
     return false;
 }
@@ -1828,23 +1974,23 @@ bool Network::operator<(const Network& aNet) const {
 Network& Network::operator=(const Network& aNet) {
   if( this != &aNet) {
       clear();
-      node_set = aNet.node_set;
-      edge_set = aNet.edge_set;
-      connection_map = aNet.connection_map;
       _node_to_edges = aNet._node_to_edges;
       
       //Bump the reference count on each of the nodes:
-      NodePSet::const_iterator n_it;
-      for(n_it = node_set.begin(); n_it != node_set.end(); n_it++) {
-          incrementNodeRefCount( *n_it );
+      NodeIterator ni = getNodeIterator();
+      while(ni.moveNext()) {
+        incrementNodeRefCount( ni.current() );
       }
-      EdgeSet::const_iterator e_it;
-      for(e_it = edge_set.begin(); e_it != edge_set.end(); e_it++) {
-          incrementEdgeRefCount( *e_it );
+      //Bump the reference count on each of the edges:
+      EdgeIterator ei = getEdgeIterator();
+      while(ei.moveNext()) {
+        incrementEdgeRefCount( ei.current() );
       }
   }
   return (*this);
 }
+
+#if 0
 bool Network::Merge(const Network& aNet, int aStart){
  //check if the ranges are correct
 	if (this->getNodes().size() < ((aStart-1) + aNet.getNodes().size())){
@@ -1874,7 +2020,7 @@ bool Network::Merge(const Network& aNet, int aStart){
 	return(true);
 }
 
-
+#endif
 
 
 
@@ -1979,19 +2125,67 @@ void Network::printToGDL(ostream& out) const {
   out<<"  attraction: 150\n";
   out<<"\n";
 
-  for(i = node_set.begin(); i != node_set.end(); i++) {
-	  label = (*i)->toString();
+
+  NodeIterator ni = getNodeIterator();
+  while( ni.moveNext() ) {
+    Node* n = ni.current();
+    label = n->toString();
     out<<"  node: { title: \""<<label<<"\" label: \""<<label<<"\" }\n";
 	  //out << 'n' << *i << " [label=\"" << label << "\",width=0.25,height=0.25,fontsize=9];" << endl;
-
-    k = connection_map.find( *i );
-	  if( k != connection_map.end() ) {
-	    for(j = k->second.begin(); j != k->second.end(); j++) {
-        out<<"  edge: { sourcename: \""<<label<<"\" targetname: \""<<(*j)->toString()<<"\" }\n";
+    Network* net2 = getNeighbors(n); 
+    NodeIterator cni = net2->getNodeIterator();
+    while( cni.moveNext() ) {
+      Node* n2 = cni.current();
+      out<<"  edge: { sourcename: \""<<label<<"\" targetname: \""<<(n2)->toString()<<"\" }\n";
         //out << 'n' << *i << " -> " << 'n' << *j << ";" << endl;
-      }
     }
+    delete net2;
     node_count++;
   }
   out << "}\n" << endl;    
+}
+
+
+Node* Network::NeighborIterator::current()
+{
+  return (*_eit)->getOtherNode( _neighbors_of );
+}
+
+bool Network::NeighborIterator::moveNext()
+{
+  if( _moved_to_first ) {
+    _eit++;
+  }
+  else {
+    _moved_to_first = true;
+  }
+  return ( _eit != _end );
+}
+
+void Network::NeighborIterator::reset()
+{
+  _eit = _beg;
+  _moved_to_first = false;
+}
+
+Edge* Network::NeighborEdgeIterator::current()
+{
+  return (*_eit);
+}
+
+bool Network::NeighborEdgeIterator::moveNext()
+{
+  if( _moved_to_first ) {
+    _eit++;
+  }
+  else {
+    _moved_to_first = true;
+  }
+  return ( _eit != _end );
+}
+
+void Network::NeighborEdgeIterator::reset()
+{
+  _eit = _beg;
+  _moved_to_first = false;
 }

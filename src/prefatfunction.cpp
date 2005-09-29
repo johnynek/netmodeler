@@ -31,42 +31,40 @@ Node* PrefAtFunction::findPartnerFor(Node* n,
 			const DegreePreferenceFunction& dp)
 {
   double pref_count = 0.0;
-  const Network::NodePSet& nodes = net.getNodes();
-  Network::NodePSet::const_iterator nit;
-  for (nit = nodes.begin(); nit != nodes.end();nit++)
-	{
-    pref_count += dp.evaluate( net.getDegree(*nit) );
-	}
+  NodeIterator netit = net.getNodeIterator();
+  while( netit.moveNext() ) {
+    pref_count += dp.evaluate( net.getDegree( netit.current() ) );
+  }
   
-	double max_pref = pref_count;
+  double max_pref = pref_count;
 
     //Don't include this node in the random selection
     if( net.has(n) ) {
       max_pref -= dp.evaluate( net.getDegree(n) );
     }
     //Don't include the neighbors:
-    const Network::NodePSet& neighbors = net.getNeighbors(n);
-    for( nit = neighbors.begin();
-	 nit != neighbors.end();
-	 nit++)
+    NodeIterator* ni = net.getNeighborIterator(n);
+    while( ni->moveNext() ) 
     {
-      max_pref -= dp.evaluate( net.getDegree(*nit) );
+      max_pref -= dp.evaluate( net.getDegree( ni->current() ) );
     }
+    delete ni;
+    ni = 0;
     double frac = r.getDouble01();
     //We are looking for a random fraction of max_pref
     double this_degree_sum = frac * max_pref;
     double this_count = 0.0;
     //Go through all the nodes selecting preferentially.
-    nit = nodes.begin();
     Node* partner = 0;
-    while( (nit != nodes.end()) && (this_count < this_degree_sum))
+    netit = net.getNodeIterator();
+    while( ( netit.moveNext() ) && (this_count < this_degree_sum))
     {
+      Node* this_node = netit.current();
       //Skip our self (n) and our neighbors
-      if((*nit != n) && (neighbors.find(*nit) == neighbors.end()) ) {
-        this_count += dp.evaluate( net.getDegree(*nit) );
-	      partner = *nit;
+      if((this_node != n) && (net.getEdge(n,this_node) == 0) ) {
+        this_count += dp.evaluate( net.getDegree(this_node) );
+	partner = this_node;
       }
-      nit++;
     }
     if( partner == n) { cerr << "n(" << n << ") == partner" << endl;}
     if( partner == 0) { cerr << "Could not find a partner for n: " << n << endl; }
@@ -79,13 +77,10 @@ Node* PrefAtFunction::findInPartnerFor(Node* n,
 			const DegreePreferenceFunction& dp)
 {
   double pref_count = 0.0;
-  const Network::NodePSet& nodes = net.getNodes();
-  Network::NodePSet::const_iterator nit;
-  for (nit = nodes.begin(); nit != nodes.end();nit++)
-	{
-    pref_count += dp.evaluate( net.getInDegree(*nit) );
-	}
-  
+  NodeIterator netit = net.getNodeIterator();
+  while( netit.moveNext() ) {
+    pref_count += dp.evaluate( net.getInDegree( netit.current() ) );
+  }
 	double max_pref = pref_count;
 
     //Don't include this node in the random selection
@@ -97,16 +92,16 @@ Node* PrefAtFunction::findInPartnerFor(Node* n,
     double this_degree_sum = frac * max_pref;
     double this_count = 0.0;
     //Go through all the nodes selecting preferentially.
-    nit = nodes.begin();
     Node* partner = 0;
-    while( (nit != nodes.end()) && (this_count < this_degree_sum))
+    netit = net.getNodeIterator();
+    while( ( netit.moveNext() ) && (this_count < this_degree_sum))
     {
+      Node* this_node = netit.current();
       //Skip our self (n) and our neighbors
-      if(*nit != n) {
-        this_count += dp.evaluate( net.getInDegree(*nit) );
-	      partner = *nit;
+      if((this_node != n) && (net.getEdge(n,this_node) == 0) ) {
+        this_count += dp.evaluate( net.getInDegree(this_node) );
+	partner = this_node;
       }
-      nit++;
     }
     if( partner == n) { cerr << "n(" << n << ") == partner" << endl;}
     if( partner == 0) { cerr << "Could not find a partner for n: " << n << endl; }

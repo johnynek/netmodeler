@@ -34,9 +34,8 @@ RealNode::RealNode() {
   local_cache = MruCache(max_size);
 }
 
-RealNode::RealNode(const std::string& s, int max) {
+RealNode::RealNode(const std::string& s, int max) : Node(s) {
   global_trust_score = 0.0;
-  _name = s;
   max_size = max; //max cache size is 500, experimental number
   local_cache = MruCache(max_size);
 }

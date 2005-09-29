@@ -75,57 +75,33 @@ bool DirectedNetwork::add(Edge* aEdge) {
     start = d_edge->second;
 	  end = d_edge->first;
   }
-  
-	//Account for the edges and nodes
-  pair< Network::EdgeSet::iterator, bool> result;
-    
-  result = edge_set.insert( d_edge );
-  if( result.second == true ) {
-    //This is a new edge:
-    incrementEdgeRefCount( d_edge );
-    if( node_set.insert(start).second ) {
-      incrementNodeRefCount( start );
-    }
-    if( node_set.insert(end).second ) {
-      incrementNodeRefCount( end );
-    }
-    connection_map[start].insert(end);
-    _node_to_edges[start].insert( d_edge );
-    in_connection_map[end].insert(start);
-    _node_to_edges[end].insert( d_edge );
-	}  
-	return result.second;
+  if( !has( start ) ) {
+    //start is new:
+    add( start );
+  }
+  if( !has( end ) ) {
+    add( end );
+  }
+  _node_to_edges[start].insert( d_edge );
+  _node_to_edges[end].insert( d_edge );
+  incrementEdgeRefCount( d_edge );
+  return true;
 }
 
 ///\todo: fix the below!
 void DirectedNetwork::moveIntoUndirectedNetwork(Network& net) {
-   
-  //Go ahead and get rid of the edges
-  edge_set.clear();
-	
-  NodePSet::const_iterator i, l;
-  map<Node*, ConnectedNodePSet >::const_iterator j;
-    
-  //Go through all the nodes:
-  for(i = node_set.begin(); i!=node_set.end(); i++) {
-	  net.add( *i );
-    j = connection_map.find( *i );
-	  //Do this loop twice, once for the out and once for in
- 	  if( j != connection_map.end() ) {
-	    for(l = j->second.begin(); l != j->second.end(); l++) {
-        net.add(Edge(*i, *l));
-	    }
-		}
-	  //The next time around add the in degrees.
-	  j = in_connection_map.find( *i );
- 	  if( j != in_connection_map.end() ) {
-	    for(l = j->second.begin(); l != j->second.end(); l++) {
-        net.add(Edge(*i, *l));
-	    }
-		}  
-	}
-	node_set.clear();
-  in_connection_map.clear();
+
+  NodeIterator ni = getNodeIterator();
+  while( ni.moveNext() ) {
+    net.add( ni.current() );
+  }
+  EdgeIterator ei = getEdgeIterator();
+  while( ei.moveNext() ) {
+    Edge* this_edge = ei.current();
+    net.add( Edge( this_edge->first, this_edge->second) );
+  }
+  //Empty out this network:
+  clear();
 }
 
 double DirectedNetwork::getAssortativity() const {
@@ -142,9 +118,10 @@ double DirectedNetwork::getAssortativity() const {
   sum_k2 = 0.0;
   EdgeSet::const_iterator i;
   DirectedEdge* d_edge;
-  for(i = edge_set.begin(); i != edge_set.end(); i++) {
+  EdgeIterator ei = getEdgeIterator();
+  while(ei.moveNext()) {
     //We need "remaining degree" for this calculation
-    d_edge = dynamic_cast<DirectedEdge*>(*i);
+    d_edge = dynamic_cast<DirectedEdge*>( ei.current() );
     //Make sure that j has the start node:
     if( d_edge->pointsFirstToSecond() ) {
       j = getOutDegree( d_edge->first ) - 1;
@@ -160,7 +137,7 @@ double DirectedNetwork::getAssortativity() const {
     sum_j2 += (double)(j * j);
     sum_k2 += (double)(k * k);
   }
-  double r, m_inv = 1.0 / (double)(edge_set.size());
+  double r, m_inv = 1.0 / (double)(getEdgeSize());
 
   /**
    *
@@ -177,9 +154,12 @@ double DirectedNetwork::getAssortativity() const {
 	
 }
 
+#ifndef HIDE_STL
 const Network::EdgeSet& DirectedNetwork::getEdges() const {
+  
   return edge_set;
 }
+#endif
 
 Edge* DirectedNetwork::getEdgePtr(const Edge& edge) const {
 
@@ -196,16 +176,6 @@ Edge* DirectedNetwork::getEdgePtr(const Edge& edge) const {
 	  	end = d_e.first;
 		}
 	
-		//Make sure that these nodes point to one another:
-		map<Node*, ConnectedNodePSet>::const_iterator it;
-		it = connection_map.find(start);
-		if( it == connection_map.end() || it->second.count(end) == 0) {
-    	return 0;
-		}
-		it = in_connection_map.find(end);
-		if( it == in_connection_map.end() || it->second.count(start) == 0) {
-    	return 0;
-		}
 		EdgeSet::const_iterator eit1, eit2;
 		const EdgeSet& e1 = _node_to_edges.find(start)->second;
 		const EdgeSet& e2 = _node_to_edges.find(end)->second;
@@ -241,16 +211,31 @@ map<int, int> DirectedNetwork::getInDegreeDist(const NodePSet& nodes) const {
 }
 
 map<int, int> DirectedNetwork::getInDegreeDist() const {
+  NodePSet node_set;
+  fillNodePSet(node_set);
   return getInDegreeDist(node_set);
 }
 
 int DirectedNetwork::getInDegree(Node* node) const {
-  map<Node*, ConnectedNodePSet >::const_iterator i = in_connection_map.find(node);
-  if( i != in_connection_map.end() ) {
-    return i->second.size();  
-	}
+  int in_deg = 0;
+  map<Node*, EdgeSet>::const_iterator neit = _node_to_edges.find(node);
+  if( neit != _node_to_edges.end() ) {
+    //He have this node:
+    EdgeSet::const_iterator eit;
+    for(eit = neit->second.begin();
+        eit != neit->second.end();
+        eit++) {
+      DirectedEdge* d_e = dynamic_cast<DirectedEdge*>(*eit);
+      if( d_e->getEndNode() == node ) {
+        //This is an in-degree;
+        in_deg++;
+      }
+    }
+    return in_deg;
+  }
   else {
-    return 0;
+    //Node not in the netork:
+    return -1;
   }
 }
 
@@ -267,21 +252,38 @@ map<int, int> DirectedNetwork::getOutDegreeDist(const NodePSet& nodes) const {
 }
 
 map<int, int> DirectedNetwork::getOutDegreeDist() const {
+  NodePSet node_set;
+  fillNodePSet(node_set);
   return getOutDegreeDist( node_set );
 }
 
 int DirectedNetwork::getOutDegree(Node* node) const {
-  map<Node*, ConnectedNodePSet >::const_iterator i = connection_map.find(node);
-  if( i != connection_map.end() ) {
-    return i->second.size();
+  int in_deg = 0;
+  map<Node*, EdgeSet>::const_iterator neit = _node_to_edges.find(node);
+  if( neit != _node_to_edges.end() ) {
+    //He have this node:
+    EdgeSet::const_iterator eit;
+    for(eit = neit->second.begin();
+        eit != neit->second.end();
+        eit++) {
+      DirectedEdge* d_e = dynamic_cast<DirectedEdge*>(*eit);
+      if( d_e->getStartNode() == node ) {
+        //This is an in-degree;
+        in_deg++;
+      }
+    }
+    return in_deg;
   }
   else {
-    return 0;
+    //Node not in the netork:
+    return -1;
   }
 }
 
 double DirectedNetwork::getInDegreeMoment(int m) const
 {
+  NodePSet node_set;
+  fillNodePSet(node_set);
   return getInDegreeMoment(m,node_set);
 }
 
@@ -309,6 +311,8 @@ double DirectedNetwork::getInDegreeMoment(int m, const NodePSet& nodes) const
 
 double DirectedNetwork::getOutDegreeMoment(int m) const
 {
+  NodePSet node_set;
+  fillNodePSet(node_set);
   return getOutDegreeMoment(m,node_set);
 }
 
@@ -334,16 +338,6 @@ double DirectedNetwork::getOutDegreeMoment(int m, const NodePSet& nodes) const
   return ave / (double)( nodes.size() );
 }
 
-void DirectedNetwork::printEdges(ostream& out) const{
-  EdgeSet::const_iterator i;
-  for(i = edge_set.begin(); i != edge_set.end(); i++){
-          DirectedEdge* d_edge = dynamic_cast<DirectedEdge*>(*i);
-	  out << (*i)->toString() << endl;
-  }
- 
-}
-
-
 void DirectedNetwork::printTo(ostream& out) const {
 
   /*
@@ -356,7 +350,8 @@ void DirectedNetwork::printTo(ostream& out) const {
   map< Node*, ConnectedNodePSet >::const_iterator k;
   string label;
   int node_count = 0;
-    
+  ///\todo fix this:
+#if 0 
   out << "digraph g {" << endl;
   for(i = node_set.begin(); i != node_set.end(); i++) {
 	  label = (*i)->toString();
@@ -376,6 +371,7 @@ void DirectedNetwork::printTo(ostream& out) const {
     }
     node_count++;
   }
+#endif
   out << "}" << endl;    
 }
 
@@ -387,8 +383,7 @@ int DirectedNetwork::remove(const Edge& edge) {
 
 int DirectedNetwork::remove(Edge* edge_to_del) {
 
-  int return_val = edge_set.erase(edge_to_del);
-  if( return_val != 0 ) {
+  if( has(edge_to_del) ) {
     DirectedEdge* d_e = dynamic_cast<DirectedEdge*>(edge_to_del);
     Node* start;
     Node* end;
@@ -401,55 +396,48 @@ int DirectedNetwork::remove(Edge* edge_to_del) {
       start = d_e->second;
       end = d_e->first;
     }
-    connection_map[start].erase(end);
-    in_connection_map[end].erase(start);
     _node_to_edges[start].erase(d_e);
     _node_to_edges[end].erase(d_e);
     decrementEdgeRefCount(d_e);  
+    return 1;
   }
-  return return_val;
+  else {
+    //We don't have this edge:
+    return 0;
+  }
 }
 
 int DirectedNetwork::remove(Node* node) {
   int deleted_edges = 0;
   //Handle the out connections:
-  map<Node*, ConnectedNodePSet >::iterator i;
-  ConnectedNodePSet::iterator j;
-    
-  i = connection_map.find(node);
-  if(i != connection_map.end() ) {
-    for(j = i->second.begin(); j != i->second.end(); j++ ) {
-	    deleted_edges += remove(DirectedEdge(node, *j));
+  map<Node*, EdgeSet>::iterator neit = _node_to_edges.find(node);
+  if( neit != _node_to_edges.end() ) {
+    //This node really exists
+    EdgeSet es = neit->second;
+    EdgeSet::iterator eit;
+    for( eit = es.begin(); eit != es.end(); eit++) {
+      remove( *eit );
+      deleted_edges++;
     }
-  }
-    
-  i = in_connection_map.find(node);
-  if(i != in_connection_map.end() ) {
-    for(j = i->second.begin(); j != i->second.end(); j++ ) {
-	    deleted_edges += remove(DirectedEdge(*j, node));
-    }
-  }
-  if( node_set.erase(node) ) {
     decrementNodeRefCount(node);
+  }
+  else {
+    //Not in the network:
   }
   return deleted_edges;
 }
 
 void DirectedNetwork::reverseEdges() {
 
-  NodePSet::const_iterator k;
-  
-  for(k = node_set.begin(); k != node_set.end(); k++) {
-    connection_map[*k].swap( in_connection_map[*k] );
-  }
-  EdgeSet::iterator e_it;
   DirectedEdge* d_e;
-  for( e_it = edge_set.begin(); e_it != edge_set.end(); e_it++) {
-      d_e = dynamic_cast<DirectedEdge*>(*e_it);
+  EdgeIterator ei = getEdgeIterator();
+  while( ei.moveNext() ) {
+      d_e = dynamic_cast<DirectedEdge*>( ei.current() );
       d_e->reverse();
   }
 }
 
+#ifndef HIDE_STL
 const DirectedNetwork::ConnectedNodePSet& DirectedNetwork::getOutNeighbors(Node* node) const {
   map< Node*, ConnectedNodePSet >::const_iterator i = connection_map.find(node);
   if( i != connection_map.end() ) {
@@ -471,7 +459,6 @@ const DirectedNetwork::ConnectedNodePSet& DirectedNetwork::getInNeighbors(Node* 
     return _empty_cnodeset;
   }
 }
-
 
 int DirectedNetwork::getInComponentSize(Node* node) const {
 
@@ -569,7 +556,7 @@ set<DirectedNetwork> DirectedNetwork::getUndirectedComponents() const {
     return output;
 }
 
-
+#endif
 
 void DirectedNetwork::setOutNodes(NodePSet& nodes) {
     NodePSet::const_iterator i;
@@ -580,6 +567,8 @@ void DirectedNetwork::setOutNodes(NodePSet& nodes) {
 }
 
 void DirectedNetwork::setOutNodes() {
+  NodePSet node_set;
+  fillNodePSet(node_set);
     setOutNodes(node_set);
 }
 

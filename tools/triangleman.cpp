@@ -34,10 +34,10 @@ int main(int argc, char* argv[])
 	       
   int triangles, wedges;
   cout << "#size triangles wedges" << endl;
-  while(my_net.getNodes().size() < 5000) {
+  while(my_net.getNodeSize() < 5000) {
     my_net.incrementTime(100);
     my_net.getTrianglesWedges(triangles, wedges);
-    cout << my_net.getNodes().size() << " " << triangles << " " << wedges << endl;
+    cout << my_net.getNodeSize() << " " << triangles << " " << wedges << endl;
   }
 #else
   //Static networks:
@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
     ExpProbabilityFunction expl(2.0/3.0,2, i);
     DegreeLawRandomNetwork my_net(i,expl,r,true);
     my_net.getTrianglesWedges(triangles, wedges);
-    cout << my_net.getNodes().size() << " " << triangles << " " << wedges << endl;
+    cout << my_net.getNodeSize() << " " << triangles << " " << wedges << endl;
   }
 #endif
 }

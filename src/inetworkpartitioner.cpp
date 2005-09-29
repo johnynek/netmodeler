@@ -63,24 +63,20 @@ double INetworkPartitioner::modularityOf(set<Network*>* partition,
   set<Network*>::const_iterator netit;
   for(netit = partition->begin(); netit != partition->end(); netit++)
   {
-    Network::NodePSet::const_iterator nit;
-    const Network::NodePSet& nodes = (*netit)->getNodes();
-    for(nit = nodes.begin(); nit != nodes.end(); nit++)
-    {
-      node_community[ *nit ] = *netit;
+    NodeIterator ni = (*netit)->getNodeIterator();
+    while( ni.moveNext() ) {
+      node_community[ ni.current() ] = *netit;
     }
   }
   
   map<Network*, map<Network*, double> > e_ij;
-  const Network::EdgeSet& edge_set = orig.getEdges();
-  Network::EdgeSet::const_iterator e_it;
   Network *com1, *com2;
   double e_total = 0.0;
-  for(e_it = edge_set.begin();
-      e_it != edge_set.end();
-      e_it++) {
-    com1 = node_community[ (*e_it)->first ];
-    com2 = node_community[ (*e_it)->second ];
+  EdgeIterator ei = orig.getEdgeIterator();
+  while( ei.moveNext() ) {
+    Edge* this_edge = ei.current();
+    com1 = node_community[ this_edge->first ];
+    com2 = node_community[ this_edge->second ];
     e_ij[com1][com2] += 1.0;
     e_ij[com2][com1] += 1.0;
     e_total += 2.0;
@@ -130,18 +126,20 @@ long INetworkPartitioner::distance(std::set<Network*>* A, std::set<Network*>* B,
   Network::NodePSet all_nodes;
   //Make the a_map
   FOREACH(nit, (*A)) {
-    Network::NodePSet::iterator nodeit;
-    FOREACH( nodeit, (*nit)->getNodes() ) {
-      a_map[ *nodeit ] = *nit;
-      all_nodes.insert(*nodeit);
+    NodeIterator ni = (*nit)->getNodeIterator();
+    while(ni.moveNext()) {
+      Node* this_node = ni.current();
+      a_map[ this_node ] = *nit;
+      all_nodes.insert(this_node);
     }
   }
   //Make the b_map
   FOREACH(nit, (*B)) {
-    Network::NodePSet::iterator nodeit;
-    FOREACH( nodeit, (*nit)->getNodes() ) {
-      b_map[ *nodeit ] = *nit;
-      all_nodes.insert(*nodeit);
+    NodeIterator ni = (*nit)->getNodeIterator();
+    while(ni.moveNext()) {
+      Node* this_node = ni.current();
+      b_map[ this_node ] = *nit;
+      all_nodes.insert(this_node);
     }
   }
   //We need a vector to make the algorithm run faster:

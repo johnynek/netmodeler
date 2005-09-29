@@ -164,8 +164,8 @@ void getThresholdPoints(Network* net, int points,
       DEBUG("About to partition");
       set<Network*>* comps = comp_part.partition(tmp_net);
       Network* largest = comp_part.getLargest( comps );
-      nodes_sum += largest->getNodes().size();
-      edges_sum += largest->getEdges().size();
+      nodes_sum += largest->getNodeSize();
+      edges_sum += largest->getEdgeSize();
       //Free up the partition memory:
       comp_part.deletePartition( comps );
     }
@@ -191,7 +191,7 @@ void getThresholdPoints(Network* net, int points,
 
 int main(int argc, char* argv[])
 {
-#if 0
+#if 1
   vector<string> reqs;
   vector<string> opts;
 
@@ -201,6 +201,8 @@ int main(int argc, char* argv[])
   opts.push_back("exp");
   opts.push_back("bigkmax");
   opts.push_back("indep");
+  opts.push_back("qmax");
+  opts.push_back("qmin");
   OptionParser op(reqs, opts); 
   try {
     op.parse(argc, argv);
@@ -224,6 +226,8 @@ int main(int argc, char* argv[])
   int nodes = op.getIntOpt("nodes", 2000); 
   bool bigkmax = op.getBoolOpt("bigkmax", false);
   bool indep = op.getBoolOpt("indep", false);
+  double qmin = op.getDoubleOpt("qmin", 0.0);
+  double qmax = op.getDoubleOpt("qmax", 1.0);
   int k_max = nodes;
   if( ! bigkmax ) {
     k_max = (int)pow((double)nodes,1.0/exp);
@@ -235,7 +239,7 @@ int main(int argc, char* argv[])
   map<double, double> prob_to_size;
   map<double, string> prob_to_out;
   //Actually do the simulation:
-  getThresholdPoints(net, points, samples, ran, 0.0, 1.0, prob_to_size, prob_to_out); 
+  getThresholdPoints(net, points, samples, ran, qmin, qmax, prob_to_size, prob_to_out); 
   //We have all the points now, output the data:
   map<double, string>::iterator oit;
   FOREACH(oit, prob_to_out) {

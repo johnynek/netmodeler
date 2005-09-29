@@ -49,18 +49,13 @@ double NewmanCom::getNextJoin(const Network& net,
       join2 = join1;
     }
     delta_q = 0.0;
-    const Network::EdgeSet& edge_set = net.getEdges();
-    if( edge_set.size() == 0 ) {
-      //cerr << "No edges to join" << endl;
-    } 
     int com1, com2;
     map<Node*, int>::const_iterator com1_it, com2_it;
-    Network::EdgeSet::const_iterator e_it;
-    for(e_it = edge_set.begin();
-        e_it != edge_set.end();
-        e_it++) {
-      com1_it = node_community.find( (*e_it)->first );
-      com2_it = node_community.find( (*e_it)->second );
+    EdgeIterator ei = net.getEdgeIterator();
+    while( ei.moveNext() ) {
+      Edge* this_edge = ei.current();
+      com1_it = node_community.find( this_edge->first );
+      com2_it = node_community.find( this_edge->second );
       com1 = com1_it->second;
       com2 = com2_it->second;
       if( com1 != com2 ) {
