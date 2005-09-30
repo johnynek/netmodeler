@@ -33,8 +33,6 @@ RandomDirectedNetwork::RandomDirectedNetwork(int nodes,
 		
 void RandomDirectedNetwork::create(int nodes, double p) {
 
-    _rand_gen.setBoolTrueBias(p);
-
     for(int k = 0; k < nodes; k++) {
         add( new Node() );
     }
@@ -44,7 +42,7 @@ void RandomDirectedNetwork::create(int nodes, double p) {
     NodeIterator nj = getNodeIterator();
     while( ni.moveNext() ) {
       while( nj.moveNext() ) {
-        if( _rand_gen.getBool() ) {
+        if( _rand_gen.getBool(p) ) {
           Node* nodei = ni.current();
 	  Node* nodej = nj.current();
           add(DirectedEdge(nodei,nodej));

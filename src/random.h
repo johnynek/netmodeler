@@ -34,17 +34,18 @@ class Random {
 
   public:
   
-    void setDoubleRange(double high=1.0, double low=0.0);
-    virtual double getDouble();
     virtual double getDouble(double high, double low=0.0);
+    /**
+     * Return a random double between 0.0 and 1.0
+     */
     virtual double getDouble01() = 0;
 
-    void setIntRange(int high, int low=0);
-    virtual int getInt();
     virtual int getInt(int high, int low=0);
     
-    void setBoolTrueBias(double p);
-    virtual bool getBool();
+    /**
+     * Get a bool that is 50/50 
+     */
+    //virtual bool getBool();
     virtual bool getBool(double p) {return (getDouble01() < p); }
 
     /**
@@ -73,11 +74,6 @@ class Random {
     {
       shuffle(coll, 0, coll.size() - 1);
     }
-
-  protected:
-      int _imin, _imax;
-      double _dmin, _dmax;
-      double _true_bias;
 };
 
 }

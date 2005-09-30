@@ -26,8 +26,7 @@ using namespace std;
 
 SmallWorldNetwork::SmallWorldNetwork(int nodes,
 		                     double p,
-				     Random& rand) : Network(), _rand(rand) {
-    _rand.setBoolTrueBias(p);
+				     Random& rand) : Network(), _p(p), _rand(rand) {
     create(nodes);
 }
 
@@ -52,7 +51,7 @@ void SmallWorldNetwork::create(int n) {
       Node* nodei = ni.current();
       nj = ni;
       while( nj.moveNext() ) {
-        if( _rand.getBool() ) {
+        if( _rand.getBool(_p) ) {
           Node* nodej = nj.current();
           add(Edge(nodei,nodej));
 	}

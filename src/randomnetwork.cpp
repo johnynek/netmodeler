@@ -33,8 +33,6 @@ RandomNetwork::RandomNetwork(int nodes,
 		
 void RandomNetwork::create(int nodes, double p) {
 
-    _rand_gen.setBoolTrueBias(p);
-
     for(int k = 0; k < nodes; k++) {
         add( new Node() );
     }
@@ -45,7 +43,7 @@ void RandomNetwork::create(int nodes, double p) {
       //Start at nodei
       nj = ni;
       while( nj.moveNext() ) {
-        if( _rand_gen.getBool() ) {
+        if( _rand_gen.getBool(p) ) {
           Node* nodei = ni.current();
 	  Node* nodej = nj.current();
           add( Edge(nodei,nodej) );

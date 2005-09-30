@@ -41,6 +41,7 @@ class SmallWorldNetwork : public Network {
 	
     protected:
 	void create(int n);
+	double _p;
 	Random& _rand;
 	
 };

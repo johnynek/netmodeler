@@ -31,7 +31,6 @@ SimkinNetwork::SimkinNetwork(int nodes,
 				 int repeat) : Network(),
 				                  _p(p),
 						  _rand(rand) {
-    _rand.setBoolTrueBias(_p);
     create(nodes,group_size,repeat);
 }
 
@@ -57,8 +56,7 @@ void SimkinNetwork::create(int nodes, int group_size, int repeat) {
 	selected_idx.clear();
 	//Random selection without replacement:
         for(int j = 0; j < group_size; j++) {
-            _rand.setIntRange( nodes - 1 - j);
-	    this_idx = _rand.getInt();
+	    this_idx = _rand.getInt( nodes - 1 - j );
 	    if( selected_idx.count(this_idx) == 0 ) {
                 selected_idx.insert( this_idx );
 	    }
@@ -73,7 +71,7 @@ void SimkinNetwork::create(int nodes, int group_size, int repeat) {
             j_it = i_it;
 	    j_it++;
 	    for(; j_it != selected_idx.end(); j_it++) {
-                if( _rand.getBool() ) {
+                if( _rand.getBool(_p) ) {
 		    a = node_vec[ *i_it ];
 		    b = node_vec[ *j_it ];
                     add( Edge( a, b ) );

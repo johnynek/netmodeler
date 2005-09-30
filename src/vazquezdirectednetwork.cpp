@@ -50,17 +50,15 @@ void VazquezDirectedNetwork::incrementTime(int steps) {
       NodePSet connect_to;
       int this_depth;
    
-      _rand.setIntRange( _node_vec.size() - 1);
-      Node* first_node = _node_vec[ _rand.getInt() ];
+      Node* first_node = _node_vec[ _rand.getInt( _node_vec.size() - 1 ) ];
     
       connect_to.insert( first_node );
-      _rand.setBoolTrueBias(_p);
       depth_map[0].insert(first_node);
       d_it = depth_map.begin();
       while( d_it != depth_map.end() ) {
 	this_depth = d_it->first + 1;
 	for(a_it = d_it->second.begin(); a_it != d_it->second.end(); a_it++) {
-            if( _rand.getBool() ) {
+            if( _rand.getBool(_p) ) {
 		//Connect to all the neighbors:
 		NodeIterator* ni = getNeighborIterator( *a_it );
 		while( ni->moveNext() ) {
