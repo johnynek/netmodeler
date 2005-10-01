@@ -49,7 +49,6 @@ edge.cpp \
 edge.h \
 edgefactory.h \
 edgeiterator.h \
-edgeiterator.cpp \
 edgerewirer.h edgerewirer.cpp \
 edgeswapper.h edgeswapper.cpp \
 emailnetwork.cpp \
@@ -94,7 +93,6 @@ node.h \
 node.cpp \
 nodefactory.h nodefactory.cpp \
 nodeiterator.h \
-nodeiterator.cpp \
 noisystardnet.h \
 noisystardnet.cpp \
 npartitenetwork.cpp  npartitenetwork.h \

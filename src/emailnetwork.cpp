@@ -98,9 +98,9 @@ void EmailNetwork::removeSmallComponents(){
      for( comp_it = components.begin(); comp_it != components.end(); comp_it++ ){
 	     size = comp_it->getNodeSize();
 	     if(size < max_size){
-               NodeIterator ni = comp_it->getNodeIterator();
-               while( ni.moveNext() ) {
-	         this->Network::remove( ni.current() );
+               auto_ptr<NodeIterator> ni( comp_it->getNodeIterator() );
+               while( ni->moveNext() ) {
+	         this->Network::remove( ni->current() );
                }
 	     }
      }
@@ -132,9 +132,9 @@ void EmailNetwork::printOutDegStrengthMap(std::ostream& out){
 
 void EmailNetwork::removeSinkNodes()
 {
-  NodeIterator ni = this->getNodeIterator();
-  while( ni.moveNext() ) {
-    Node* this_node = ni.current();
+  auto_ptr<NodeIterator> ni( this->getNodeIterator() );
+  while( ni->moveNext() ) {
+    Node* this_node = ni->current();
     if(this->getOutStrength(this_node) == 0.0 )
       this->remove(this_node);
   }

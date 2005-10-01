@@ -38,9 +38,9 @@ RandAgPart::RandAgPart(Random& rand, RandAgPart::Method meth, double param):
 void RandAgPart::initRandomCom(const Network& net) {
   _com_order.clear();
   _com_to_node.clear();
-  NodeIterator ni = net.getNodeIterator();
-  while( ni.moveNext() ) {
-    _com_to_node.push_back( ni.current() );
+  auto_ptr<NodeIterator> ni( net.getNodeIterator() );
+  while( ni->moveNext() ) {
+    _com_to_node.push_back( ni->current() );
   }
   int count = net.getNodeSize();
   _com_order.resize( count );
@@ -88,9 +88,9 @@ double RandAgPart::getNextJoin(const Network& net,
     int com2 = -1;
 
     map<Node*, int>::const_iterator com1_it, com2_it;
-    EdgeIterator ei = net.getEdgeIterator();
-    while( ei.moveNext() ) {
-      Edge* this_edge = ei.current();
+    auto_ptr<EdgeIterator> ei( net.getEdgeIterator() );
+    while( ei->moveNext() ) {
+      Edge* this_edge = ei->current();
       com1_it = node_community.find( this_edge->first );
       com1 = com1_it->second;
       com2_it = node_community.find( this_edge->second );
@@ -140,9 +140,9 @@ double RandAgPart::getNextJoin(const Network& net,
      * for each possible (edge mediated) join
      */
     map< pair<int, int> , double> delta_q_matrix;
-    EdgeIterator ei = net.getEdgeIterator();
-    while( ei.moveNext() ) {
-      Edge* this_edge = ei.current();
+    auto_ptr<EdgeIterator> ei( net.getEdgeIterator() );
+    while( ei->moveNext() ) {
+      Edge* this_edge = ei->current();
       com1_it = node_community.find( this_edge->first );
       com1 = com1_it->second;
       com2_it = node_community.find( this_edge->second );

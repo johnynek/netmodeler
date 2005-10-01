@@ -33,9 +33,9 @@ set<Network*>* ComponentPart::partition(const Network& input)
     Network::NodePSet::iterator check_it;
     
     //For all nodes
-    NodeIterator nit = input.getNodeIterator();
-    while( nit.moveNext() ) {
-        Node* nodei = nit.current();
+    auto_ptr<NodeIterator> nit( input.getNodeIterator() );
+    while( nit->moveNext() ) {
+        Node* nodei = nit->current();
 	//Check to make sure we have not already identified this component:
 	if( checked.find( nodei ) == checked.end() ) {
             to_check.insert( nodei );
@@ -44,22 +44,18 @@ set<Network*>* ComponentPart::partition(const Network& input)
 	    tmp_net = new Network();
             while( check_it != to_check.end() ) {
 		tmp_net->add( *check_it );
-		Network* tmp_edges = input.getEdges( *check_it );
-		EdgeIterator ei = tmp_edges->getEdgeIterator();
-		while( ei.moveNext() ) {
-                    tmp_net->add( ei.current() );
+		auto_ptr<EdgeIterator> ei( input.getEdgeIterator( *check_it ) );
+		while( ei->moveNext() ) {
+                    tmp_net->add( ei->current() );
 	        }
-		delete tmp_edges;
-		Network* neighbors = input.getNeighbors( *check_it );
-		NodeIterator ni = neighbors->getNodeIterator();
-		while( ni.moveNext() ) {
-	            Node* this_node = ni.current();
+		auto_ptr<NodeIterator> ni( input.getNeighborIterator( *check_it ) );
+		while( ni->moveNext() ) {
+	            Node* this_node = ni->current();
 		    if( checked.find( this_node ) == checked.end() ) {
                       to_check.insert( this_node );
 		    }
 		    //Else we have already checked this one.
 	        }
-		delete neighbors;
 	        checked.insert( *check_it );
                 to_check.erase( check_it );
 	        check_it = to_check.begin();

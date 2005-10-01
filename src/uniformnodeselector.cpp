@@ -28,9 +28,9 @@ void UniformNodeSelector::postAdd(Network* net)
 {
   _my_net = net;
   _nodes.clear();
-  NodeIterator ni = net->getNodeIterator();
-  while( ni.moveNext() ) {
-    _nodes.push_back( ni.current() );
+  auto_ptr<NodeIterator> ni( net->getNodeIterator() );
+  while( ni->moveNext() ) {
+    _nodes.push_back( ni->current() );
   }
 }
 

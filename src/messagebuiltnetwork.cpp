@@ -40,12 +40,12 @@ MessageBuiltNetwork::MessageBuiltNetwork(int nodes,
         this_node = new Node();
 	Network::add(this_node);
 	NodePSet::const_iterator nit;
-	NodeIterator ni = getNodeIterator();
-	while(ni.moveNext()) 
+	auto_ptr<NodeIterator> ni( getNodeIterator() );
+	while(ni->moveNext()) 
 	{
 	  //We have to make sure not to add loops:
-	  if( this_node != ni.current() ) {
-            Network::add( Edge(this_node, ni.current()) );
+	  if( this_node != ni->current() ) {
+            Network::add( Edge(this_node, ni->current()) );
 	  }
 	}
     }
@@ -75,13 +75,13 @@ Node* MessageBuiltNetwork::findPartnerFor(Node* start)
     //start does not have any neighbors, so start at random
     rn = _rand.getInt( getNodeSize() - 1);
     if( has(start) ) { rn--; }
-    NodeIterator ni = getNodeIterator();
-    ni.moveNext();
-    while( rn-- > 0 ) { ni.moveNext(); }
-    if( ni.current() == start ) { ni.moveNext(); }
+    auto_ptr<NodeIterator> ni( getNodeIterator() );
+    ni->moveNext();
+    while( rn-- > 0 ) { ni->moveNext(); }
+    if( ni->current() == start ) { ni->moveNext(); }
     
     //Now we change our start node:
-    begin = ni.current();
+    begin = ni->current();
   }
   //Start at the start, and visit the nodes.
   _message.forgetVisitedNodes();

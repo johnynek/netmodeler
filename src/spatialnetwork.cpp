@@ -41,9 +41,9 @@ SpatialNetwork::SpatialNetwork(int nodes,
     multimap<double, SpatialNode*>::iterator mm_it;
     double this_dist = 0.0;
     
-    NodeIterator ni1 = getNodeIterator();
-    while( ni1.moveNext() ) {
-	start_node = dynamic_cast<SpatialNode*>( ni1.current() );
+    auto_ptr<NodeIterator> ni1( getNodeIterator() );
+    while( ni1->moveNext() ) {
+	start_node = dynamic_cast<SpatialNode*>( ni1->current() );
 	while( dist_queue.empty() == false) {
             dist_queue.pop();	
 	}
@@ -57,9 +57,9 @@ SpatialNetwork::SpatialNetwork(int nodes,
 	}
 	
 	if( start_node != 0 ) {
-          NodeIterator ni2 = getNodeIterator();
-	  while( ni2.moveNext() ) {
-            end_node = dynamic_cast<SpatialNode*>( ni2.current() );
+          auto_ptr<NodeIterator> ni2( getNodeIterator() );
+	  while( ni2->moveNext() ) {
+            end_node = dynamic_cast<SpatialNode*>( ni2->current() );
 	    if( (start_node != end_node) && (end_node != 0) ) {
               this_dist = start_node->getDistanceTo( end_node );
 	      if( this_dist > 0 ) {

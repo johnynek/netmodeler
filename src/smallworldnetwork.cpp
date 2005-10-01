@@ -45,14 +45,13 @@ void SmallWorldNetwork::create(int n) {
     add(Edge(last, first));
 
     //This next part is the same as the Random Network:
-    NodeIterator ni = getNodeIterator();
-    NodeIterator nj;
-    while( ni.moveNext() ) {
-      Node* nodei = ni.current();
-      nj = ni;
-      while( nj.moveNext() ) {
+    auto_ptr<NodeIterator> ni( getNodeIterator() );
+    while( ni->moveNext() ) {
+      Node* nodei = ni->current();
+      auto_ptr<NodeIterator> nj( ni->clone() );
+      while( nj->moveNext() ) {
         if( _rand.getBool(_p) ) {
-          Node* nodej = nj.current();
+          Node* nodej = nj->current();
           add(Edge(nodei,nodej));
 	}
 

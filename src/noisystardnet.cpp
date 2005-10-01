@@ -40,13 +40,13 @@ Node* NoisyStarDNet::findPartnerFor(Node* s)
   //This network only has one node
   if( has(s) && (getNodeSize() == 1) ) { return tmp; }
   //Get a random node in the network:
-  NodeIterator ni = getNodeIterator();
-  ni.moveNext();
+  auto_ptr<NodeIterator> ni( getNodeIterator() );
+  ni->moveNext();
   int r_n = _rand.getInt(getNodeSize() - 1);
   if(has(s)) { r_n--; }
-  while( r_n-- > 0 ) { ni.moveNext(); }
-  if( ni.current() == s ) { ni.moveNext(); }
-  tmp = ni.current();
+  while( r_n-- > 0 ) { ni->moveNext(); }
+  if( ni->current() == s ) { ni->moveNext(); }
+  tmp = ni->current();
   //Now tmp has a random node in the network.
   if( _rand.getBool(_p) ) {
     return tmp;
@@ -58,10 +58,9 @@ Node* NoisyStarDNet::findPartnerFor(Node* s)
   Node* max_node = tmp;
   //Hack to randomly connect to a neighbor:
   int n = _rand.getInt( getDegree(tmp), 1 );
-  Network* neighbors = getNeighbors(tmp);
-  ni = neighbors->getNodeIterator();
-  while(ni.moveNext()) {
-      Node* this_neigh = ni.current();
+  auto_ptr<NodeIterator> nj( getNeighborIterator( tmp ) );
+  while(nj->moveNext()) {
+      Node* this_neigh = nj->current();
 #if 1
       //Connect to the maximum degree that is not the start node: 
       if( (s != this_neigh) && (max_degree < getDegree(this_neigh)) )
@@ -74,8 +73,6 @@ Node* NoisyStarDNet::findPartnerFor(Node* s)
       if(n-- == 0) { max_node = this_neigh; break; }
 #endif
   }
-  delete neighbors;
-  neighbors = 0;
   return max_node;
 }
 
@@ -84,13 +81,13 @@ const Network::NodePSet NoisyStarDNet::getRemoveNodes()
  if( _rand.getBool( _del ) ) {
   //Select a random node:
   int r = _rand.getInt( getNodeSize() - 1 );
-  NodeIterator ni = getNodeIterator();
-  ni.moveNext();
+  auto_ptr<NodeIterator> ni( getNodeIterator() );
+  ni->moveNext();
   while( r-- > 0 ) {
-    ni.moveNext();
+    ni->moveNext();
   }
   NodePSet ret;
-  ret.insert( ni.current() );
+  ret.insert( ni->current() );
   return ret;
  }
  return Network::_empty_nodeset;

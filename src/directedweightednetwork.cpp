@@ -168,9 +168,9 @@ map<double, int> DirectedWeightedNetwork::getEdgeWeightDist(const EdgeSet& edges
 
 map<double, int> DirectedWeightedNetwork::getEdgeWeightDist() const {
   EdgeSet edge_set;
-  EdgeIterator ei = getEdgeIterator();
-  while( ei.moveNext() ) {
-    edge_set.insert( ei.current() );
+  auto_ptr<EdgeIterator> ei( getEdgeIterator() );
+  while( ei->moveNext() ) {
+    edge_set.insert( ei->current() );
   }
   return getEdgeWeightDist( edge_set );
 }
@@ -390,9 +390,9 @@ void DirectedWeightedNetwork::printOutDegStrengthPlot(ostream& out){
 
 void DirectedWeightedNetwork::printInZeros(ostream& out) const{
     out << "#The following nodes have indegree zero" << endl;
-    NodeIterator ni = getNodeIterator();
-    while( ni.moveNext() ) {
-      Node* this_node = ni.current();
+    auto_ptr<NodeIterator> ni( getNodeIterator() );
+    while( ni->moveNext() ) {
+      Node* this_node = ni->current();
       if(getInDegree(this_node) == 0) {
         out << this_node->toString() << endl;
       }
@@ -402,9 +402,9 @@ void DirectedWeightedNetwork::printInZeros(ostream& out) const{
 void DirectedWeightedNetwork::printOutZeros(ostream& out) const{
     out << "#The following nodes have outdegree zero" << endl;
     NodePSet::const_iterator i;
-    NodeIterator ni = getNodeIterator();
-    while( ni.moveNext() ) {
-      Node* this_node = ni.current();
+    auto_ptr<NodeIterator> ni( getNodeIterator() );
+    while( ni->moveNext() ) {
+      Node* this_node = ni->current();
       if(getOutDegree(this_node) == 0){
         out << (this_node)->toString() << endl;
       }
@@ -435,9 +435,9 @@ void DirectedWeightedNetwork::printOutDegStrengthMap(std::ostream& out){
 
 void DirectedWeightedNetwork::printWeights(std::ostream& out) const{
     EdgeSet::const_iterator i;
-    EdgeIterator ei = getEdgeIterator();
-    while( ei.moveNext() ) {
-      Edge* this_edge = ei.current();
+    auto_ptr<EdgeIterator> ei( getEdgeIterator() );
+    while( ei->moveNext() ) {
+      Edge* this_edge = ei->current();
       out << this_edge->toString() << " with weight = " << this_edge->getWeight() << endl;
     }
 }

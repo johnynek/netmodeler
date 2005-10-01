@@ -105,6 +105,11 @@ class Network {
 	 * Empties the network and deletes all the Node*
 	 */
 	virtual void clear();
+
+	/**
+	 * Removes all edges from the network, but leaves the nodes
+	 */
+	virtual void clearEdges();
 #ifndef HIDE_STL
 	/**
 	 * Use STL algorithm for_each on all the nodes
@@ -343,7 +348,7 @@ class Network {
 	/**
 	 * @return an iterator to loop through the edges with
 	 */
-	EdgeIterator getEdgeIterator() const;
+	EdgeIterator* getEdgeIterator() const;
 	
 	/**
 	 * @return an iterator to all edges connected to a given node
@@ -425,7 +430,7 @@ class Network {
 	/**
 	 * Return a NodeIterator that can iterator through all the nodes
 	 */
-	NodeIterator getNodeIterator() const;
+	NodeIterator* getNodeIterator() const;
 #ifndef HIDE_STL
 	/**
 	 * @return a copy of the set<Node*> of all nodes.  Notice,
@@ -606,8 +611,48 @@ class Network {
 	    /**
 	     * Here are some inner classes to implement some interators
 	     */
+	    /**
+	     * NodeIterator for the default Network class
+	     */
+	    class NetNodeIterator : NodeIterator {
+	      public: 
+		virtual NodeIterator* clone();
+                virtual Node* current();
+	        virtual bool moveNext();
+	        virtual void reset();
+		friend class Network;
+              protected:
+                std::map< Node*, std::set<Edge*> >::const_iterator _nit;
+                std::map< Node*, std::set<Edge*> >::const_iterator _begin;
+                std::map< Node*, std::set<Edge*> >::const_iterator _end;
+                bool _called_movenext;
+	    };
+            
+	    /**
+	     * EdgeIterator for the default Network class
+	     */
+	    class NetEdgeIterator : EdgeIterator {
+	      public: 
+                virtual EdgeIterator* clone();
+                virtual Edge* current();
+	        virtual bool moveNext();
+	        virtual void reset();
+		friend class Network;
+              protected:
+                std::map< Node*, std::set<Edge*> >::const_iterator _nit;
+                std::map< Node*, std::set<Edge*> >::const_iterator _begin;
+                std::map< Node*, std::set<Edge*> >::const_iterator _end;
+                std::set<Edge*>::const_iterator _eit;
+                bool _called_movenext;
+	    };
+	    
+            /**
+             * This is the iterator for iterating over neighbors,
+             * which requires slightly different internal logic
+             */
 	    class NeighborIterator : NodeIterator {
 	      public: 
+		virtual NodeIterator* clone();
                 virtual Node* current();
 	        virtual bool moveNext();
 	        virtual void reset();
@@ -624,6 +669,7 @@ class Network {
 	     */
 	    class NeighborEdgeIterator : EdgeIterator {
 	      public: 
+                virtual EdgeIterator* clone();
                 virtual Edge* current();
 	        virtual bool moveNext();
 	        virtual void reset();

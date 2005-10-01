@@ -39,15 +39,24 @@ class Network;
  *
  * In order to make it easier to wrap netmodeler with another language,
  * we prefer not to directly expose STL elements in the API.
+ *
+ * This is an abstract class.
  */
 class NodeIterator {
 
   public:
     /**
+     * Sometimes we want to interate forward from a given spot over
+     * and over.  We can do this by cloning an iterator when it reaches
+     * a given point.
+     * @return a copy of this iterator along with any inner state
+     */
+    virtual NodeIterator* clone() = 0;
+    /**
      * @throw an exception if this is called before MoveNext is called once.
      * @return the node that the iterator currently points to
      * */
-    virtual Node* current();
+    virtual Node* current() = 0;
     /**
      * Go to the next node.  Return true if there is another node
      * This must be called before you first call Current.  So,
@@ -56,19 +65,12 @@ class NodeIterator {
      * This is so the while( it.MoveNext() ) { } idiom will
      * work.
      */
-    virtual bool moveNext();
+    virtual bool moveNext() = 0;
     /**
      * Go back to the start of the network.
      * Must call MoveNext before we can call current again
      */
-    virtual void reset();
-    //Allow Network to modify protected and private members
-    friend class Network;
-  protected:
-    std::map< Node*, std::set<Edge*> >::const_iterator _nit;
-    std::map< Node*, std::set<Edge*> >::const_iterator _begin;
-    std::map< Node*, std::set<Edge*> >::const_iterator _end;
-    bool _called_movenext;
+    virtual void reset() = 0;
 };
 	
 }

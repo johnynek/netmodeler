@@ -41,9 +41,9 @@ int main(int argc, char* argv[]) {
   Network::NodePSet::iterator n_it;
   int max = -1;
   Node* max_n = 0;
-  NodeIterator ni = net.getNodeIterator();
-  while( ni.moveNext() ) {
-    Node* this_node = ni.current();
+  auto_ptr<NodeIterator> ni( net.getNodeIterator() );
+  while( ni->moveNext() ) {
+    Node* this_node = ni->current();
     if( net.getDegree(this_node) == 2 ) {
       max = net.getDegree(this_node);
       max_n = this_node;

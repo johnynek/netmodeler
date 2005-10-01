@@ -51,9 +51,9 @@ double NewmanCom::getNextJoin(const Network& net,
     delta_q = 0.0;
     int com1, com2;
     map<Node*, int>::const_iterator com1_it, com2_it;
-    EdgeIterator ei = net.getEdgeIterator();
-    while( ei.moveNext() ) {
-      Edge* this_edge = ei.current();
+    auto_ptr<EdgeIterator> ei( net.getEdgeIterator() );
+    while( ei->moveNext() ) {
+      Edge* this_edge = ei->current();
       com1_it = node_community.find( this_edge->first );
       com2_it = node_community.find( this_edge->second );
       com1 = com1_it->second;

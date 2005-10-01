@@ -56,13 +56,13 @@ void AmnesiacMessage::visit(Node* n, Network& _my_net) {
 	   if( n_count > 0 ) {
 	     //Get a random edge
 	     rand_neighbor = _rand.getInt(n_count - 1);
-	     EdgeIterator ei = star->getEdgeIterator();
-	     ei.moveNext();
+	     auto_ptr<EdgeIterator> ei( star->getEdgeIterator() );
+	     ei->moveNext();
 	     for(int k = 0; k < rand_neighbor; k++) {
-               ei.moveNext();
+               ei->moveNext();
 	     }
 	     //We have selected a random neighbor (via a random edge):
-	     Node* rand_neigh = ei.current()->getOtherNode( j->first ); 
+	     Node* rand_neigh = ei->current()->getOtherNode( j->first ); 
 	     //We know the TTL was > 0, so new_ttl is a legitimate number
 	     new_ttl = j->second - 1; 
 	     to_visit.insert( pair<Node*,int>(rand_neigh,new_ttl) ); 

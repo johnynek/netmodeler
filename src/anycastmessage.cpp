@@ -56,28 +56,27 @@ void AnycastMessage::visit(Node* n, Network& net) {
         //Here are all the nodes at this distance:
         for( a_it = tv_it->second.begin(); a_it != tv_it->second.end(); a_it++) {
             //Now look for a random node to go to:
-	    Network* star = net.getEdges( *a_it );
+	    auto_ptr<Network> star( net.getEdges( *a_it ) );
 	    //Make sure there are some neighbors to go to:
 	    if( star->getEdgeSize() > 0 ) {
 	      for(routes = 0; routes < _max; routes++) {
 		//First select a random node:
 		rand_node = _rand.getInt( star->getEdgeSize() - 1);
-		EdgeIterator ei = star->getEdgeIterator();
-		ei.moveNext();
+		auto_ptr<EdgeIterator> ei( star->getEdgeIterator() );
+		ei->moveNext();
 		while( rand_node-- > 0 ) {
-                    ei.moveNext();
+                    ei->moveNext();
 		}
-		Node* other = ei.current()->getOtherNode( *a_it );
+		Node* other = ei->current()->getOtherNode( *a_it );
 		//Visit the randomly selected node:
 		to_visit[this_distance].insert( other );
 		_visited_nodes.insert( other );
 		//We must cross one edge to visit the above node:
 		_crossed_edges++;
 		//Remove this node from consideration for next time:
-		star->remove( ei.current() );
+		star->remove( ei->current() );
 	      }
 	    }
-	    delete star;
         }
         to_visit.erase(tv_it);
         tv_it = to_visit.begin();

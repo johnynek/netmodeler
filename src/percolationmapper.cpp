@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "percolationmapper.h"
 
 using namespace Starsky;
+using namespace std;
 
 PercolationMapper::PercolationMapper(Random& rand,
 		                     double bp,
@@ -35,10 +36,10 @@ PercolationMapper::PercolationMapper(Random& rand,
 void PercolationMapper::map(Network* net)
 {
   Network::NodePSet ndel_set;
-  NodeIterator ni = net->getNodeIterator();
-  while( ni.moveNext() ) 
+  auto_ptr<NodeIterator> ni( net->getNodeIterator() );
+  while( ni->moveNext() ) 
   {
-    Node* this_node = ni.current();
+    Node* this_node = ni->current();
     //getBool returns true with probability of the argument
     if( !_rand.getBool( _site_p ) ) {
       ndel_set.insert( this_node );
@@ -55,9 +56,9 @@ void PercolationMapper::map(Network* net)
 
   //Do the same thing for the edges: 
   Network::EdgeSet del_set;
-  EdgeIterator ei = net->getEdgeIterator();
-  while( ei.moveNext() ) {
-    Edge* this_edge = ei.current();
+  auto_ptr<EdgeIterator> ei( net->getEdgeIterator() );
+  while( ei->moveNext() ) {
+    Edge* this_edge = ei->current();
     if( !_rand.getBool( _bond_p ) ) {
       //We delete this one:
       del_set.insert( this_edge );

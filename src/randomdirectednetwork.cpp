@@ -38,13 +38,13 @@ void RandomDirectedNetwork::create(int nodes, double p) {
     }
 
     set<Node*>::iterator i,j;
-    NodeIterator ni = getNodeIterator();
-    NodeIterator nj = getNodeIterator();
-    while( ni.moveNext() ) {
-      while( nj.moveNext() ) {
+    auto_ptr<NodeIterator> ni( getNodeIterator() );
+    auto_ptr<NodeIterator> nj( getNodeIterator() );
+    while( ni->moveNext() ) {
+      while( nj->moveNext() ) {
         if( _rand_gen.getBool(p) ) {
-          Node* nodei = ni.current();
-	  Node* nodej = nj.current();
+          Node* nodei = ni->current();
+	  Node* nodej = nj->current();
           add(DirectedEdge(nodei,nodej));
 	}
       }

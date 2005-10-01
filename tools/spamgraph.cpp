@@ -59,9 +59,9 @@ int main(int argc, char* argv[]) {
        Network* this_net = *comp_it;
        Network::NodePSet::const_iterator n_it;
        int kmax = 0;
-       NodeIterator ni = this_net->getNodeIterator();
-       while( ni.moveNext() ) {
-	 Node* this_node = ni.current();
+       auto_ptr<NodeIterator> ni( this_net->getNodeIterator() );
+       while( ni->moveNext() ) {
+	 Node* this_node = ni->current();
          if( kmax < this_net->getDegree( this_node ) ) {
            kmax = this_net->getDegree( this_node );
 	 }
@@ -99,16 +99,16 @@ int main(int argc, char* argv[]) {
   //Print out the nodes in each spamg and hamg
   Network::NodePSet::const_iterator nit;
   for(comp_it = spamg.begin(); comp_it != spamg.end(); comp_it++) {
-    NodeIterator ni2 = (*comp_it)->getNodeIterator();
-    while( ni2.moveNext() ) {
-      Node* this_node = ni2.current();
+    auto_ptr<NodeIterator> ni2( (*comp_it)->getNodeIterator() );
+    while( ni2->moveNext() ) {
+      Node* this_node = ni2->current();
       spam << this_node->toString() << endl;
     }
   }
   for(comp_it = hamg.begin(); comp_it != hamg.end(); comp_it++) {
-    NodeIterator ni2 = (*comp_it)->getNodeIterator();
-    while( ni2.moveNext() ) {
-      Node* this_node = ni2.current();
+    auto_ptr<NodeIterator> ni2( (*comp_it)->getNodeIterator() );
+    while( ni2->moveNext() ) {
+      Node* this_node = ni2->current();
       ham << this_node->toString() << endl;
     }
   }

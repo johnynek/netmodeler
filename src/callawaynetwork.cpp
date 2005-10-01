@@ -36,9 +36,9 @@ CallawayNetwork::CallawayNetwork(const Network& seed,
 {
     Network::operator=(seed);
     //We need to fill up the node vector:
-    NodeIterator ni = getNodeIterator();
-    while( ni.moveNext() ) {
-      _node_vec.push_back( ni.current() );
+    auto_ptr<NodeIterator> ni( getNodeIterator() );
+    while( ni->moveNext() ) {
+      _node_vec.push_back( ni->current() );
     }
 }
 

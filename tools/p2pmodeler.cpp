@@ -91,11 +91,10 @@ int main(int argc, char* argv[]) {
      cout << "#ttl p hit_rate edges_crossed nodes_reached" << endl;
      //Put the nodes into a vector so we can randomly select them easier:
      node_vector.clear();
-     NodeIterator ni = net->getNodeIterator();
-     while( ni.moveNext() ) {
-       node_vector.push_back( ni.current() );
+     auto_ptr<NodeIterator> ni( net->getNodeIterator() );
+     while( ni->moveNext() ) {
+       node_vector.push_back( ni->current() );
      }
-     r3.setIntRange( node_vector.size() - 1);
      
      Message* query = 0;
      Message* implant = 0;
@@ -129,7 +128,7 @@ int main(int argc, char* argv[]) {
 	 // Insert the content into the network
 	 for(int i = 0; i < cont_count; i++) 
 	 {
-	     a_node = node_vector[ r3.getInt() ];
+	     a_node = node_vector[ r3.getInt( node_vector.size() - 1 ) ];
 	     c_node = content_vector[i];
 	     my_cnet->insertContent(a_node, c_node, *implant);
          }
@@ -139,7 +138,7 @@ int main(int argc, char* argv[]) {
       
 	 int hit_nodes = 0, crossed_edges = 0;
          for(int i = 0; i < runs; i++) {
-	     a_node = node_vector[ r3.getInt() ];
+	     a_node = node_vector[ r3.getInt( node_vector.size() - 1 ) ];
 	     c_node = content_vector[ i % cont_count ];
 	     res_nodes = my_cnet->queryForContent(a_node, c_node, *query);
 	     if( res_nodes.size() != 0) {

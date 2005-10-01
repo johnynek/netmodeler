@@ -85,10 +85,10 @@ const Network::NodePSet PrefDelCompAttNetwork::getRemoveNodes()
 	    if( _rand.getBool( _uniform_del_p ) && (getNodeSize() > 2000)) 
 	    {
 		 node = _rand.getInt(getNodeSize() - 1);
-		 NodeIterator ni = getNodeIterator();
-		 ni.moveNext();
-		 while( node-- > 0) { ni.moveNext(); }
-		 removenodes.insert(ni.current());
+		 auto_ptr<NodeIterator> ni( getNodeIterator() );
+		 ni->moveNext();
+		 while( node-- > 0) { ni->moveNext(); }
+		 removenodes.insert(ni->current());
 		 flag=true;
 	    }
     }

@@ -34,18 +34,20 @@ int main(int argc, char* argv[])
   PowerLawProbabilityFunction pl(-2.0,2,size);
   NetworkFactory* nf = new DegreeLawNetFac(size, pl, r, false);
   Network* net = nf->create();
-  cout << "Made network of node size: " << net->getNodeSize() << endl;
-  cout << "Made network of edge size: " << net->getEdgeSize() << endl;
+  cout << "#Made network of node size: " << net->getNodeSize() << endl;
+  cout << "#Made network of edge size: " << net->getEdgeSize() << endl;
   net->printTo(std::cout);
-  NodeIterator ni = net->getNodeIterator();
-  while( ni.moveNext() ) {
-    cout << ni.current()->toString() << endl;
+#if 0
+  auto_ptr<NodeIterator> ni( net->getNodeIterator() );
+  while( ni->moveNext() ) {
+    cout << ni->current()->toString() << endl;
   }
-  EdgeIterator ei = net->getEdgeIterator();
+  auto_ptr<EdgeIterator> ei( net->getEdgeIterator() );
   cout << "Got ei" << endl;
-  while( ei.moveNext() ) {
-    cout << ei.current()->toString() << endl;
+  while( ei->moveNext() ) {
+    cout << ei->current()->toString() << endl;
   }
+#endif
   delete nf;
   delete net;
 }

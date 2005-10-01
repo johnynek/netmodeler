@@ -54,9 +54,9 @@ void SimpleRuleNet::incrementTime(int steps)
       remove( Edge(*it, *it) );
 	    
       //Find the nodes that will need compensation
-      EdgeIterator ei = getEdgeIterator();
-      while( ei.moveNext() ) {
-	Edge* this_edge = ei.current();
+      auto_ptr<EdgeIterator> ei( getEdgeIterator() );
+      while( ei->moveNext() ) {
+	Edge* this_edge = ei->current();
         Node* other = this_edge->getOtherNode( *it );
 	if( needsCompensation(other, this_edge) ) {
           comped.insert( other );

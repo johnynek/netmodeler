@@ -84,9 +84,9 @@ int WeightedNetwork::getCommunities(vector<double>& q_t,
 
   //Initialize everything here:
   int community = 0;
-  NodeIterator ni = getNodeIterator();
-  while( ni.moveNext() ) {
-    Node* this_node = ni.current();
+  auto_ptr<NodeIterator> ni( getNodeIterator() );
+  while( ni->moveNext() ) {
+    Node* this_node = ni->current();
     node_community[ this_node ] = community;
     community++;
   }
@@ -111,9 +111,9 @@ int WeightedNetwork::getCommunities(vector<double>& q_t,
   int com1, com2;
   double e_total = 0.0;
   double weight;
-  EdgeIterator ei = getEdgeIterator();
-  while( ei.moveNext() ) {
-    Edge* this_edge = ei.current();
+  auto_ptr<EdgeIterator> ei( getEdgeIterator() );
+  while( ei->moveNext() ) {
+    Edge* this_edge = ei->current();
     com1 = node_community[ this_edge->first ];
     com2 = node_community[ this_edge->second ];
     weight = (*e_it)->getWeight();
@@ -163,9 +163,9 @@ int WeightedNetwork::getCommunities(vector<double>& q_t,
     //These are not valid communities, but initialize to this:
     com1 = -1;
     com2 = -1;
-    EdgeIterator ei1 = getEdgeIterator();
-    while( ei1.moveNext() ) {
-      Edge* this_edge = ei1.current();
+    auto_ptr<EdgeIterator> ei1( getEdgeIterator() );
+    while( ei1->moveNext() ) {
+      Edge* this_edge = ei1->current();
       com1 = node_community[ this_edge->first ];
       com2 = node_community[ this_edge->second ];
       if( com1 != com2 ) {
@@ -196,9 +196,9 @@ int WeightedNetwork::getCommunities(vector<double>& q_t,
     }
     a_i[join2] = 0.0;
     //Put all the join2 nodes into join1
-    NodeIterator ni = getNodeIterator();
-    while( ni.moveNext() ) {
-      Node* this_node = ni.current();
+    auto_ptr<NodeIterator> ni( getNodeIterator() );
+    while( ni->moveNext() ) {
+      Node* this_node = ni->current();
       if( node_community[ this_node ] == join2 ) {
         node_community[ this_node ] = join1;
       }
@@ -238,17 +238,17 @@ map<double, int> WeightedNetwork::getEdgeWeightDist(const EdgeSet& edges) const 
 
 map<double, int> WeightedNetwork::getEdgeWeightDist() const {
   EdgeSet edge_set;
-  EdgeIterator ei = getEdgeIterator();
-  while( ei.moveNext() ) {
-    edge_set.insert( ei.current() );
+  auto_ptr<EdgeIterator> ei( getEdgeIterator() );
+  while( ei->moveNext() ) {
+    edge_set.insert( ei->current() );
   }
   return getEdgeWeightDist( edge_set );
 }
 
 void WeightedNetwork::printWeights(ostream& out) const{
-    EdgeIterator ei = getEdgeIterator();
-    while( ei.moveNext() ) {
-      Edge* this_edge = ei.current();
+    auto_ptr<EdgeIterator> ei( getEdgeIterator() );
+    while( ei->moveNext() ) {
+      Edge* this_edge = ei->current();
 	    out << this_edge->toString() << " with weight = "
 		<< this_edge->getWeight() << endl;
     }

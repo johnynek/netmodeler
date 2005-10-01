@@ -56,10 +56,9 @@ void PercolationMessage::visit(Node* n, Network& net) {
         //Here are all the nodes at this distance:
         for( a_it = tv_it->second.begin(); a_it != tv_it->second.end(); a_it++) {
             //Now do each randomly:
-	    Network* neighbors = net.getNeighbors(*a_it);
-	    NodeIterator ni = neighbors->getNodeIterator();
-	    while( ni.moveNext() ) {
-		Node* neigh = ni.current();
+	    auto_ptr<NodeIterator> ni( net.getNeighborIterator(*a_it) );
+	    while( ni->moveNext() ) {
+		Node* neigh = ni->current();
                 if( _rand.getBool(_prob) ) {
 		  //We must cross exactly one edge to see if we visit this node
 		  _crossed_edges++;
@@ -70,8 +69,6 @@ void PercolationMessage::visit(Node* n, Network& net) {
                   }
 		}
             }
-	    delete neighbors;
-	    neighbors = 0;
         }
         to_visit.erase(tv_it);
         tv_it = to_visit.begin();

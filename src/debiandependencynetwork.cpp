@@ -53,10 +53,10 @@ double DebianDependencyNetwork::getSizeAssortativity() const {
   sum_jk = 0.0;
   sum_j2 = 0.0;
   sum_k2 = 0.0;
-  EdgeIterator ei = getEdgeIterator();
-  while( ei.moveNext() ) {
+  auto_ptr<EdgeIterator> ei( getEdgeIterator() );
+  while( ei->moveNext() ) {
     //We need "remaining degree" for this calculation
-    d_e = dynamic_cast<DirectedEdge*>( ei.current() );
+    d_e = dynamic_cast<DirectedEdge*>( ei->current() );
     //Make sure that j has the start node:
     if( d_e->pointsFirstToSecond() ) {
 	//Here we use fancy C++ features:
@@ -104,10 +104,10 @@ double DebianDependencyNetwork::getLibAssortativity() const {
   
   bool start_lib, end_lib;
   
-  EdgeIterator ei = getEdgeIterator();
-  while( ei.moveNext() ) {
+  auto_ptr<EdgeIterator> ei( getEdgeIterator() );
+  while( ei->moveNext() ) {
     //We need "remaining degree" for this calculation
-    d_e = dynamic_cast<DirectedEdge*>( ei.current() );
+    d_e = dynamic_cast<DirectedEdge*>( ei->current() );
     //Make sure that j has the start node:
     if( d_e->pointsFirstToSecond() ) {
 	start = dynamic_cast<DebianNode*>(d_e->first);

@@ -32,9 +32,9 @@ UniformAttachNet::UniformAttachNet(const Network& seed,
 {
     Network::operator=(seed);
     //Load the nodes into a vector
-    NodeIterator ni = getNodeIterator();
-    while( ni.moveNext() ) {
-      _nodes.push_back( ni.current() );
+    auto_ptr<NodeIterator> ni( getNodeIterator() );
+    while( ni->moveNext() ) {
+      _nodes.push_back( ni->current() );
     }
 }
 

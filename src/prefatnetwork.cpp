@@ -39,12 +39,12 @@ PrefAtNetwork::PrefAtNetwork(int nodes,
     for(i = 0; i < seeds; i++) {
         new_node = new Node();
 	Network::add( new_node );
-	NodeIterator ni = getNodeIterator();
-	while( ni.moveNext() ) {
+	auto_ptr<NodeIterator> ni( getNodeIterator() );
+	while( ni->moveNext() ) {
 	    //We have to make sure we are not adding a loop,
 	    //since the node will be in the node set
-	    if( new_node != ni.current() ) {
-	      Network::add( Edge( new_node, ni.current() ) );
+	    if( new_node != ni->current() ) {
+	      Network::add( Edge( new_node, ni->current() ) );
 	    }
 	}
     }
@@ -70,12 +70,12 @@ PrefAtNetwork::PrefAtNetwork(int nodes,
     for(i = 0; i < seeds; i++) {
         new_node = new Node();
 	Network::add( new_node );
-	NodeIterator ni = getNodeIterator();
-	while( ni.moveNext() ) {
+	auto_ptr<NodeIterator> ni( getNodeIterator() );
+	while( ni->moveNext() ) {
 	    //We have to make sure we are not adding a loop,
 	    //since the node will be in the node set
-	    if( new_node != ni.current() ) {
-	      Network::add( Edge( new_node, ni.current()) );
+	    if( new_node != ni->current() ) {
+	      Network::add( Edge( new_node, ni->current()) );
 	    }
 	}
     }
@@ -144,9 +144,9 @@ bool PrefAtNetwork::add(Edge* new_edge) {
 void PrefAtNetwork::computePrefCount()
 {
     pref_count = 0.0;
-    NodeIterator ni = getNodeIterator();
-    while( ni.moveNext() ) {
-      pref_count += _pref.evaluate( getDegree( ni.current() ) );
+    auto_ptr<NodeIterator> ni( getNodeIterator() );
+    while( ni->moveNext() ) {
+      pref_count += _pref.evaluate( getDegree( ni->current() ) );
     }
 }
 
@@ -159,11 +159,11 @@ Node* PrefAtNetwork::findPartnerFor(Node* n)
       max_pref -= _pref.evaluate( getDegree(n) );
     }
     //Don't include the neighbors:
-    Network* neighbors = getNeighbors(n);
-    NodeIterator ni = neighbors->getNodeIterator();
-    while(ni.moveNext())
+    auto_ptr<Network> neighbors( getNeighbors(n) );
+    auto_ptr<NodeIterator> ni( getNeighborIterator(n) );
+    while(ni->moveNext())
     {
-      max_pref -= _pref.evaluate( getDegree( ni.current() ) );
+      max_pref -= _pref.evaluate( getDegree( ni->current() ) );
     }
     double frac = _rand.getDouble01();
     //We are looking for a random fraction of max_pref
@@ -171,18 +171,16 @@ Node* PrefAtNetwork::findPartnerFor(Node* n)
     double this_count = 0.0;
     //Go through all the nodes selecting preferentially.
     Node* partner = 0;
-    ni = getNodeIterator();
-    while(ni.moveNext() && (this_count < this_degree_sum))
+    auto_ptr<NodeIterator> nj( getNodeIterator() );
+    while(nj->moveNext() && (this_count < this_degree_sum))
     {
-      Node* this_node = ni.current();
+      Node* this_node = nj->current();
       //Skip our self (n) and our neighbors
       if((this_node != n) && (!neighbors->has(this_node)) ) {
         this_count += _pref.evaluate( getDegree( this_node ) );
 	partner = this_node;
       }
     }
-    delete neighbors;
-    neighbors = 0;
     if( partner == n) { cerr << "n(" << n << ") == partner" << endl;}
     if( partner == 0) { cerr << "Could not find a partner for n: " << n << endl; }
     return partner;

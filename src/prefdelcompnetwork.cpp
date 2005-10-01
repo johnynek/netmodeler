@@ -58,11 +58,11 @@ const Network::NodePSet PrefDelCompNetwork::getRemoveNodes()
     NodePSet::const_iterator nit;
 
     int node = _rand.getInt(getNodeSize() - 1);
-    NodeIterator ni = getNodeIterator();
-    ni.moveNext();
-    while( node-- > 0) { ni.moveNext(); }
+    auto_ptr<NodeIterator> ni( getNodeIterator() );
+    ni->moveNext();
+    while( node-- > 0) { ni->moveNext(); }
     NodePSet removenodes;
-    removenodes.insert(ni.current());
+    removenodes.insert(ni->current());
     return removenodes;
   }
   return _empty_nodeset;

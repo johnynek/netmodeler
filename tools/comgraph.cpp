@@ -99,9 +99,9 @@ void printCommunities(AgglomPart* ap, ostream& out, string prefix, const Network
         out << this_com.str();
         Network::NodePSet::const_iterator comnodeit;
 	Network* this_comnet = *comit;
-	NodeIterator ni = this_comnet->getNodeIterator();
-	while( ni.moveNext() ) {
-          out << " " << ni.current()->toString();
+	auto_ptr<NodeIterator> ni( this_comnet->getNodeIterator() );
+	while( ni->moveNext() ) {
+          out << " " << ni->current()->toString();
         }
         out << endl;
 	//Recurse:

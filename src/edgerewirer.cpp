@@ -65,11 +65,11 @@ void EdgeRewirer::map(Network* net)
   _startsel->selectFrom( net );
 
   set<Edge*> edges_to_rewire;
-  EdgeIterator ei = net->getEdgeIterator();
-  while( ei.moveNext() ) {
+  auto_ptr<EdgeIterator> ei( net->getEdgeIterator() );
+  while( ei->moveNext() ) {
     if( _rand.getBool(_prob) ) {
       //Rewire this edge:
-      edges_to_rewire.insert( ei.current() );
+      edges_to_rewire.insert( ei->current() );
     }
   }
   set<Edge*>::iterator reit;

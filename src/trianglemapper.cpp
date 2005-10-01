@@ -24,13 +24,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define FOREACH(it, col) for(it = col.begin(); it != col.end(); it++)
 
 using namespace Starsky;
+using namespace std;
 
 void TriangleMapper::map(Network* net)
 {
   Network::EdgeSet to_remove;
-  EdgeIterator ei = net->getEdgeIterator();
-  while( ei.moveNext() ) {
-    Edge* this_edge = ei.current();
+  auto_ptr<EdgeIterator> ei( net->getEdgeIterator() );
+  while( ei->moveNext() ) {
+    Edge* this_edge = ei->current();
     if( net->getDegree( this_edge->first ) == 1 ||
         net->getDegree( this_edge->second ) == 1 ) {
       //This is a dead-end, keep it.

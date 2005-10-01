@@ -34,9 +34,9 @@ int main(int argc, char* argv) {
   comfinder.getCommunities(my_net,q_t, joins);
   //In order to know which community refers to what, we must build a table:
   vector<Node*> all_nodes;
-  NodeIterator ni = my_net.getNodeIterator();
-  while( ni.moveNext() ) {
-    all_nodes.push_back( ni.current() );
+  auto_ptr<NodeIterator> ni( my_net.getNodeIterator() );
+  while( ni->moveNext() ) {
+    all_nodes.push_back( ni->current() );
   }
   for(int i = 0; i < joins.size(); i++) {
       int join1, join2;

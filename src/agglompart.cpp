@@ -45,9 +45,9 @@ int AgglomPart::getCommunities(const Network& net, std::vector<double>& q_t,
   //Initialize everything here:
   Network::NodePSet::const_iterator n_it;
   int community = 0;
-  NodeIterator ni = net.getNodeIterator();
-  while( ni.moveNext() ) {
-    node_community[ ni.current() ] = community;
+  auto_ptr<NodeIterator> ni( net.getNodeIterator() );
+  while( ni->moveNext() ) {
+    node_community[ ni->current() ] = community;
     community++;
   }
   //initialize e_ij:
@@ -71,9 +71,9 @@ int AgglomPart::getCommunities(const Network& net, std::vector<double>& q_t,
   double e_total = 0.0;
   //This is the only difference in the wieghted version of the algorithm:
   if( _weighted == false ) {
-    EdgeIterator ei = net.getEdgeIterator();
-    while( ei.moveNext() ) {
-      Edge* this_edge = ei.current();
+    auto_ptr<EdgeIterator> ei( net.getEdgeIterator() );
+    while( ei->moveNext() ) {
+      Edge* this_edge = ei->current();
       com1 = node_community[ (this_edge)->first ];
       com2 = node_community[ (this_edge)->second ];
       e_ij[com1][com2] += 1.0;
@@ -82,9 +82,9 @@ int AgglomPart::getCommunities(const Network& net, std::vector<double>& q_t,
     }
   }
   else {
-    EdgeIterator ei = net.getEdgeIterator();
-    while( ei.moveNext() ) {
-      Edge* this_edge = ei.current();
+    auto_ptr<EdgeIterator> ei( net.getEdgeIterator() );
+    while( ei->moveNext() ) {
+      Edge* this_edge = ei->current();
       double weight = (this_edge)->getWeight();
       com1 = node_community[ (this_edge)->first ];
       com2 = node_community[ (this_edge)->second ];
@@ -181,9 +181,9 @@ set<Network*>* AgglomPart::getCommunity(const Network& net, int step,
   int community = 0;
   vector<Network::NodePSet> comm_node;
   comm_node.resize( net.getNodeSize() );
-  NodeIterator ni = net.getNodeIterator();
-  while( ni.moveNext() ) {
-    comm_node[community++].insert( ni.current() );
+  auto_ptr<NodeIterator> ni( net.getNodeIterator() );
+  while( ni->moveNext() ) {
+    comm_node[community++].insert( ni->current() );
   }
   /**
    * Recreate the step with the best structure:

@@ -63,18 +63,18 @@ double INetworkPartitioner::modularityOf(set<Network*>* partition,
   set<Network*>::const_iterator netit;
   for(netit = partition->begin(); netit != partition->end(); netit++)
   {
-    NodeIterator ni = (*netit)->getNodeIterator();
-    while( ni.moveNext() ) {
-      node_community[ ni.current() ] = *netit;
+    auto_ptr<NodeIterator> ni( (*netit)->getNodeIterator() );
+    while( ni->moveNext() ) {
+      node_community[ ni->current() ] = *netit;
     }
   }
   
   map<Network*, map<Network*, double> > e_ij;
   Network *com1, *com2;
   double e_total = 0.0;
-  EdgeIterator ei = orig.getEdgeIterator();
-  while( ei.moveNext() ) {
-    Edge* this_edge = ei.current();
+  auto_ptr<EdgeIterator> ei( orig.getEdgeIterator() );
+  while( ei->moveNext() ) {
+    Edge* this_edge = ei->current();
     com1 = node_community[ this_edge->first ];
     com2 = node_community[ this_edge->second ];
     e_ij[com1][com2] += 1.0;
@@ -126,18 +126,18 @@ long INetworkPartitioner::distance(std::set<Network*>* A, std::set<Network*>* B,
   Network::NodePSet all_nodes;
   //Make the a_map
   FOREACH(nit, (*A)) {
-    NodeIterator ni = (*nit)->getNodeIterator();
-    while(ni.moveNext()) {
-      Node* this_node = ni.current();
+    auto_ptr<NodeIterator> ni( (*nit)->getNodeIterator() );
+    while(ni->moveNext()) {
+      Node* this_node = ni->current();
       a_map[ this_node ] = *nit;
       all_nodes.insert(this_node);
     }
   }
   //Make the b_map
   FOREACH(nit, (*B)) {
-    NodeIterator ni = (*nit)->getNodeIterator();
-    while(ni.moveNext()) {
-      Node* this_node = ni.current();
+    auto_ptr<NodeIterator> ni( (*nit)->getNodeIterator() );
+    while(ni->moveNext()) {
+      Node* this_node = ni->current();
       b_map[ this_node ] = *nit;
       all_nodes.insert(this_node);
     }

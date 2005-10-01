@@ -66,10 +66,9 @@ map<double,int> GnutellaFileSpaceNetwork::getContentWeights() const {
   for( it = content.begin(); it != content.end(); it++) {
     node_neighbors = 0;
     query_neighbors = 0;
-    Network* neigh = getNeighbors(*it);
-    NodeIterator ni = neigh->getNodeIterator();
-    while(ni.moveNext()) {
-      Node* this_node = ni.current();
+    auto_ptr<NodeIterator> ni( getNeighborIterator(*it) );
+    while(ni->moveNext()) {
+      Node* this_node = ni->current();
       mit = _type_to_node_map.find(node_type);
       if(mit != _type_to_node_map.end()) {
 	if( mit->second.find(this_node) != mit->second.end()) {
@@ -83,7 +82,6 @@ map<double,int> GnutellaFileSpaceNetwork::getContentWeights() const {
 	}
       } 
     }
-    delete neigh;
     weights[ ((double)node_neighbors)/((double)query_neighbors) ]++;
   }
   return weights;

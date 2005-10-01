@@ -30,9 +30,9 @@ void printEdges(const Network& net,
 		Network::EdgeSet& printed,
 		const string& attributes)
 {
-  EdgeIterator eit = net.getEdgeIterator();
-  while( eit.moveNext() ) {
-    Edge* this_edge = eit.current();
+  auto_ptr<EdgeIterator> eit( net.getEdgeIterator() );
+  while( eit->moveNext() ) {
+    Edge* this_edge = eit->current();
     if( printed.count( this_edge ) == 0 ) {
       Node* start = this_edge->first;
       Node* end = this_edge->second;
@@ -40,9 +40,9 @@ void printEdges(const Network& net,
 	   << " " << attributes << ";" << endl;
     }
   }
-  eit.reset();
-  while( eit.moveNext() ) {
-    printed.insert( eit.current() );
+  eit->reset();
+  while( eit->moveNext() ) {
+    printed.insert( eit->current() );
   }
 }
 

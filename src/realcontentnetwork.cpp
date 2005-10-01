@@ -33,9 +33,9 @@ using namespace Starsky;
 RealContentNetwork::RealContentNetwork(Network& aNet) : _my_net(aNet) {
   Network::NodePSet::const_iterator n_it;
   int cache_size = 300; //every node has max cache size of 'cache_size'
-  NodeIterator ni = _my_net.getNodeIterator();
-  while( ni.moveNext() ) {
-    Node* n = ni.current();
+  auto_ptr<NodeIterator> ni( _my_net.getNodeIterator() );
+  while( ni->moveNext() ) {
+    Node* n = ni->current();
     RealNode* rnode = new RealNode( n->toString(), cache_size ); 
     node_to_real_node[n] = rnode;
   }

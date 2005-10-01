@@ -43,10 +43,10 @@ void EdgeSwapper::map(Network* net)
 {
   DEBUG("About to look for edges to swap");
   vector<Edge*> edges;
-  EdgeIterator ei = net->getEdgeIterator();
-  while( ei.moveNext() ) {
+  auto_ptr<EdgeIterator> ei( net->getEdgeIterator() );
+  while( ei->moveNext() ) {
     if ( _rand.getBool(_p) ) {
-      edges.push_back( ei.current() );
+      edges.push_back( ei->current() );
     }
   }
   //This is in the STL algorithms

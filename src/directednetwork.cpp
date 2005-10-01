@@ -91,13 +91,13 @@ bool DirectedNetwork::add(Edge* aEdge) {
 ///\todo: fix the below!
 void DirectedNetwork::moveIntoUndirectedNetwork(Network& net) {
 
-  NodeIterator ni = getNodeIterator();
-  while( ni.moveNext() ) {
-    net.add( ni.current() );
+  auto_ptr<NodeIterator> ni( getNodeIterator() );
+  while( ni->moveNext() ) {
+    net.add( ni->current() );
   }
-  EdgeIterator ei = getEdgeIterator();
-  while( ei.moveNext() ) {
-    Edge* this_edge = ei.current();
+  auto_ptr<EdgeIterator> ei( getEdgeIterator() );
+  while( ei->moveNext() ) {
+    Edge* this_edge = ei->current();
     net.add( Edge( this_edge->first, this_edge->second) );
   }
   //Empty out this network:
@@ -118,10 +118,10 @@ double DirectedNetwork::getAssortativity() const {
   sum_k2 = 0.0;
   EdgeSet::const_iterator i;
   DirectedEdge* d_edge;
-  EdgeIterator ei = getEdgeIterator();
-  while(ei.moveNext()) {
+  auto_ptr<EdgeIterator> ei( getEdgeIterator() );
+  while(ei->moveNext()) {
     //We need "remaining degree" for this calculation
-    d_edge = dynamic_cast<DirectedEdge*>( ei.current() );
+    d_edge = dynamic_cast<DirectedEdge*>( ei->current() );
     //Make sure that j has the start node:
     if( d_edge->pointsFirstToSecond() ) {
       j = getOutDegree( d_edge->first ) - 1;
@@ -430,9 +430,9 @@ int DirectedNetwork::remove(Node* node) {
 void DirectedNetwork::reverseEdges() {
 
   DirectedEdge* d_e;
-  EdgeIterator ei = getEdgeIterator();
-  while( ei.moveNext() ) {
-      d_e = dynamic_cast<DirectedEdge*>( ei.current() );
+  auto_ptr<EdgeIterator> ei( getEdgeIterator() );
+  while( ei->moveNext() ) {
+      d_e = dynamic_cast<DirectedEdge*>( ei->current() );
       d_e->reverse();
   }
 }
