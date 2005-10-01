@@ -21,6 +21,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "network.h"
 
+//#define DEBUG_MSG(msg) std::cerr << __FILE__ << " (" << __LINE__ << ") " << msg << std::endl;
+#define DEBUG_MSG(msg)
+//#define DEBUG
+
 using namespace std;
 using namespace Starsky;
 
@@ -32,7 +36,6 @@ const Network::EdgeSet Network::_empty_edgeset;
 map<Node*, int> Network::_node_ref_count;
 map<Edge*, int> Network::_edge_ref_count;
 
-//#define DEBUG
 
 Network::Network()  {
   _edge_count = 0;
@@ -233,14 +236,16 @@ double Network::getAssortativity() const {
   sum_j2 = 0;
   sum_k2 = 0;
   //Add the neighbors:
+  DEBUG_MSG("About to get EdgeIterator"); 
   auto_ptr<EdgeIterator> ei( getEdgeIterator() );
   while( ei->moveNext() ) {
+    DEBUG_MSG("Got EdgeIterator, about to get current");
     Edge* this_edge = ei->current();
     //We need "remaining degree" for this calculation
     j = (double)(getDegree( (this_edge)->first ) - 1);
     k = (double)(getDegree( (this_edge)->second ) - 1);
     //DEBUG:
-    //cerr << "j: " << j << " k: " << k << endl;
+    DEBUG_MSG("j: " << j << " k: " << k);
     sum_j += j;
     sum_k += k;
     sum_jk += j * k;
@@ -1545,11 +1550,10 @@ int Network::getTriangles(Node* n) const {
    * are distance 1 or less from n, so get the neighborhood
    * and remove n
    */
-  Network* hood = getNeighborhood(n);
+  DEBUG_MSG("About to getNeighborhood");
+  auto_ptr<Network> hood( getNeighborhood(n) );
   hood->remove(n);
-  int triangles = hood->getEdgeSize();
-  delete hood;
-  return triangles;
+  return hood->getEdgeSize();
 }
 
 int Network::getTriangles(Edge* this_edge) const {
@@ -1614,8 +1618,6 @@ void Network::getTrianglesWedges(int& triangles, int& wedges) const {
    * and twice in a wedge.
    * 
    */
-  EdgeSet::const_iterator e_it, e2_it;
-  map<Node*, EdgeSet>::const_iterator emap_it;
   triangles = 0;
   wedges = 0;
   auto_ptr<EdgeIterator> ei( getEdgeIterator() );
@@ -1624,15 +1626,14 @@ void Network::getTrianglesWedges(int& triangles, int& wedges) const {
     //Look at the wedges from one end:
     Node* this_node = this_edge->first;
     Node* other1 = this_edge->second;
-    emap_it = _node_to_edges.find(this_node);
-    for( e2_it = emap_it->second.begin();
-	 e2_it != emap_it->second.end();
-	 e2_it++) {
-      if( *e2_it != *e_it ) {
+    auto_ptr<EdgeIterator> ei2( getEdgeIterator( this_node ) );
+    while( ei2->moveNext() ) {
+      Edge* edge2 = ei2->current(); 
+      if( edge2 != this_edge ) {
         //There is one more wedge:
         wedges++;
         //See if it is a triangle:
-	Node* other = (*e2_it)->getOtherNode(this_node);
+	Node* other = edge2->getOtherNode(this_node);
         if( getEdge(other, other1) != 0 ) {
           //There is an edge between other - other1
           triangles++;
@@ -1642,15 +1643,14 @@ void Network::getTrianglesWedges(int& triangles, int& wedges) const {
     //Look at the wedges from the other end:
     this_node = this_edge->second;
     other1 = this_edge->first;
-    emap_it = _node_to_edges.find(this_node);
-    for( e2_it = emap_it->second.begin();
-	 e2_it != emap_it->second.end();
-	 e2_it++) {
-      if( *e2_it != *e_it ) {
+    auto_ptr<EdgeIterator> ei3( getEdgeIterator(this_node) );
+    while( ei3->moveNext() ) {
+      Edge* edge3 = ei3->current();
+      if( edge3 != this_edge ) {
         //There is one more wedge:
         wedges++;
         //See if it is a triangle:
-	Node* other = (*e2_it)->getOtherNode(this_node);
+	Node* other = edge3->getOtherNode(this_node);
         if( getEdge(other, other1) != 0 ) {
           //There is an edge between other - other1
           triangles++;
@@ -2191,8 +2191,6 @@ void Network::NetNodeIterator::reset()
   _called_movenext = false;
 }
 
-//#define DEBUG(msg) std::cerr << __FILE__ << " (" << __LINE__ << ") " << msg << std::endl;
-#define DEBUG(msg)
 
 EdgeIterator* Network::NetEdgeIterator::clone()
 {
@@ -2214,23 +2212,23 @@ Edge* Network::NetEdgeIterator::current()
   if( _eit == _nit->second.end() ) {
     throw exception();
   }
-  DEBUG("End of Current");
+  DEBUG_MSG("End of Current");
   return (*_eit);
 }
 
 bool Network::NetEdgeIterator::moveNext()
 {
-  DEBUG("Start of MoveNext");
+  DEBUG_MSG("Start of MoveNext");
   if( false == _called_movenext ) {
-    DEBUG("not called movenext");
+    DEBUG_MSG("not called movenext");
     _called_movenext = true;
   }
   else {
-    DEBUG("Already called movenext");
+    DEBUG_MSG("Already called movenext");
     _eit++;
   }
   //Advance to the next real edge
-  DEBUG("Looking for next edge");
+  DEBUG_MSG("Looking for next edge");
   bool found_next = false;
   while( ( false == found_next ) && ( _nit != _end ) ) {
     /*
@@ -2278,7 +2276,7 @@ bool Network::NetEdgeIterator::moveNext()
       //We don't need to say this, but it is true: found_next = true;
     }
   }
-  DEBUG("End of EdgeIterator::MoveNext"); 
+  DEBUG_MSG("End of EdgeIterator::MoveNext"); 
   return found_next;
 }
 

@@ -31,17 +31,17 @@ int main(int argc, char* argv[]) {
 	Network my_net(cin);
 
         cout << "#loaded network" << endl;	
-	cout << "#assortativity: " << my_net.getAssortativity() << endl
-	     << "#cluster coeff: " << my_net.getClusterCoefficient() << endl
-	     << "#transitivity: " << my_net.getTransitivity() << endl
-	     << "#nodes: " << my_net.getNodeSize() << endl
-	     << "#edges: " << my_net.getEdgeSize() << endl
-	     << "#<k>: " << my_net.getDegreeMoment(1) << endl
-	     << "#<k^2>: " << my_net.getDegreeMoment(2) << endl
-	     << "#H(degs): " << my_net.getDegreeEntropy() << endl
-	     << "#H(e_i): " << my_net.getEdgeEntropy().first << endl
-	     << "#H(e_ij): " << my_net.getEdgeEntropy().second << endl
-	     << "#EdgeMI: " << my_net.getEdgeMutualInfo() << endl;
+	cout << "#assortativity: " << my_net.getAssortativity() << endl;
+	cout << "#cluster coeff: " << my_net.getClusterCoefficient() << endl;
+	cout << "#transitivity: " << my_net.getTransitivity() << endl;
+	cout << "#nodes: " << my_net.getNodeSize() << endl;
+	cout	     << "#edges: " << my_net.getEdgeSize() << endl;
+	cout	     << "#<k>: " << my_net.getDegreeMoment(1) << endl;
+	cout	     << "#<k^2>: " << my_net.getDegreeMoment(2) << endl;
+	cout	     << "#H(degs): " << my_net.getDegreeEntropy() << endl;
+	cout	     << "#H(e_i): " << my_net.getEdgeEntropy().first << endl;
+	cout	     << "#H(e_ij): " << my_net.getEdgeEntropy().second << endl;
+	cout	     << "#EdgeMI: " << my_net.getEdgeMutualInfo() << endl;
 	
 	//Print out the degree distribution:
 	map<int, int> deg_dist = my_net.getDegreeDist();
