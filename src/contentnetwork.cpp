@@ -51,6 +51,7 @@ const Network::NodePSet& ContentNetwork::getNodesHoldingContent(ContentNode* c) 
       return c_it->second;
     }
     else {
+      ///\todo This network needs "de-stl-izing"
       return Network::_empty_nodeset;
     }
 }

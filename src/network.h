@@ -94,6 +94,10 @@ class Network {
 	 */
         virtual bool add(Edge* edge);
 	/**
+	 * Add all the nodes and edges of a given network to this one
+	 */
+	virtual void add(Network* n);
+	/**
 	 * @return false if the Node* is already in the network, else true
 	 */
 	virtual bool add(Node* node);
@@ -179,38 +183,6 @@ class Network {
 	 * @return average clustering coefficient for the whole network
 	 */
 	double getClusterCoefficient() const;
-#if 0
-	/**
-	 * Use the Newman community finding algorithm to find
-	 * communities: @see cond-mat/0309508
-	 * @param q the Q parameter at each step
-	 * @param joins the pair of communities joined at each step
-	 * @return the step where the maximum Q is found
-	 * The joins are made from initially labelling each node with
-	 * an integer (in the node_set order).
-	 *
-	 * The "join" number refers to the index of the node in the
-	 * default ordering of the node_set.  You can get a vector
-	 * which has the right order by doing:
-	 * vector<Node*> my_vec;
-	 * my_vec.insert(my_vec.begin(), node_set.begin(), node_set.end());
-	 * 
-	 * you can also use getCommunity to get the network that has
-	 * all edges BETWEEN communities removed, leaving only the
-	 * edges inside communities
-	 */
-	virtual int getCommunities(std::vector<double>& q,
-			   std::vector< std::pair<int,int> >& joins) const;
-	/**
-	 * using the above, get the particular break down of the communities:
-	 */
-	std::set<Network> getCommunity(int step,
-			    const std::vector< std::pair<int, int> >& joins) const;
-	/**
-	 * @return a set of networks.  One network for each component.
-	 */
-	std::set<Network> getComponents() const;
-#endif
 	/**
 	 * @return degree of a given node
 	 */
@@ -324,15 +296,8 @@ class Network {
 	 * This function basically calls the getEDgeBetweennessFor on each Node in the network
 	 */
 	Edge* getEdgeBetweenness(std::map<Edge*, double>& betweenness) const;
-#ifndef HIDE_STL
+        
 	/**
-	 * when calling getEdges() or getEdges(0) return the set of all edges.
-	 * @return the edges that a given Node is an endpoint of
-	 */
-	virtual const EdgeSet& getEdges(Node* node) const;
-	virtual const EdgeSet& getEdges() const;
-#endif
-        /**
          * @return a network that contains the edges in this network which
          * have one end with node
          * This is the star network (tree) with node in the center
@@ -348,12 +313,12 @@ class Network {
 	/**
 	 * @return an iterator to loop through the edges with
 	 */
-	EdgeIterator* getEdgeIterator() const;
+	virtual EdgeIterator* getEdgeIterator() const;
 	
 	/**
 	 * @return an iterator to all edges connected to a given node
 	 */
-	EdgeIterator* getEdgeIterator(Node* n) const;
+	virtual EdgeIterator* getEdgeIterator(Node* n) const;
 	/**
 	 * @return a map such that result[pair<int,int>(i,j)] = number of edges which
 	 * go from degree i to degree j plus the number that go from j to i
@@ -386,12 +351,6 @@ class Network {
 	 * given the degree distribution
 	 */
 	virtual double getExpectedTransitivity() const;
-#ifndef HIDE_STL
-	/**
-	 * @return all neighbors of a given node
-	 */
-	const ConnectedNodePSet& getNeighbors(Node* node) const;
-#else
 	/**
 	 * @return a node iterator that iterates over a node's neighbors
 	 */
@@ -400,14 +359,13 @@ class Network {
          * @return a network which only contains the nodes
          * which are neighbors of the given node, and no edges
          */
-        Network* getNeighbors(Node* node) const;
+        virtual Network* getNeighbors(Node* node) const;
         /**
          * Get the neighborhood of a node, all nodes, and edges between
          * those nodes.
          * This includes the node argument:
          */
-        Network* getNeighborhood(Node* node) const;
-#endif
+        virtual Network* getNeighborhood(Node* node) const;
 
 #ifndef HIDE_STL
 	/**
@@ -430,16 +388,7 @@ class Network {
 	/**
 	 * Return a NodeIterator that can iterator through all the nodes
 	 */
-	NodeIterator* getNodeIterator() const;
-#ifndef HIDE_STL
-	/**
-	 * @return a copy of the set<Node*> of all nodes.  Notice,
-	 * that if these Nodes might point no
-	 * where if the Network goes out of scope (since Networks
-	 * do reference counting).
-	 */
-	virtual const NodePSet& getNodes() const;
-#endif
+	virtual NodeIterator* getNodeIterator() const;
 	/**
 	 * @return the number of nodes
 	 */
@@ -502,7 +451,8 @@ class Network {
 	 */
 	virtual void printTo(std::ostream& out) const;
 	/**
-	 * Prints the network out to GDL format.  See http://www.absint.com/aisee/manual/windows/node58.html
+	 * Prints the network out to GDL format.
+	 * @see http://www.absint.com/aisee/manual/windows/node58.html
 	 */
   virtual void printToGDL(std::ostream& out) const;
 	/**
@@ -560,21 +510,6 @@ class Network {
 	virtual void readFrom(std::istream& in);
 
   virtual void readFromGDL(std::istream& in);
-#ifndef HIDE_STL
-	    /**
-	     * Just a set which holds pointers to all nodes in the network
-	     */
-	    NodePSet node_set;
-	    /**
-	     * set of all the edges in the network.
-	     */
-	    EdgeSet edge_set;
-	    /**
-	     * This holds the structure of the graph.  For each Node*, we get the set
-	     * of Node* that it is connected to.
-	     */
-	    std::map<Node*, ConnectedNodePSet > connection_map;
-#endif
             /**
 	     * Holds the edges each node is involved with:
 	     */
@@ -588,7 +523,6 @@ class Network {
 	    /**
 	     * sometimes we need to return a const reference to an empty node set
 	     */
-	    static const ConnectedNodePSet _empty_cnodeset;
 	    static const NodePSet _empty_nodeset;
 	    static const EdgeSet _empty_edgeset;
 	    /**

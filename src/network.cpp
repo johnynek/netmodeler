@@ -29,7 +29,6 @@ using namespace std;
 using namespace Starsky;
 
 //Initialization of the static empty node set
-const Network::ConnectedNodePSet Network::_empty_cnodeset;
 const Network::NodePSet Network::_empty_nodeset;
 const Network::EdgeSet Network::_empty_edgeset;
 
@@ -103,6 +102,13 @@ bool Network::add(Edge* edge) {
       success = false;
     }
     return success;
+}
+
+void Network::add(Network* net) {
+  auto_ptr<NodeIterator> ni( net->getNodeIterator() );
+  while( ni->moveNext() ) { add( ni->current() ); }
+  auto_ptr<EdgeIterator> ei( net->getEdgeIterator() );
+  while( ei->moveNext() ) { add( ei->current() ); }
 }
 
 bool Network::add(Node* node) {
@@ -390,235 +396,6 @@ double Network::getCCStdErr() const {
   return sqrt( (n_count - 1.0) * sigma2/n_count );
 }
 
-#if 0
-int Network::getCommunities(vector<double>& q_t,
-		            vector< pair<int,int> >& joins) const {
-
-  //Which community does a given node belong to:
-  map<Node*, int> node_community;
-
-  //Initialize everything here:
-  NodePSet::const_iterator n_it;
-  int community = 0;
-  for(n_it = node_set.begin();
-      n_it != node_set.end();
-      n_it++) {
-    node_community[ *n_it ] = community;
-    community++;
-  }
-  //initialize e_ij:
-  //This is the fraction of edges that go from
-  //community i to j (it is symmetric).
-  vector< vector<double> > e_ij;
-  vector< vector<double> >::iterator it;
-  e_ij.resize( node_set.size() );
-  for( it = e_ij.begin();
-       it != e_ij.end();
-       it++) {
-    it->resize( node_set.size() );
-  }
-  //Initialize e_ij
-  for(int i = 0; i < e_ij.size(); i++) {
-    for(int j = 0; j < e_ij[i].size(); j++) {
-      e_ij[i][j] = 0.0;
-    }
-  }
-  EdgeSet::const_iterator e_it;
-  int com1, com2;
-  double e_total = 0.0;
-  for(e_it = edge_set.begin();
-      e_it != edge_set.end();
-      e_it++) {
-    com1 = node_community[ (*e_it)->first ];
-    com2 = node_community[ (*e_it)->second ];
-    e_ij[com1][com2] += 1.0;
-    e_ij[com2][com1] += 1.0;
-    e_total += 2.0;
-  }
-  //Normalize e_ij:
-  for(int i = 0; i < e_ij.size(); i++) {
-    for(int j = 0; j < e_ij[i].size(); j++) {
-      if( e_ij[i][j] > 0.0 ) {
-        e_ij[i][j] /= e_total;
-      }
-    }
-  }
-  //Make a_i;
-  vector<double> a_i;
-  a_i.resize( e_ij.size() );
-  for(int i = 0; i < a_i.size(); i++) {
-    a_i[i] = 0.0;
-    for(int j = 0; j < e_ij[i].size(); j++) {
-      a_i[i] += e_ij[i][j];
-    }
-  }
-  joins.clear();
-  joins.resize( e_ij.size() - 1 );
-  q_t.clear();
-  q_t.resize( e_ij.size() );
-  //We don't neccesarily start at Q=0;
-  double q = 0.0;
-  for(int i = 0; i < e_ij.size(); i++) {
-    q += e_ij[i][i] - a_i[i] * a_i[i];
-  }
-  q_t[0] = q;
-  bool got_first = false;
-  double delta_q, tmp_delta, q_max;
-  int join1, join2, step, step_max;
-  step = 0;
-  step_max = step;
-  q_max = q;
-  //Begin the algorithm:
-  for( int k = 0; k < joins.size(); k++) {
-    //Iterate over each edge and find the biggest increase in Q
-    got_first = false;
-    //If we do no joins, there is delta_q = 0.0
-    delta_q = 0.0;
-    //These are not valid communities, but initialize to this:
-    com1 = -1;
-    com2 = -1;
-    for(e_it = edge_set.begin();
-        e_it != edge_set.end();
-        e_it++) {
-      com1 = node_community[ (*e_it)->first ];
-      com2 = node_community[ (*e_it)->second ];
-      if( com1 != com2 ) {
-        tmp_delta = 2 * (e_ij[com1][com2] - a_i[com1] * a_i[com2] );
-        if( (!got_first) || ( tmp_delta > delta_q ) ) {
-          delta_q = tmp_delta;
-  	  if( com1 < com2 ) { join1 = com1; join2 = com2; }
-	  else { join1 = com2; join2 = com1; }
-	  got_first = true;
-        }
-      }
-    }
-    //Now we have the biggest delta_q
-    
-    //update the number of edges between communities:
-    for(int j = 0; j < e_ij.size(); j++) {
-      if( j != join2 ) {
-        e_ij[join1][j] += e_ij[join2][j];
-        e_ij[j][join1] += e_ij[j][join2];
-      }
-    }
-    a_i[join1] += a_i[join2];
-    //Delete all of join2:
-    e_ij[join1][join1] += e_ij[join2][join2];
-    for(int j = 0; j < e_ij.size(); j++) {
-      e_ij[join2][j] = 0.0;
-      e_ij[j][join2] = 0.0;
-    }
-    a_i[join2] = 0.0;
-    //Put all the join2 nodes into join1
-    for(n_it = node_set.begin();
-        n_it != node_set.end();
-        n_it++) {
-      if( node_community[ *n_it ] == join2 ) {
-        node_community[ *n_it ] = join1;
-      }
-    }  
-  
-    //Record Q:
-    joins[step] = pair<int,int>( join1, join2 );
-    q_t[step + 1] = q_t[step] + delta_q;
-    //cerr << "q[" << step << "]= " << q_t[step] << endl;
-    step++;
-    if( q_t[step] > q_max ) {
-      q_max = q_t[step];
-      step_max = step;
-    }
-  }
-  return step_max;
-}
-
-set<Network> Network::getCommunity(int step,
-			            const vector< pair<int, int> >& joins)
-                                    const
-{
-  //Remake the node_community structure:
-  int community = 0;
-  vector<NodePSet> comm_node;
-  comm_node.resize( node_set.size() );
-  NodePSet::const_iterator n_it;
-  for(n_it = node_set.begin();
-      n_it != node_set.end();
-      n_it++) {
-    comm_node[community++].insert( *n_it );
-  }
-  //Recreate the step with the best structure:
-  int join1, join2;
-  for(int k = 0; k < step; k++) {
-    join1 = joins[k].first;
-    join2 = joins[k].second;
-    comm_node[ join1 ].insert( comm_node[ join2 ].begin(),
-		               comm_node[ join2 ].end() );
-    comm_node[ join2 ].clear();
-  }
-  //Prepare the output:
-  set< Network > output;
-  for(int k = 0; k < comm_node.size(); k++) {
-    if( comm_node[k].size() > 0 ) {
-      output.insert( getSubNet( comm_node[k] ) );
-    }
-  }
-  return output;
-}
-
-
-set<Network> Network::getComponents() const {
-
-    set<Network> output;
-    
-    Network* tmp_net = 0;
-    
-    NodePSet to_check, checked;
-    NodePSet::const_iterator i;
-    NodePSet::iterator check_it;
-    
-    ConnectedNodePSet::const_iterator n_it;
-    
-    EdgeSet tmp_edges;
-    EdgeSet::const_iterator e_it;
-    
-    //For all nodes
-    for(i = node_set.begin(); i != node_set.end(); i++) {
-	//Check to make sure we have not already identified this component:
-	if( checked.find( *i ) == checked.end() ) {
-            to_check.insert( *i );
-            check_it = to_check.begin();
-	    //Here we make a new component:
-	    tmp_net = new Network();
-            while( check_it != to_check.end() ) {
-		tmp_net->add( *check_it );
-                tmp_edges = getEdges( *check_it );
-	        for(e_it = tmp_edges.begin(); e_it != tmp_edges.end(); e_it++) {
-                    tmp_net->add( *e_it );
-	        }
-	        for(n_it = getNeighbors( *check_it ).begin();
-		    n_it != getNeighbors( *check_it ).end();
-		    n_it++) {
-		    if( checked.find( *n_it ) == checked.end() ) {
-                      to_check.insert( *n_it );
-		    }
-		    //Else we have already checked this one.
-	        }
-	        checked.insert( *check_it );
-                to_check.erase( check_it );
-	        check_it = to_check.begin();
-            }
-	    checked.insert( *i );
-	    //We have reached the entire component, go to the next.
-	    output.insert( *tmp_net );
-	    delete tmp_net;
-	    tmp_net = 0;
-        }
-	else {
-	}
-    }
-    return output;
-}
-#endif
-
 double Network::getDegreeMoment(int m) const
 {
   NodePSet ns;
@@ -647,19 +424,6 @@ double Network::getDegreeMoment(int m, const NodePSet& nodes) const
     }
     return ave / (double)( nodes.size() );
 }
-
-#ifndef HIDE_STL
-const Network::ConnectedNodePSet& Network::getNeighbors(Node* node) const {
-  map< Node*, ConnectedNodePSet >::const_iterator i = connection_map.find(node);
-  if( i != connection_map.end() ) {
-    return i->second;
-  }
-  else {
-    //returns an empty set
-    return _empty_cnodeset;
-  }
-}
-#endif
 
 NodeIterator* Network::getNeighborIterator(Node* n) const {
   map<Node*, EdgeSet>::const_iterator neit = _node_to_edges.find(n);
@@ -709,49 +473,6 @@ double Network::getClusterCoefficient(Node* node) const {
     return -1.0;
   }
 }
-#if 0
-double Network::getClusterCoefficient(Node* node) const {
-    map<Node*, ConnectedNodePSet >::const_iterator i, j;
-    ConnectedNodePSet::const_iterator k,l;
-
-    /*
-     * edges counts the number of edges between the nodes that node is connected
-     * to.  The clustering coefficient is that number, divided by the maximum.
-     */
-    
-    int edges = 0;
-    int i_deg = 0;
-   
-    i = connection_map.find(node);
-    if( i != connection_map.end() ) {
-      i_deg = i->second.size();
-      if ( i_deg == 0 ) {
-	  //Maybe we should return -1.0 here.
-	  //Clustering does not make sense for isolated nodes
-          return -1.0;
-      }
-      if ( i_deg == 1 ) {
-	  //If you have degree 1, return -1.0.
-          return -1.0;
-      }
-      for(k = i->second.begin(); k != i->second.end(); k++) {
-	l = k;
-	l++;
-	for(; l != i->second.end(); l++) {
-          j = connection_map.find(*k);
-          if( j != connection_map.end() ) {
-            edges += j->second.count(*l);
- 	  }
-	}
-      }
-      return (double)(edges)/(double)((i_deg * (i_deg - 1))/2);
-    }
-    else {
-      //This is an error value
-      return -1.0;
-    }
-}
-#endif
 
 double Network::getClusterCoefficient(const NodePSet& nodes) const {
     double out = 0.0;
@@ -1153,27 +874,6 @@ Edge* Network::getEdgeBetweenness(map<Edge*, double>& betweenness) const {
   return max_edge;
 }
 
-#ifndef HIDE_STL
-
-const Network::EdgeSet& Network::getEdges() const {
-    return edge_set;
-}
-
-const Network::EdgeSet& Network::getEdges(Node* node) const {
-    
-    if(node == 0) {
-        return edge_set;
-    }
-    map<Node*, EdgeSet >::const_iterator i;    
-    i = _node_to_edges.find(node);
-    if( i != _node_to_edges.end() ) {
-	return i->second;
-    }
-    return _empty_edgeset;
-}
-
-#endif
-
 Network* Network::getEdges(Node* node) const {
   Network* net = new Network();
   map<Node*, EdgeSet>::const_iterator neit = _node_to_edges.find(node);
@@ -1369,38 +1069,22 @@ double Network::getExpectedTransitivity() const {
 
 
 Network* Network::getNeighborhood(Node* n) const {
-  map<Node*, EdgeSet>::const_iterator neit = _node_to_edges.find(n);
   Network* net = new Network();
-  if( neit != _node_to_edges.end() ) {
-    EdgeSet::const_iterator e_it;
-    for(e_it = neit->second.begin();
-        e_it != neit->second.end();
-        e_it++) {
-      //Add all the edges which have this node in it.
-      net->add( *e_it );
-    }
-  }
-  //Iterate over these nodes:
-  auto_ptr<NodeIterator> ni( net->getNodeIterator() );
-  while( ni->moveNext() ) {
-    Node* this_node = ni->current();
-    neit = _node_to_edges.find(this_node);
-    EdgeSet::const_iterator e_it;
-    for(e_it = neit->second.begin();
-        e_it != neit->second.end();
-        e_it++) {
-      //Here are all the edges of this_node
-      Edge* this_edge = *e_it;
-      if( net->has( this_edge->first ) && net->has( this_edge->second ) ) {
-        //Both of these nodes are in the network, add the edge:
-        net->add( this_edge );
+  auto_ptr<EdgeIterator> ei( getEdgeIterator(n) );
+  while( ei->moveNext() ) {
+    Edge* ea = ei->current();
+    net->add( ea );
+    auto_ptr<EdgeIterator> ei2( ei->clone() );
+    while( ei2->moveNext() ) {
+      Edge* eb = ei->current();
+      Node* a = ea->getOtherNode( n );
+      Node* b = eb->getOtherNode( n );
+      //See if there is an edge between these two:
+      Edge* ec = getEdge( a, b );
+      if( ec != 0 ) {
+        net->add( ec );
       }
-      else {
-        //One of these nodes are not in the network, don't add it.
-      }
-      //Now we have considered all the edges of this_node
     }
-    //now we have considered all the nodes which are neighbors of n
   }
   return net;
 }
@@ -1431,12 +1115,6 @@ NodeIterator* Network::getNodeIterator() const {
   ni->reset();
   return ni;
 }
-
-#ifndef HIDE_STL
-const Network::NodePSet& Network::getNodes() const {
-    return node_set;
-}
-#endif
 
 int Network::getNodeSize() const {
   return _node_to_edges.size();
@@ -1501,47 +1179,6 @@ double Network::getTransitivity() const {
   return 3.0 * (double)triangles/(double)wedges;
 }
 
-#ifndef HIDE_STL
-int Network::getTriangles(Node* node) const {
-    map<Node*, ConnectedNodePSet >::const_iterator i, j;
-    ConnectedNodePSet::const_iterator k,l;
-
-    /*
-     * edges counts the number of edges between the nodes that node is connected
-     * to.  The clustering coefficient is that number, divided by the maximum.
-     */
-    
-    int edges = 0;
-    int i_deg = 0;
-   
-    i = connection_map.find(node);
-    if( i != connection_map.end() ) {
-      i_deg = i->second.size();
-      if ( i_deg == 0 ) {
-          return 0;
-      }
-      if ( i_deg == 1 ) {
-          return 0;
-      }
-      for(k = i->second.begin(); k != i->second.end(); k++) {
-	l = k;
-	l++;
-	for(; l != i->second.end(); l++) {
-          j = connection_map.find(*k);
-          if( j != connection_map.end() ) {
-            edges += j->second.count(*l);
- 	  }
-	}
-      }
-      return edges; 
-    }
-    else {
-      //Maybe we should throw an exception
-      return 0;
-    }
-}
-#endif
-
 int Network::getTriangles(Node* n) const {
   /*
    * The number of triangles is the number of edges
@@ -1558,49 +1195,42 @@ int Network::getTriangles(Node* n) const {
 
 int Network::getTriangles(Edge* this_edge) const {
 
-  /*
-   * 
-   */
-  EdgeSet::const_iterator e2_it;
-  map<Node*, EdgeSet>::const_iterator emap_it;
   int triangles = 0;
   int wedges = 0;
-    //Look at the wedges from one end:
-    Node* this_node = this_edge->first;
-    Node* other1 = this_edge->second;
-    emap_it = _node_to_edges.find(this_node);
-    for( e2_it = emap_it->second.begin();
-	 e2_it != emap_it->second.end();
-	 e2_it++) {
-      if( *e2_it != this_edge ) {
-        //There is one more wedge:
-        wedges++;
-        //See if it is a triangle:
-	Node* other = (*e2_it)->getOtherNode(this_node);
-        if( getEdge(other, other1) != 0 ) {
-          //There is an edge between other - other1
-          triangles++;
-        }
+  //Look at the wedges from one end:
+  Node* this_node = this_edge->first;
+  Node* other1 = this_edge->second;
+  auto_ptr<EdgeIterator> ei1( getEdgeIterator(this_node) );
+  while( ei1->moveNext() ) {
+    Edge* edgeone = ei1->current();
+    if( edgeone != this_edge ) {
+      //There is one more wedge:
+      wedges++;
+      //See if it is a triangle:
+	Node* other = edgeone->getOtherNode(this_node);
+      if( getEdge(other, other1) != 0 ) {
+        //There is an edge between other - other1
+        triangles++;
       }
     }
-    //Look at the wedges from the other end:
-    this_node = this_edge->second;
-    other1 = this_edge->first;
-    emap_it = _node_to_edges.find(this_node);
-    for( e2_it = emap_it->second.begin();
-	 e2_it != emap_it->second.end();
-	 e2_it++) {
-      if( *e2_it != this_edge ) {
-        //There is one more wedge:
-        wedges++;
-        //See if it is a triangle:
-	Node* other = (*e2_it)->getOtherNode(this_node);
-        if( getEdge(other, other1) != 0 ) {
-          //There is an edge between other - other1
-          triangles++;
-        }
+  }
+  //Look at the wedges from the other end:
+  this_node = this_edge->second;
+  other1 = this_edge->first;
+  auto_ptr<EdgeIterator> ei2( getEdgeIterator(this_node) );
+  while( ei2->moveNext() ) {
+    Edge* edgetwo = ei2->current();
+    if( edgetwo != this_edge ) {
+      //There is one more wedge:
+      wedges++;
+      //See if it is a triangle:
+	Node* other = edgetwo->getOtherNode(this_node);
+      if( getEdge(other, other1) != 0 ) {
+        //There is an edge between other - other1
+        triangles++;
       }
     }
+  }
   //We saw the triangles 2 times, once
   //from one "end" once from the other
   //reduce the number:
