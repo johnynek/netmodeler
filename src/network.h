@@ -25,9 +25,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define HIDE_STL
 
 #include "node.h"
-#include "nodeiterator.h"
 #include "edge.h"
-#include "edgeiterator.h"
+#include "iterator.h"
 #include "inetworkmonitor.h"
 #include "superstring.h"
 #include <set>
@@ -52,6 +51,16 @@ namespace Starsky {
  * As a convenience, you can add edges directly, this makes a copy internally *IF* this is
  * indeed a new edge (using getEdgePtr to check).
  */
+
+/**
+ * The NodeIterator is used a lot by this class, so we typedef it here
+ */
+typedef Iterator<Node> NodeIterator;
+/**
+ * The EdgeIterator is used a lot by this class, so we typedef it here
+ */
+typedef Iterator<Edge> EdgeIterator;
+
 class Network {
 
     public:

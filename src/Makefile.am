@@ -72,6 +72,7 @@ inetworkpartitioner.h inetworkpartitioner.cpp \
 inetworkmapper.h \
 inetworkmonitor.h \
 inodeselector.h \
+iterator.h \
 linearpreference.cpp \
 linearpreference.h \
 magnetmessage.h \

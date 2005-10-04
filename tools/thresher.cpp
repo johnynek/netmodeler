@@ -236,6 +236,22 @@ int main(int argc, char* argv[])
   NetworkFactory* nf = new DegreeLawNetFac(nodes, pl, ran, indep);
   Network* net = nf->create();
   DEBUG("Made net");  
+    cout << "#loaded network" << endl;	
+    DEBUG("Made net");  
+    cout << "#assortativity: " << net->getAssortativity() << endl;
+    cout << "#cluster coeff: " << net->getClusterCoefficient() << endl;
+    cout << "#transitivity: " << net->getTransitivity() << endl;
+    cout << "#nodes: " << net->getNodeSize() << endl;
+    cout << "#edges: " << net->getEdgeSize() << endl;
+    cout     << "#<k>: " << net->getDegreeMoment(1) << endl;
+    cout     << "#<k^2>: " << net->getDegreeMoment(2) << endl;
+    cout     << "#H(degs): " << net->getDegreeEntropy() << endl;
+    cout     << "#H(e_i): " << net->getEdgeEntropy().first << endl;
+    cout     << "#H(e_ij): " << net->getEdgeEntropy().second << endl;
+    cout     << "#EdgeMI: " << net->getEdgeMutualInfo() << endl;
+    //Here is the expected threshold:
+    double exp_th = PercolationMapper::getExpectedThreshold(net);
+    cout << "#q_c: " << exp_th << endl;
   map<double, double> prob_to_size;
   map<double, string> prob_to_out;
   //Actually do the simulation:
@@ -250,7 +266,6 @@ int main(int argc, char* argv[])
   qthresh = getThreshold(prob_to_size, qhigh, qlow);
   cout << "#q_th: " << qthresh << ", low: " << qlow << ", high: " << qhigh << endl;
   //Here is the expected threshold:
-  double exp_th = PercolationMapper::getExpectedThreshold(net);
   cout << "#q_c: " << exp_th << endl;
   nf->deleteNet(net);
   delete nf;

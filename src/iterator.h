@@ -19,46 +19,39 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef starsky__nodeenumerator_h
-#define starsky__nodeenumerator_h
-
-#include <node.h>
-#include <edge.h>
-#include <map>
-#include <set>
-#include <exception>
+#ifndef starsky__iterator_h
+#define starsky__iterator_h
 
 namespace Starsky {
 
-//Let the NodeIterator know that Networks exist:
-class Network;
-	
 /**
  * This class abstracts any container system we are using to
- * loop over all nodes in a network.
+ * loop over objects in a container.
  *
  * In order to make it easier to wrap netmodeler with another language,
  * we prefer not to directly expose STL elements in the API.
  *
  * This is an abstract class.
  */
-class NodeIterator {
+template<typename T>
+class Iterator {
 
   public:
+    virtual ~Iterator<T>() { };
     /**
      * Sometimes we want to interate forward from a given spot over
      * and over.  We can do this by cloning an iterator when it reaches
      * a given point.
      * @return a copy of this iterator along with any inner state
      */
-    virtual NodeIterator* clone() = 0;
+    virtual Iterator<T>* clone() = 0;
     /**
      * @throw an exception if this is called before MoveNext is called once.
-     * @return the node that the iterator currently points to
+     * @return the pointer that the iterator currently points to
      * */
-    virtual Node* current() = 0;
+    virtual T* current() = 0;
     /**
-     * Go to the next node.  Return true if there is another node
+     * Go to the next item.  Return true if there is another item
      * This must be called before you first call Current.  So,
      * you can think of the Iterator as positioned BEFORE the
      * start, and so you must move it once to be in position.
