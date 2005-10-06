@@ -19,44 +19,46 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef starsky__degreelawrandomnetwork
-#define starsky__degreelawrandomnetwork
+#ifndef starsky__expdrv
+#define starsky__expdrv
 
-#include "network.h"
-#include "node.h"
-#include "degreeprobabilityfunction.h"
+#include "discreterandvar.h"
 #include "random.h"
-
+#include <cmath>
 #include <vector>
-#include <set>
-#include <algorithm>
 
 namespace Starsky {
 
-  /**
-   * a random network with a degree distribution given.
-   */
+/**
+ * DRV for a exponential (really geometric) probability
+ * distribution.  
+ */
 
-class DegreeLawRandomNetwork : public Network {
+class ExpDRV : public DiscreteRandVar {
 
     public:
 	/**
-	 * @param nodes the size of the network
-	 * @param dpf the probability function you want for the degree dist
-	 * @param rand Random number generator used to randomly form edges
-	 * @param indep If true, each node is assigned a degree independently
-	 *   according to the dpf.  If false, then the dpf gives the FRACTION
-	 *   of nodes with a given degree.  This means that if one selects a 
-	 *   node at random, the probability distribution on degrees will be dpf
+	 * @param base that is exponentiated
+	 * @param min_deg the minimum degree allowed
+	 * @param max_deg the maximum degree allowed (defaults to (2^31-2), which is ~2*10^9)
+	 * p_k = base^(-k) for all k between min_deg and max_deg
 	 */
-        DegreeLawRandomNetwork(int nodes,
-			       DegreeProbabilityFunction& dpf,
-			       Random& rand,
-			       bool indep=false);
-    protected:
-        DegreeProbabilityFunction& _dpf;
-	Random& _rand;
+        ExpDRV(Random& r, double base = 0.5,
+				    int min_deg = 1,
+				    int max_deg = 0x7FFFFFFE);
 	
+	double getProbabilityOf(int deg) const;
+	int sample();
+	int getMin() const { return _min; }
+	int getMax() const { return _max; }
+    protected:
+        Random& _rand; 
+	double _base;
+	double _coeff;
+	double _coeff2;
+	double _coeff3;
+	int _min;
+	int _max;
 };
 	
 }

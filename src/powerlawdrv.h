@@ -19,44 +19,47 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef starsky__expprobabilityfunction
-#define starsky__expprobabilityfunction
+#ifndef starsky__powerlawdrv
+#define starsky__powerlawdrv
 
-#include "degreeprobabilityfunction.h"
+#include "discreterandvar.h"
+#include "random.h"
 #include <cmath>
-#include <vector>
+#include <map>
 
 namespace Starsky {
 
 /**
- * Degree distribution function for a exponential probability
- * distribution.
+ * Degree distribution function for a power-law with a given
+ * exponent, minimum degree, and maximum degree.
  */
 
-class ExpProbabilityFunction : public DegreeProbabilityFunction {
+class PowerLawDRV : public DiscreteRandVar {
 
     public:
 	/**
-	 * @param base that is exponentiated
+	 * @param r the RNG to use
+	 * @param exponent the exponent of the power law.
 	 * @param min_deg the minimum degree allowed
-	 * @param max_deg the maximum degree allowed (defaults to (2^31-2), which is ~2*10^9)
-	 * p_k = base^(-k) for all k between min_deg and max_deg
+	 * @param max_deg the maximum degree allowed (defaults to (2^31-1), which is ~2*10^9)
 	 */
-        ExpProbabilityFunction(double base = 0.5,
+        PowerLawDRV(Random& r,
+			            double exponent = -2.0,
 				    int min_deg = 1,
-				    int max_deg = 0x7FFFFFFE);
+				    int max_deg = 0x7FFFFFFF);
 	
 	double getProbabilityOf(int deg) const;
-	int getRandomDegree(double prob);
-	int minDegree() const { return _min; }
-	int maxDegree() const { return _max; }
+	int sample();
+	int getMin() const;
+	int getMax() const;
     protected:
-	double _base;
+	Random& _rand;
+	double _expon;
 	double _coeff;
-	double _coeff2;
-	double _coeff3;
 	int _min;
 	int _max;
+	//The below is used to do efficient look up of the cdf of a given degree
+	std::map<double, int> _cdf_to_idx;
 };
 	
 }

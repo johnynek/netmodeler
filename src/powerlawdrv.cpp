@@ -19,16 +19,17 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include "powerlawprobabilityfunction.h"
+#include "powerlawdrv.h"
 
 #include <iostream>
 
 using namespace Starsky;
 using namespace std;
 
-PowerLawProbabilityFunction::PowerLawProbabilityFunction(double expon,
+PowerLawDRV::PowerLawDRV(Random& r, double expon,
 		                                         int min,
-							 int max) : _expon(expon),
+							 int max) : _rand(r),
+                                                                    _expon(expon),
                                                                     _min(min),
 								    _max(max)
 {
@@ -46,13 +47,14 @@ PowerLawProbabilityFunction::PowerLawProbabilityFunction(double expon,
     _coeff = 1.0/sum;
 }
 
-double PowerLawProbabilityFunction::getProbabilityOf(int deg) const {
+double PowerLawDRV::getProbabilityOf(int deg) const {
     if( (_min <= deg) && (deg <= _max) ) {
       return _coeff * pow((double)deg, _expon);
     }
     return 0.0;
 }
-int PowerLawProbabilityFunction::getRandomDegree(double prob)  {
+int PowerLawDRV::sample()  {
+    double prob = _rand.getDouble01();
     double p_over_c = prob / _coeff;
     map<double, int>::const_iterator cit = _cdf_to_idx.upper_bound(p_over_c);
     //This is a new upper bound:
@@ -80,11 +82,11 @@ int PowerLawProbabilityFunction::getRandomDegree(double prob)  {
     return i;
 }
 
-int PowerLawProbabilityFunction::minDegree() const {
+int PowerLawDRV::getMin() const {
     return _min;
 }
 
-int PowerLawProbabilityFunction::maxDegree() const {
+int PowerLawDRV::getMax() const {
     return _max;
 }
 

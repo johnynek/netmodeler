@@ -19,43 +19,35 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef starsky__powerlawprobabilityfunction
-#define starsky__powerlawprobabilityfunction
-
-#include "degreeprobabilityfunction.h"
-#include <cmath>
-#include <map>
+#ifndef starsky__discreterandvar_h
+#define starsky__discreterandvar_h
 
 namespace Starsky {
 
-/**
- * Degree distribution function for a power-law with a given
- * exponent, minimum degree, and maximum degree.
- */
-
-class PowerLawProbabilityFunction : public DegreeProbabilityFunction {
+  /**
+   * Abstract class for defining discrete probability distributions
+   */
+	
+class DiscreteRandVar {
 
     public:
 	/**
-	 * @param exponent the exponent of the power law.
-	 * @param min_deg the minimum degree allowed
-	 * @param max_deg the maximum degree allowed (defaults to (2^31-1), which is ~2*10^9)
+	 * @return the probability that the distribution takes a particular value
 	 */
-        PowerLawProbabilityFunction(double exponent = -2.0,
-				    int min_deg = 1,
-				    int max_deg = 0x7FFFFFFF);
+        virtual double getProbabilityOf(int degree) const = 0;
+	/**
+	 * @return a sample from this random variable
+	 */
+	virtual int sample() = 0;
+	/**
+	 * @return minimum value with p > 0
+	 */
+	virtual int getMin() const = 0;
+	/**
+	 * @return maximum value with p > 0
+	 */
+	virtual int getMax() const = 0;
 	
-	double getProbabilityOf(int deg) const;
-	int getRandomDegree(double prob);
-	int minDegree() const;
-	int maxDegree() const;
-    protected:
-	double _expon;
-	double _coeff;
-	int _min;
-	int _max;
-	//The below is used to do efficient look up of the cdf of a given degree
-	std::map<double, int> _cdf_to_idx;
 };
 	
 }

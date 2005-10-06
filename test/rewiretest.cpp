@@ -47,8 +47,8 @@ int main(int argc, char* argv[])
   int nodes = 1000;
   bool uniform_p = true;
   Ran1Random ran;
-  PowerLawProbabilityFunction pl(-1.0*exp,2,(int)pow((double)nodes,1.0/exp));
-  //DegreeLawRandomNetwork my_net(nodes, pl, ran, uniform_p);
+  PowerLawDRV pl(ran, -1.0*exp,2,(int)pow((double)nodes,1.0/exp));
+  //DegreeLawNetFac my_fac(nodes, pl, ran, uniform_p);
   CallawayNetwork my_net(10000, 0.5, ran);
 
   printInfo(my_net);

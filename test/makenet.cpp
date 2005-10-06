@@ -30,7 +30,9 @@ int main(int argc, char* argv[])
 
   int size = atoi(argv[1]);
   Ran1Random r(-1);
-  PowerLawProbabilityFunction pl(-2.0,2,(int)pow((double)size,0.5));
+  //PowerLawDRV pl(r, -2.0,2,(int)pow((double)size,0.5));
+  //ConstDRV pl(4);
+  UniformDRV pl(r, 2, 4);
   //PowerLawProbabilityFunction pl(-2.0,2,size);
   NetworkFactory* nf = new DegreeLawNetFac(size, pl, r, false);
   Network* net = nf->create();

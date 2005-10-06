@@ -19,27 +19,46 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include "expprobabilityfunction.h"
+#ifndef starsky__constdrv_h
+#define starsky__constdrv_h
 
-using namespace Starsky;
+#include <discreterandvar.h>
 
-ExpProbabilityFunction::ExpProbabilityFunction(double base,
-		                                         int min,
-							 int max) : _base(base),
-                                                                    _min(min),
-								    _max(max)
-{
-  _coeff = (1.0 - _base)/( pow(_base, _min) - pow(_base, (_max + 1)));
-  _coeff2 = (1.0 - _base) / (pow(_base, _min) * _coeff);
-  _coeff3 = 1.0/log(_base);
+namespace Starsky {
+
+  /**
+   * This is a constant random variable.
+   */
+	
+class ConstDRV : public DiscreteRandVar {
+
+    public:
+	/**
+	 * @param The value that this random variable always takes
+	 */
+	ConstDRV(int val) { _val = val; }
+	/**
+	 * @return the probability that the distribution takes a particular value
+	 */
+        double getProbabilityOf(int degree) const
+	{ if (degree == _val) { return 1.0; } else { return 0.0; } }
+	/**
+	 * @return a sample from this random variable
+	 */
+	int sample() { return _val; }
+	/**
+	 * @return minimum value with p > 0
+	 */
+	int getMin() const { return _val; }
+	/**
+	 * @return maximum value with p > 0
+	 */
+	int getMax() const { return _val; }
+    protected:
+	int _val;
+	
+};
+	
 }
 
-double ExpProbabilityFunction::getProbabilityOf(int deg) const {
-    if( (_min <= deg) && (deg <= _max) ) {
-      return _coeff * pow(_base, deg);
-    }
-    return 0.0;
-}
-int ExpProbabilityFunction::getRandomDegree(double prob)  {
-    return _min + (int)floor( _coeff3 * log(1.0 - _coeff2 * prob) );
-}
+#endif

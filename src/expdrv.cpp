@@ -19,39 +19,29 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef starsky__degreelawnetfac_h
-#define starsky__degreelawnetfac_h
+#include "expdrv.h"
 
-#include <networkfactory.h>
-#include <random.h>
-#include <discreterandvar.h>
+using namespace Starsky;
 
-namespace Starsky {
-
-/**
- * A NetworkFactory that produces random networks with given
- * degree distributions
- */
-	
-class DegreeLawNetFac : public NetworkFactory {
-
-  public:
-    DegreeLawNetFac(int nodes, DiscreteRandVar& dpf, Random& ran, bool indep=true);
-    DegreeLawNetFac(int nodes, DiscreteRandVar& dpf, Random& ran,
-                    NodeFactory* nf, EdgeFactory* ef,
-                    bool indep=true);
-
-    virtual Network* create();
-  protected:
-
-    int _nodes;
-    DiscreteRandVar& _dpf;
-    Random& _rand;
-    bool _indep;
-	
-};
-	
+ExpDRV::ExpDRV(Random& r, double base,
+		                                         int min,
+							 int max) : 
+	_rand(r), _base(base),
+                                                                    _min(min),
+								    _max(max)
+{
+  _coeff = (1.0 - _base)/( pow(_base, _min) - pow(_base, (_max + 1)));
+  _coeff2 = (1.0 - _base) / (pow(_base, _min) * _coeff);
+  _coeff3 = 1.0/log(_base);
 }
 
-
-#endif
+double ExpDRV::getProbabilityOf(int deg) const {
+    if( (_min <= deg) && (deg <= _max) ) {
+      return _coeff * pow(_base, deg);
+    }
+    return 0.0;
+}
+int ExpDRV::sample()  {
+    double prob = _rand.getDouble01();
+    return _min + (int)floor( _coeff3 * log(1.0 - _coeff2 * prob) );
+}

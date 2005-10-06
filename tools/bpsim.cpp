@@ -96,7 +96,7 @@ int main(int argc, char* argv[])
       //Small k_max
       k_max = (int)pow((double)nodes,1.0/exp);
     }
-    PowerLawProbabilityFunction pl(-1.0*exp,2, k_max);
+    PowerLawDRV pl(ran, -1.0*exp,2, k_max);
     NetworkFactory* nf = new DegreeLawNetFac(nodes, pl, ran, indep);
     int max_deg = -1;
     for(int k = 0; k < count; k++) {

@@ -79,8 +79,9 @@ int main(int argc, char* argv[]) {
      }
      else{
        //The exponent -1.81 is what we want for the email network
-       PowerLawProbabilityFunction pl(-1.81,1,500);
-       net = new DegreeLawRandomNetwork(800,pl,r1,true);
+       PowerLawDRV pl(r1,-1.81,1,500);
+       DegreeLawNetFac my_fact(800, pl, r1, true);
+       net = my_fact.create();
      }
      cout << endl;
      //use the biggest connected component;

@@ -24,7 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 using namespace std;
 using namespace Starsky;
 
-DegreeLawNetFac::DegreeLawNetFac(int nodes, DegreeProbabilityFunction& dpf,
+DegreeLawNetFac::DegreeLawNetFac(int nodes, DiscreteRandVar& dpf,
 		                 Random& ran, bool indep) : NetworkFactory(),
                                                             _nodes(nodes),
                                                             _dpf(dpf),
@@ -34,7 +34,7 @@ DegreeLawNetFac::DegreeLawNetFac(int nodes, DegreeProbabilityFunction& dpf,
 
 }
 
-DegreeLawNetFac::DegreeLawNetFac(int nodes, DegreeProbabilityFunction& dpf,
+DegreeLawNetFac::DegreeLawNetFac(int nodes, DiscreteRandVar& dpf,
 		                 Random& ran,
                                  NodeFactory* nf, EdgeFactory* ef,
                                  bool indep) : NetworkFactory(nf, ef),
@@ -65,7 +65,7 @@ Network* DegreeLawNetFac::create()
   int max_degree = 0;
   int n_with_deg = 0;
   double surplus_nodes = 0.0; //Used in the indep case
-  int this_deg = _dpf.minDegree() - 1; //We will increment this later
+  int this_deg = _dpf.getMin() - 1; //We will increment this later
   for(int i = 0; i < _nodes; i++) {
     Node* this_node = _nf->create();
     //cout << "Nodefactory created: " << this_node << endl;
@@ -74,12 +74,12 @@ Network* DegreeLawNetFac::create()
     if( _indep ) {
       //Assign degree independently:
       //cout << "getRandomDegree" << endl;
-      degs = _dpf.getRandomDegree( _rand.getDouble01() );
+      degs = _dpf.sample();
       //cout << "got: " << degs << endl;
     }
     else {
       //Each degree gets a fixed fraction of nodes in the network:
-      while( (n_with_deg == 0) && (this_deg < _dpf.maxDegree()) ) {
+      while( (n_with_deg == 0) && (this_deg < _dpf.getMax()) ) {
         this_deg++;
 	double tmp_n = ( (double) _nodes) * _dpf.getProbabilityOf( this_deg )
 		       + surplus_nodes;
@@ -87,7 +87,7 @@ Network* DegreeLawNetFac::create()
 	surplus_nodes = tmp_n - (double)n_with_deg;
       }
       //This is one more node with this degree:
-      if( this_deg <= _dpf.maxDegree() ) {
+      if( this_deg <= _dpf.getMax() ) {
         degs = this_deg;
         n_with_deg--;
       }

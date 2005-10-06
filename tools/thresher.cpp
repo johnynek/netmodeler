@@ -232,7 +232,7 @@ int main(int argc, char* argv[])
   if( ! bigkmax ) {
     k_max = (int)pow((double)nodes,1.0/exp);
   }
-  PowerLawProbabilityFunction pl(-1.0*exp, 2, k_max);
+  PowerLawDRV pl(ran, -1.0*exp, 2, k_max);
   NetworkFactory* nf = new DegreeLawNetFac(nodes, pl, ran, indep);
   Network* net = nf->create();
   DEBUG("Made net");  

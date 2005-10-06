@@ -1,7 +1,6 @@
 /*
 This program is part of Netmodeler, a library for graph and network
 modeling and simulation.
-Copyright (C) 2005  University of California
 Copyright (C) 2005  P. Oscar Boykin <boykin@pobox.com>, University of Florida
 
 This program is free software; you can redistribute it and/or
@@ -19,37 +18,49 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef starsky__degreeprobabilityfunction
-#define starsky__degreeprobabilityfunction
+#ifndef starsky__uniformdrv_h
+#define starsky__uniformdrv_h
+
+#include <random.h>
+#include <discreterandvar.h>
+
+#include <exception>
 
 namespace Starsky {
 
   /**
-   * Abstract class for defining degree probability functions
-   * for use in producing random networks with given degree
-   * distributions.
+   * A Uniform discrete random variable
    */
 	
-class DegreeProbabilityFunction {
+class UniformDRV : public DiscreteRandVar {
 
     public:
 	/**
-	 * @return the probability that a node has a given degree
+	 * @param r the Random to use
+	 * @param max the maximum value this can take.
+	 * @param min the minimum value this can take
 	 */
-        virtual double getProbabilityOf(int degree) const = 0;
+	UniformDRV(Random& r, int min, int max);
 	/**
-	 * @param prob a random cdf value (0.0,1.0)
-	 * @return the smallest degree with cdf > prob
+	 * @return the probability that the distribution takes a particular value
 	 */
-	virtual int getRandomDegree(double prob) = 0;
+        double getProbabilityOf(int degree) const;
 	/**
-	 * @return minimum degree with p > 0
+	 * @return a sample from this random variable
 	 */
-	virtual int minDegree() const = 0;
+	int sample();
 	/**
-	 * @return maximum degree with p > 0
+	 * @return minimum value with p > 0
 	 */
-	virtual int maxDegree() const = 0;
+	int getMin() const;
+	/**
+	 * @return maximum value with p > 0
+	 */
+	int getMax() const;
+    protected:
+	Random& _rand;
+	int _min;
+	int _max;
 	
 };
 	

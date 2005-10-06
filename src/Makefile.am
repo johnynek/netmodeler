@@ -18,6 +18,7 @@ cache.h \
 cache.cpp \
 callawaynetwork.cpp \
 callawaynetwork.h \
+constdrv.h \
 contentnetwork.cpp \
 contentnetwork.h \
 contentnode.h \
@@ -29,11 +30,9 @@ debiannode.cpp \
 debiannode.h \
 debianpackagenode.cpp \
 debianpackagenode.h \
-degreelawrandomnetwork.cpp \
-degreelawrandomnetwork.h \
 degreelawnetfac.h degreelawnetfac.cpp \
 degreepreferencefunction.h \
-degreeprobabilityfunction.h \
+discreterandvar.h \
 directededge.cpp \
 directededge.h \
 directednetwork.cpp \
@@ -55,8 +54,8 @@ emailnetwork.cpp \
 emailnetwork.h \
 exppreference.cpp \
 exppreference.h \
-expprobabilityfunction.h \
-expprobabilityfunction.cpp \
+expdrv.h \
+expdrv.cpp \
 gnutellacontent.cpp \
 gnutellacontent.h \
 gnutellafilespacenetwork.cpp \
@@ -102,8 +101,8 @@ percolationmessage.h \
 percolationmapper.h percolationmapper.cpp \
 polypreference.cpp \
 polypreference.h \
-powerlawprobabilityfunction.cpp \
-powerlawprobabilityfunction.h \
+powerlawdrv.cpp \
+powerlawdrv.h \
 prefatnetwork.cpp \
 prefatnetwork.h \
 prefatfunction.cpp \
@@ -146,6 +145,7 @@ trustgraphmatrix.cpp \
 uniformattachnet.h \
 uniformattachnet.cpp \
 uniformnodeselector.h uniformnodeselector.cpp \
+uniformdrv.h uniformdrv.cpp \
 vazquezdirectednetwork.cpp \
 vazquezdirectednetwork.h \
 walkandpercmessage.cpp \
