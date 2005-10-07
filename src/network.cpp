@@ -1483,8 +1483,30 @@ int Network::remove(Node* node) {
 
 int Network::remove(NodeIterator* nodes) {
     int ret = 0;
-    while( nodes->moveNext() ) {
-      ret += remove( nodes->current() );
+    bool keep_going = nodes->moveNext();
+    while( keep_going ) {
+      Node* this_node = nodes->current();
+      /*
+       * We can't remove the node we are currently pointing
+       * to and then move forward (it is not allowed)
+       */
+      keep_going = nodes->moveNext();
+      ret += remove( this_node );
+    }
+    return ret;
+}
+
+int Network::remove(EdgeIterator* edges) {
+    int ret = 0;
+    bool keep_going = edges->moveNext();
+    while( keep_going ) {
+      Edge* this_edge = edges->current();
+      /*
+       * We can't remove the edge we are currently pointing
+       * to and then move forward (it is not allowed)
+       */
+      keep_going = edges->moveNext();
+      ret += remove( this_edge );
     }
     return ret;
 }

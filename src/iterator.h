@@ -46,6 +46,10 @@ class Iterator {
      */
     virtual Iterator<T>* clone() = 0;
     /**
+     * Get the item this iterator is point at.  Keep in mind, removing
+     * this element from a Network this iterator came from is not safe.
+     * You should copy this, then move to the next position before trying
+     * to remove it.
      * @throw an exception if this is called before MoveNext is called once.
      * @return the pointer that the iterator currently points to
      * */

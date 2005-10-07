@@ -451,10 +451,21 @@ class Network {
 	virtual int remove(const Edge& edge);
 	virtual int remove(Edge* e);
 	/**
+	 * Remove all the edges specified by this iterator
+	 * NEVER remove using an iterator and then call moveNext().
+	 * This function does the right thing (copy the current,
+	 * moveNext, then remove).
+	 * @param edges the iterator for the edges to remove
+	 */
+	virtual int remove(EdgeIterator* edges);
+	/**
 	 * @return the number of edges removed
 	 */
 	virtual int remove(Node* node);
 	/**
+	 * NEVER remove using an iterator and then call moveNext().
+	 * This function does the right thing (copy the current,
+	 * moveNext, then remove).
 	 * @param aset a set of nodes to remove from the network
 	 * @return the number of edges removed by this operation
 	 */

@@ -92,9 +92,7 @@ void EmailNetwork::removeSmallComponents(){
 	     size = comp_it->getNodeSize();
 	     if(size < max_size){
                auto_ptr<NodeIterator> ni( comp_it->getNodeIterator() );
-               while( ni->moveNext() ) {
-	         this->Network::remove( ni->current() );
-               }
+	       remove(ni.get());
 	     }
      }
 	    
