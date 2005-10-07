@@ -70,6 +70,7 @@ class WeightedNetwork : public Network {
 	std::map<double, int> getEdgeWeightDist(const EdgeSet& edges) const;
 
 	std::map<double, int> getEdgeWeightDist() const;
+	virtual WeightedNetwork* newNetwork() const { return new WeightedNetwork(); }
 	/**
 	 * Prints all the edges in the network and the weights associated with each edge.
 	 */

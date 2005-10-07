@@ -440,7 +440,7 @@ NodeIterator* Network::getNeighborIterator(Node* n) const {
 Network* Network::getNeighbors(Node* node) const {
   map<Node*, EdgeSet>::const_iterator it;
   it = _node_to_edges.find(node);
-  Network* net = new Network();
+  Network* net = newNetwork();
   if( it != _node_to_edges.end() ) {
     EdgeSet::const_iterator eit;
     //Add all the Nodes:
@@ -832,7 +832,7 @@ Edge* Network::getEdgeBetweenness(map<Edge*, double>& betweenness) const {
 }
 
 Network* Network::getEdges(Node* node) const {
-  Network* net = new Network();
+  Network* net = newNetwork();
   map<Node*, EdgeSet>::const_iterator neit = _node_to_edges.find(node);
   if( neit != _node_to_edges.end() ) {
     EdgeSet::const_iterator eit;
@@ -1026,7 +1026,7 @@ double Network::getExpectedTransitivity() const {
 
 
 Network* Network::getNeighborhood(Node* n) const {
-  Network* net = new Network();
+  Network* net = newNetwork();
   auto_ptr<EdgeIterator> ei( getEdgeIterator(n) );
   while( ei->moveNext() ) {
     Edge* ea = ei->current();
@@ -1079,7 +1079,7 @@ int Network::getNodeSize() const {
 
 Network* Network::getSubNet(NodeIterator* nodes) const {
   //Return a Network with just the nodes given
-  Network* out = new Network();
+  Network* out = newNetwork();
   //First add all the nodes:
   while( nodes->moveNext() ) {
     Node* this_node = nodes->current();
@@ -1291,6 +1291,10 @@ int Network::incrementNodeRefCount(Node* node) {
       return 1;
     } 
     return -1;
+}
+
+Network* Network::newNetwork() const {
+  return new Network();
 }
 
 void Network::printTo(ostream& out) const {

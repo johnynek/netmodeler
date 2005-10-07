@@ -52,6 +52,7 @@ class DirectedNetwork : public Network {
 	int getOutDegree(Node* node) const;
 	int getOutSize(){ return out_node_set.size();}  
 	void moveIntoUndirectedNetwork(Network& net);
+	virtual DirectedNetwork* newNetwork() const { return new DirectedNetwork(); }
 	void printTo(std::ostream& out) const;
 	//Reverse ALL the edge directions
 	void reverseEdges();

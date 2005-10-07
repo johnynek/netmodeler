@@ -429,6 +429,10 @@ class Network {
 	 */
 	bool has(Node* node) const;
 	/**
+	 * @return a new network of the same type as the one called on
+	 */
+	virtual Network* newNetwork() const;
+	/**
 	 * Prints the network out to graphviz (for now) format.
 	 */
 	virtual void printTo(std::ostream& out) const;

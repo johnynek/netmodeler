@@ -41,7 +41,7 @@ set<Network*>* ComponentPart::partition(const Network& input)
             to_check.insert( nodei );
             check_it = to_check.begin();
 	    //Here we make a new component:
-	    tmp_net = new Network();
+	    tmp_net = input.newNetwork();
             while( check_it != to_check.end() ) {
 		tmp_net->add( *check_it );
 		auto_ptr<EdgeIterator> ei( input.getEdgeIterator( *check_it ) );

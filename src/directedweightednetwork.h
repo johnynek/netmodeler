@@ -121,6 +121,9 @@ class DirectedWeightedNetwork : public DirectedNetwork {
 	 */
         double getOutAverageStrengthMoment(int m, NodeIterator* nodes) const;
 
+	virtual DirectedWeightedNetwork* newNetwork() const {
+          return new DirectedWeightedNetwork();
+	}
 	//the below two functions are not too useful!
 	void printOutDegStrengthPlot(NodeIterator* ni, std::ostream& out);
 
