@@ -42,7 +42,13 @@ namespace Starsky {
 	
 /**
  * This handles all the general algorithms on undirected graphs.
- * Subclass this class to make specific types of networks (such as Erdos-Renyi random graphs).
+ * Subclass this class to make specific types of networks.
+ *
+ * Also note that in this codebase, Networks are used as general
+ * storage containers for Node and Edge objects.  In those cases,
+ * you can think of the Network as being used as a set of Nodes,
+ * a set of Edges, or perhaps a mapping of nodes.
+ * 
  * IMPORTANT: if you subclass Network to use subclasses of Edge rather than Edge itself, you
  * MUST implement getEdgePtr for this new network, otherwise, things will not work.
  * Note that all memory (Nodes and Edges) is managed by a reference counting system internal
@@ -161,10 +167,10 @@ class Network {
 	 */
 	double getAverageDegree() const;
 	/**
-	 * @param nodes a subset of the network to consider
+	 * @param nodes a subset of nodes to consider
 	 * @return the average over this subset
 	 */
-	double getAverageDegree(const NodePSet& nodes) const;
+	double getAverageDegree(NodeIterator* nodes) const;
 	/**
 	 * @param bin_count the number of evenly spaced bins
 	 * @return a histogram evenly spaced over clustering coefficients
@@ -182,7 +188,7 @@ class Network {
 	 * @param nodes set of nodes to average over
 	 * @return the average cluster coefficient of these nodes
 	 */
-	double getClusterCoefficient(const NodePSet& nodes) const;
+	double getClusterCoefficient(NodeIterator* nodes) const;
 	/**
 	 * Estimate the variance in the CC using the jackknife
 	 * delete-1 method
@@ -204,7 +210,7 @@ class Network {
 	 * @param nodes the set of nodes to look at
 	 * @return for each degree, the number of nodes which have that degree
 	 */
-	std::map<int, int> getDegreeDist(const NodePSet& nodes) const;
+	std::map<int, int> getDegreeDist(NodeIterator* nodes) const;
 
 	/**
 	 * @return the entropy of the degree distribution
@@ -216,7 +222,7 @@ class Network {
 	 * @param nodes set of nodes we are looking at the moment of
 	 * @return <k^m> for the set of node_set
 	 */
-        double getDegreeMoment(int m, const NodePSet& nodes) const;
+        double getDegreeMoment(int m, NodeIterator* nodes) const;
 	/**
 	 * @param m moment we are computing
 	 * @return <k^m> for the set of node_set
@@ -250,14 +256,6 @@ class Network {
 	 *            in the same component with start
 	 */
 	int getDistance(Node* start, Node* end=0) const;
-	/**
-	 * This is O(N) memory, O(N) time.
-	 * @deprecated use the one below
-	 * @param node the node to see how many neighbors it has at each distance
-	 * @param max_dist the maximum distance to go to.  -1 means infinite.
-	 * @return a vector<int> which has the number of nodes at [distance]
-	 */
-	std::vector<int> getDistanceDist(Node* node, int max_dist = -1) const;
 
 	/**
 	 * Calls getDistancesFrom to add distances to the distribution
@@ -278,19 +276,6 @@ class Network {
 	 */
 	int getDistanceDist(std::map<int, int>& distribution) const;
 	
-	/**
-	 * @deprecated, use the one above
-	 * Calls the above function N times.
-	 * O(N^2) time, O(N) memory where N is the number of nodes
-	 * @return the number of shortest paths which have each given distance
-	 */
-	std::map<int, int> getDistanceDist() const;
-	/**
-	 * O(N^2) time O(N) memory where N is the number of nodes
-	 * @param nodes the set of nodes you are interesting the distances between
-	 * @return the number of shortest paths which have each given distance
-	 */
-	std::map<int, int> getDistanceDist(const NodePSet& nodes) const;
 	/**
 	 * @param target the node which we are generating the betweennesses for
 	 * @param betweeness the value for of the betweenness from this node (we assume
@@ -383,18 +368,6 @@ class Network {
 	NodePSet getNeighborhood(Node* node, int distance) const;
 #endif
 	/**
-	 * count the number of nth neighbors for each node, and see how often
-	 * each count appears.
-	 * @param nth the distance to count. 1 means first neighbors, 2 seccond neighbors...
-	 * @return key is the number of neighbors, value is the number of nodes that have that number.
-	 */
-	virtual std::map<int, int> getNthNeighborDist(int nth) const;
-	/**
-	 * same as above except with a given set of nodes to consider.
-	 */
-	virtual std::map<int, int> getNthNeighborDist(const NodePSet& nodes, int nth) const;
-
-	/**
 	 * Return a NodeIterator that can iterator through all the nodes
 	 */
 	virtual NodeIterator* getNodeIterator() const;
@@ -410,7 +383,7 @@ class Network {
 	 * @param nodes the nodes for which to build the subgraph
 	 * @return the Network which is the subgraph
 	 */
-	virtual Network* getSubNet(const NodePSet& nodes) const;
+	virtual Network* getSubNet(NodeIterator* nodes) const;
 	/**
 	 * This is an alternative definition of clustering
 	 * for the entire graph.  It is:
@@ -471,7 +444,6 @@ class Network {
 	 * @return number of neighbors the node had
 	 */
 	virtual int removeAndCluster(Node* node);
-	virtual int removeAndCluster(const NodePSet& node);
 	/**
 	 * @return the number of edges actually removed
 	 * (0 means the edge is not in the network).
@@ -486,7 +458,7 @@ class Network {
 	 * @param aset a set of nodes to remove from the network
 	 * @return the number of edges removed by this operation
 	 */
-	virtual int remove(const NodePSet& aset);
+	virtual int remove(NodeIterator* aset);
 	
 	virtual void remove(INetworkMonitor* nm);
         /**
@@ -504,12 +476,6 @@ class Network {
 #endif
 
     protected:
-        /**
-         * This is a transitional function which should
-         * be removed after de-STL-ization
-         * @param ns fill this up with all the nodes
-         */
-        void fillNodePSet(NodePSet& ns) const;
 	/**
 	 * This is used by the constructor which
 	 * takes the istream input.  It should
@@ -519,12 +485,6 @@ class Network {
 	virtual void readFrom(std::istream& in);
 
   virtual void readFromGDL(std::istream& in);
-            /**
-	     * Holds the edges each node is involved with:
-	     */
-	    std::map<Node*, EdgeSet> _node_to_edges;
-	    //This is the total number of edges:
-	    int _edge_count;
 	    /**
 	     * Holds all the network monitors:
 	     */
@@ -624,6 +584,17 @@ class Network {
 		EdgeSet::const_iterator _end;
 		bool _moved_to_first; //Start before the first
 	    };
+	    
+	private:
+            /**
+	     * Here is our current implementation.  Not even subclasses
+	     * should assume this is how it works.
+	     *
+	     * Holds the edges each node is involved with:
+	     */
+	    std::map<Node*, EdgeSet> _node_to_edges;
+	    //This is the total number of edges:
+	    int _edge_count;
   };
 
 }

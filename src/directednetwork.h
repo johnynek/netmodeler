@@ -40,24 +40,19 @@ class DirectedNetwork : public Network {
     public:
 	DirectedNetwork();
 	DirectedNetwork(std::istream& in);
-	bool add(const Edge& e);
+	virtual bool add(const Edge& e);
+	virtual bool add(Edge* aEdge);
 	double getAssortativity() const;
-#ifndef HIDE_STL
-	const EdgeSet& getEdges() const;
-#endif
 	Edge* getEdgePtr(const Edge& aEdge) const;
-	std::map<int, int> getInDegreeDist(const NodePSet& nodes) const;
+	std::map<int, int> getInDegreeDist(NodeIterator* nodes) const;
 	std::map<int, int> getInDegreeDist() const;
 	int getInDegree(Node* node) const;
-	std::map<int, int> getOutDegreeDist(const NodePSet& nodes) const;
+	std::map<int, int> getOutDegreeDist(NodeIterator* nodes) const;
 	std::map<int, int> getOutDegreeDist() const;
 	int getOutDegree(Node* node) const;
 	int getOutSize(){ return out_node_set.size();}  
 	void moveIntoUndirectedNetwork(Network& net);
 	void printTo(std::ostream& out) const;
-	int remove(const Edge& edge);
-	int remove(Edge* edge);
-	int remove(Node* node);
 	//Reverse ALL the edge directions
 	void reverseEdges();
 	
@@ -66,7 +61,7 @@ class DirectedNetwork : public Network {
 	 * @param nodes set of nodes we are looking at the moment of
 	 * @return <k_in^m> for the set of node_set
 	 */
-  double getInDegreeMoment(int m, const NodePSet& nodes) const;
+  double getInDegreeMoment(int m, NodeIterator* nodes) const;
 	/**
 	 * @param m moment we are computing
 	 * @return <k_in^m> for the set of node_set
@@ -77,7 +72,7 @@ class DirectedNetwork : public Network {
 	 * @param nodes set of nodes we are looking at the moment of
 	 * @return <k_out^m> for the set of node_set
 	 */
-  double getOutDegreeMoment(int m, const NodePSet& nodes) const;
+  double getOutDegreeMoment(int m, NodeIterator* nodes) const;
 	/**
 	 * @param m moment we are computing
 	 * @return <k_out^m> for the set of node_set
@@ -120,7 +115,6 @@ class DirectedNetwork : public Network {
  protected:
 	NodePSet out_node_set;
 
-	virtual bool add(Edge* aEdge);
 };
 	
 }

@@ -49,7 +49,6 @@ class EmailNetwork : public DirectedWeightedNetwork {
 	 */
 	EmailNetwork(std::istream& in);
 
-        //int getInternalSize(NodePSet& nodes);
 	int getInternalSize();
 
 	int getInternalOutSize();
@@ -70,15 +69,15 @@ class EmailNetwork : public DirectedWeightedNetwork {
 
 	void removeSinkNodes();
 
-	void setInternalNodes(NodePSet& nodes);
+	void setInternalNodes(NodeIterator* nodes);
 	void setInternalNodes();
 
-	void setInternalOutNodes(NodePSet& nodes);
+	void setInternalOutNodes(NodeIterator* nodes);
 	void setInternalOutNodes();
 
  protected:
-	NodePSet internal_node_set;
-	NodePSet internal_out_node_set;
+	Network internal_node_set;
+	Network internal_out_node_set;
 
 };
 	

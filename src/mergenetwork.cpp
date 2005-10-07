@@ -59,11 +59,13 @@ void MergeNetwork::incrementTime(int steps)
       }
     }
     //Remove all n1's edges:
-    EdgeSet e = _node_to_edges[n1];
-    EdgeSet::iterator e_it;
-    for(e_it = e.begin(); e_it != e.end(); e_it++)
-    {
-      remove( *e_it );
+    auto_ptr<EdgeIterator> ei( getEdgeIterator( n1 ) );
+    bool keep_going = ei->moveNext();
+    while( keep_going ) {
+      Edge* this_edge = ei->current();
+      //Removing a current iterator is bad, move it first:
+      keep_going = ei->moveNext();
+      remove( this_edge );
     }
     //Give n1 some new edges:
     NodePSet new_neighbors;

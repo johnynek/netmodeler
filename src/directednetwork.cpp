@@ -54,38 +54,18 @@ bool DirectedNetwork::add(const Edge& edge) {
 }
 
 bool DirectedNetwork::add(Edge* aEdge) {
-   DirectedEdge* d_edge = dynamic_cast<DirectedEdge*>(aEdge);
+  DirectedEdge* d_edge = dynamic_cast<DirectedEdge*>(aEdge);
   if( d_edge == 0) {
     //This is not a directed edge:
-	  return false;  
-	}
+    return false;  
+  }
   
-	if( has(*d_edge) == true) {
-     //We don't add edges twice
+  if( has(*d_edge) == true) {
+    //We don't add edges twice
     return false;
   }
-  
-  Node  *start, *end;
-
-  if( d_edge->pointsFirstToSecond() ) {
-    start = d_edge->first;
-	  end = d_edge->second;
-  }
-  else {
-    start = d_edge->second;
-	  end = d_edge->first;
-  }
-  if( !has( start ) ) {
-    //start is new:
-    add( start );
-  }
-  if( !has( end ) ) {
-    add( end );
-  }
-  _node_to_edges[start].insert( d_edge );
-  _node_to_edges[end].insert( d_edge );
-  incrementEdgeRefCount( d_edge );
-  return true;
+  //Else, let Network::add do the job
+  Network::add(d_edge);
 }
 
 ///\todo: fix the below!
@@ -177,17 +157,18 @@ Edge* DirectedNetwork::getEdgePtr(const Edge& edge) const {
 		}
 	
 		EdgeSet::const_iterator eit1, eit2;
-		const EdgeSet& e1 = _node_to_edges.find(start)->second;
-		const EdgeSet& e2 = _node_to_edges.find(end)->second;
-		for(eit1 = e1.begin(); eit1 != e1.end(); eit1++) {
-			for( eit2 = e2.begin(); eit2 != e2.end(); eit2++) {
-			  //the following three lines were crucial in find the getEdgePtr bug
-			  DirectedEdge* d_edge1 = dynamic_cast<DirectedEdge*>(*eit1);
-			  DirectedEdge* d_edge2 = dynamic_cast<DirectedEdge*>(*eit2);
-			  if( d_edge1 == d_edge2 && d_edge1->getStartNode() == start ) {
-			    return d_edge1;
-			  }
-	    }
+		auto_ptr<EdgeIterator> ei1( getEdgeIterator( start ) );
+		while( ei1->moveNext() ) {
+		  Edge* edge1 = ei1->current();
+	          DirectedEdge* d_edge1 = dynamic_cast<DirectedEdge*>(edge1);
+	          auto_ptr<EdgeIterator> ei2( getEdgeIterator( end ) );
+		  while( ei2->moveNext() ) {
+	            Edge* edge2 = ei2->current();
+		    DirectedEdge* d_edge2 = dynamic_cast<DirectedEdge*>(edge2);
+	            if( d_edge1 == d_edge2 && d_edge1->getStartNode() == start ) {
+		      return d_edge1;
+		    }
+	          }
 		}
 		return 0;  
 	}
@@ -197,37 +178,33 @@ Edge* DirectedNetwork::getEdgePtr(const Edge& edge) const {
 	}
 }
 
-map<int, int> DirectedNetwork::getInDegreeDist(const NodePSet& nodes) const {
+map<int, int> DirectedNetwork::getInDegreeDist(NodeIterator* nodes) const {
 
-  NodePSet::const_iterator i;
   map<int, int> deg_dist;
   int deg = 0;
 
-  for(i = nodes.begin(); i != nodes.end(); i++) {
-    deg = getInDegree( *i );
+  while( nodes->moveNext() ) {
+    Node* this_node = nodes->current();
+    deg = getInDegree( this_node );
     deg_dist[deg] = deg_dist[deg] + 1;
   }
   return deg_dist;
 }
 
 map<int, int> DirectedNetwork::getInDegreeDist() const {
-  NodePSet node_set;
-  fillNodePSet(node_set);
-  return getInDegreeDist(node_set);
+  auto_ptr<NodeIterator> ni(getNodeIterator());
+  return getInDegreeDist( ni.get() );
 }
 
 int DirectedNetwork::getInDegree(Node* node) const {
+  if( has( node ) ) {
   int in_deg = 0;
-  map<Node*, EdgeSet>::const_iterator neit = _node_to_edges.find(node);
-  if( neit != _node_to_edges.end() ) {
-    //He have this node:
-    EdgeSet::const_iterator eit;
-    for(eit = neit->second.begin();
-        eit != neit->second.end();
-        eit++) {
-      DirectedEdge* d_e = dynamic_cast<DirectedEdge*>(*eit);
+    auto_ptr<EdgeIterator> ei( getEdgeIterator(node) );
+    while( ei->moveNext() ) {
+      Edge* this_edge = ei->current();
+      DirectedEdge* d_e = dynamic_cast<DirectedEdge*>(this_edge);
       if( d_e->getEndNode() == node ) {
-        //This is an in-degree;
+        //This is an out-degree;
         in_deg++;
       }
     }
@@ -239,40 +216,36 @@ int DirectedNetwork::getInDegree(Node* node) const {
   }
 }
 
-map<int, int> DirectedNetwork::getOutDegreeDist(const NodePSet& nodes) const {
-  NodePSet::const_iterator i;
+map<int, int> DirectedNetwork::getOutDegreeDist(NodeIterator* nodes) const {
   map<int, int> deg_dist;
   int deg = 0;
 
-  for(i = nodes.begin(); i != nodes.end();i++) {
-    deg = getOutDegree( *i );
+  while( nodes->moveNext() ) {
+    Node* this_node = nodes->current();
+    deg = getOutDegree( this_node );
     deg_dist[ deg ] = deg_dist[deg] + 1;
   }
   return deg_dist;
 }
 
 map<int, int> DirectedNetwork::getOutDegreeDist() const {
-  NodePSet node_set;
-  fillNodePSet(node_set);
-  return getOutDegreeDist( node_set );
+  auto_ptr<NodeIterator> ni( getNodeIterator() );
+  return getOutDegreeDist( ni.get() );
 }
 
 int DirectedNetwork::getOutDegree(Node* node) const {
-  int in_deg = 0;
-  map<Node*, EdgeSet>::const_iterator neit = _node_to_edges.find(node);
-  if( neit != _node_to_edges.end() ) {
-    //He have this node:
-    EdgeSet::const_iterator eit;
-    for(eit = neit->second.begin();
-        eit != neit->second.end();
-        eit++) {
-      DirectedEdge* d_e = dynamic_cast<DirectedEdge*>(*eit);
+  if( has( node ) ) {
+  int out_deg = 0;
+    auto_ptr<EdgeIterator> ei( getEdgeIterator(node) );
+    while( ei->moveNext() ) {
+      Edge* this_edge = ei->current();
+      DirectedEdge* d_e = dynamic_cast<DirectedEdge*>(this_edge);
       if( d_e->getStartNode() == node ) {
-        //This is an in-degree;
-        in_deg++;
+        //This is an out-degree;
+        out_deg++;
       }
     }
-    return in_deg;
+    return out_deg;
   }
   else {
     //Node not in the netork:
@@ -282,60 +255,70 @@ int DirectedNetwork::getOutDegree(Node* node) const {
 
 double DirectedNetwork::getInDegreeMoment(int m) const
 {
-  NodePSet node_set;
-  fillNodePSet(node_set);
-  return getInDegreeMoment(m,node_set);
+  auto_ptr<NodeIterator> ni( getNodeIterator() );
+  return getInDegreeMoment(m, ni.get() );
 }
 
-double DirectedNetwork::getInDegreeMoment(int m, const NodePSet& nodes) const
+double DirectedNetwork::getInDegreeMoment(int m, NodeIterator* nodes) const
 {
   double ave = 0.0;
-  NodePSet::const_iterator i;
+  int tot = 0;
   if( m == 1) {
-    for(i = nodes.begin(); i != nodes.end(); i++) {
-      ave += (double)getInDegree( *i );
+    while( nodes->moveNext() ) {
+      Node* this_node = nodes->current();
+      ave += (double)getInDegree( this_node );
+      tot++;
     }
   }
   else if( m == 2) {
-    for(i = nodes.begin(); i != nodes.end(); i++) {
-      ave += (double)(getInDegree( *i ) * getInDegree( *i ));
+    while( nodes->moveNext() ) {
+      Node* this_node = nodes->current();
+      ave += (double)(getInDegree( this_node ) * getInDegree( this_node ));
+      tot++;
     }	
   }
   else {
-    for(i = nodes.begin(); i != nodes.end(); i++) {
-      ave += pow( (double)getInDegree( *i ), m);
+    while( nodes->moveNext() ) {
+      Node* this_node = nodes->current();
+      ave += pow( (double)getInDegree( this_node ), m);
+      tot++;
     }
   }
-  return ave / (double)( nodes.size() );
+  return ave / (double)( tot );
 }
 
 double DirectedNetwork::getOutDegreeMoment(int m) const
 {
-  NodePSet node_set;
-  fillNodePSet(node_set);
-  return getOutDegreeMoment(m,node_set);
+  auto_ptr<NodeIterator> ni( getNodeIterator() );
+  return getOutDegreeMoment(m, ni.get() );
 }
 
-double DirectedNetwork::getOutDegreeMoment(int m, const NodePSet& nodes) const
+double DirectedNetwork::getOutDegreeMoment(int m, NodeIterator* nodes) const
 {
   double ave = 0.0;
-  NodePSet::const_iterator i;
+  int tot = 0;
   if( m == 1) {
-    for(i = nodes.begin(); i != nodes.end(); i++) {
-      ave += (double)getOutDegree( *i );
+    while( nodes->moveNext() ) {
+      Node* this_node = nodes->current();
+      tot++;
+      ave += (double)getOutDegree( this_node );
     }
   }
   else if( m == 2) {
-    for(i = nodes.begin(); i != nodes.end(); i++) {
-      ave += (double)(getOutDegree( *i ) * getOutDegree( *i ));
+    while( nodes->moveNext() ) {
+      Node* this_node = nodes->current();
+      tot++;
+      ave += (double)(getOutDegree( this_node ) * getOutDegree( this_node ));
     }	
   }
   else {
-    for(i = nodes.begin(); i != nodes.end(); i++) {
-      ave += pow( (double)getOutDegree( *i ), m);
+    while( nodes->moveNext() ) {
+      Node* this_node = nodes->current();
+      tot++;
+      ave += pow( (double)getOutDegree( this_node ), m);
     }
   }
-  return ave / (double)( nodes.size() );
+  return ave / (double)( tot );
 }
 
 void DirectedNetwork::printTo(ostream& out) const {
@@ -373,58 +356,6 @@ void DirectedNetwork::printTo(ostream& out) const {
   }
 #endif
   out << "}" << endl;    
-}
-
-int DirectedNetwork::remove(const Edge& edge) {
-
-  Edge* edge_to_del = getEdgePtr(edge);
-  return remove(edge_to_del);
-}
-
-int DirectedNetwork::remove(Edge* edge_to_del) {
-
-  if( has(edge_to_del) ) {
-    DirectedEdge* d_e = dynamic_cast<DirectedEdge*>(edge_to_del);
-    Node* start;
-    Node* end;
-
-    if( d_e->pointsFirstToSecond() ) {
-      start = d_e->first;
-      end = d_e->second;
-    }
-    else {
-      start = d_e->second;
-      end = d_e->first;
-    }
-    _node_to_edges[start].erase(d_e);
-    _node_to_edges[end].erase(d_e);
-    decrementEdgeRefCount(d_e);  
-    return 1;
-  }
-  else {
-    //We don't have this edge:
-    return 0;
-  }
-}
-
-int DirectedNetwork::remove(Node* node) {
-  int deleted_edges = 0;
-  //Handle the out connections:
-  map<Node*, EdgeSet>::iterator neit = _node_to_edges.find(node);
-  if( neit != _node_to_edges.end() ) {
-    //This node really exists
-    EdgeSet es = neit->second;
-    EdgeSet::iterator eit;
-    for( eit = es.begin(); eit != es.end(); eit++) {
-      remove( *eit );
-      deleted_edges++;
-    }
-    decrementNodeRefCount(node);
-  }
-  else {
-    //Not in the network:
-  }
-  return deleted_edges;
 }
 
 void DirectedNetwork::reverseEdges() {
@@ -568,8 +499,11 @@ void DirectedNetwork::setOutNodes(NodePSet& nodes) {
 
 void DirectedNetwork::setOutNodes() {
   NodePSet node_set;
-  fillNodePSet(node_set);
-    setOutNodes(node_set);
+  auto_ptr<NodeIterator> ni( getNodeIterator() );
+  while( ni->moveNext() ) {
+    node_set.insert( ni->current() );
+  }
+  setOutNodes(node_set);
 }
 
 

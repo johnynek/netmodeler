@@ -179,11 +179,11 @@ set<Network*>* AgglomPart::getCommunity(const Network& net, int step,
 {
   //Remake the node_community structure:
   int community = 0;
-  vector<Network::NodePSet> comm_node;
+  vector<Network> comm_node;
   comm_node.resize( net.getNodeSize() );
   auto_ptr<NodeIterator> ni( net.getNodeIterator() );
   while( ni->moveNext() ) {
-    comm_node[community++].insert( ni->current() );
+    comm_node[community++].add( ni->current() );
   }
   /**
    * Recreate the step with the best structure:
@@ -199,15 +199,15 @@ set<Network*>* AgglomPart::getCommunity(const Network& net, int step,
   for(int k = 0; k < step; k++) {
     join1 = joins[k].first;
     join2 = joins[k].second;
-    comm_node[ join1 ].insert( comm_node[ join2 ].begin(),
-		               comm_node[ join2 ].end() );
+    comm_node[ join1 ].add( &comm_node[ join2 ] );
     comm_node[ join2 ].clear();
   }
   //Prepare the output:
   set< Network* >* out = new set<Network*>();
   for(int k = 0; k < comm_node.size(); k++) {
-    if( comm_node[k].size() > 0 ) {
-      out->insert( net.getSubNet( comm_node[k] ) );
+    if( comm_node[k].getNodeSize() > 0 ) {
+      auto_ptr<NodeIterator> ni( comm_node[k].getNodeIterator() );
+      out->insert( net.getSubNet( ni.get() ) );
     }
   }
   return out;

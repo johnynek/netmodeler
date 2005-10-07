@@ -39,39 +39,32 @@ using namespace std;
 	EmailNetwork::setInternalOutNodes();
   }
 
-/*  int EmailNetwork::getInternalSize(NodePSet& nodes){
-    int counter = 0;
-    NodePSet::const_iterator i;
-     for(i = nodes.begin(); i != nodes.end(); i++) {
-       std::string str = (*i)->toString();
-	 if(str[0] == 's')
-          counter += 1;	 
-      }
-     return counter;
-     }*/
-  
   int EmailNetwork::getInternalSize(){
-    return internal_node_set.size();
+    return internal_node_set.getNodeSize();
   }
 
 int EmailNetwork::getInternalOutSize(){
-  return internal_out_node_set.size();
+  return internal_out_node_set.getNodeSize();
 }
 
 map<int, double> EmailNetwork::getInternalOutDegtoAverageStrengthMap() const{
-  return DirectedWeightedNetwork::getOutDegtoAverageStrengthMap(internal_out_node_set);
+  auto_ptr<NodeIterator> ni( internal_out_node_set.getNodeIterator() );
+  return DirectedWeightedNetwork::getOutDegtoAverageStrengthMap(ni.get());
 }
 
 double EmailNetwork::getInternalOutDegStrengthCoefficient(){
-  return DirectedWeightedNetwork::getOutDegStrengthCoefficient(internal_out_node_set);
+  auto_ptr<NodeIterator> ni( internal_out_node_set.getNodeIterator() );
+  return DirectedWeightedNetwork::getOutDegStrengthCoefficient(ni.get());
 }
 
 double EmailNetwork::getInternalOutDegAverageStrengthCoefficient(){
-  return DirectedWeightedNetwork::getOutDegAverageStrengthCoefficient(internal_out_node_set);
+  auto_ptr<NodeIterator> ni( internal_out_node_set.getNodeIterator() );
+  return DirectedWeightedNetwork::getOutDegAverageStrengthCoefficient(ni.get());
 }
 
 map<double, int> EmailNetwork::getInternalNodeOutStrengthDist(){
-  return getNodeOutStrengthDist(internal_out_node_set);
+  auto_ptr<NodeIterator> ni( internal_out_node_set.getNodeIterator() );
+  return getNodeOutStrengthDist( ni.get() );
 }
 
 void EmailNetwork::removeSmallComponents(){
@@ -141,32 +134,30 @@ void EmailNetwork::removeSinkNodes()
   
 }
 
-void EmailNetwork::setInternalNodes(NodePSet& nodes) {
-    NodePSet::const_iterator i;
-     for(i = nodes.begin(); i != nodes.end(); i++) {
-       std::string str = (*i)->toString();
-	 if(str[0] == 's')
-          internal_node_set.insert(*i);	 
-      }     
+void EmailNetwork::setInternalNodes(NodeIterator* nodes) {
+  while( nodes->moveNext() ) {
+    Node* this_node = nodes->current();
+    std::string str = this_node->toString();
+    if(str[0] == 's')
+      internal_node_set.add(this_node);	 
+    }     
 }
 
 void EmailNetwork::setInternalNodes() {
-    NodePSet node_set;
-    fillNodePSet(node_set);
-    setInternalNodes(node_set);
+    auto_ptr<NodeIterator> ni( getNodeIterator() );
+    setInternalNodes( ni.get() );
 }
 
-void EmailNetwork::setInternalOutNodes(NodePSet& nodes) {
-    NodePSet::const_iterator i;
-     for(i = nodes.begin(); i != nodes.end(); i++) {
-       std::string str = (*i)->toString();
-	 if(str[0] == 's' && getOutDegree(*i) >= 1)
-          internal_out_node_set.insert(*i);	 
+void EmailNetwork::setInternalOutNodes(NodeIterator* nodes) {
+     while( nodes->moveNext() ) {
+       Node* this_node = nodes->current();
+       std::string str = this_node->toString();
+	 if(str[0] == 's' && getOutDegree(this_node) >= 1)
+          internal_out_node_set.add(this_node);	 
       }     
 }
 
 void EmailNetwork::setInternalOutNodes() {
-    NodePSet node_set;
-    fillNodePSet(node_set);
-    setInternalOutNodes(node_set);
+    auto_ptr<NodeIterator> ni( getNodeIterator() );
+    setInternalOutNodes(ni.get());
 }

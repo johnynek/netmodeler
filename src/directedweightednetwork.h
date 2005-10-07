@@ -54,7 +54,7 @@ class DirectedWeightedNetwork : public DirectedNetwork {
 
 	double getAverageWeight(Node* node) const;
 
-	std::map<int, double> getOutDegtoAverageStrengthMap(const NodePSet& nodes) const;
+	std::map<int, double> getOutDegtoAverageStrengthMap(NodeIterator* nodes) const;
 
 	std::map<int, double> getOutDegtoAverageStrengthMap() const;
 	/**
@@ -65,7 +65,7 @@ class DirectedWeightedNetwork : public DirectedNetwork {
 	/**
 	 * @return for each # of weights, the number of edges which have that weight
 	 */
-	std::map<double, int> getEdgeWeightDist(const EdgeSet& edges) const;
+	std::map<double, int> getEdgeWeightDist(EdgeIterator* edges) const;
 
 	std::map<double, int> getEdgeWeightDist() const;
 	/**
@@ -78,7 +78,7 @@ class DirectedWeightedNetwork : public DirectedNetwork {
 	 * @return the correlation coefficient between the degree and average strength
 	 * IMPORTANT: all input nodes must have outdegree >= 1
 	 */
-	virtual double getOutDegAverageStrengthCoefficient(NodePSet& nodes);
+	virtual double getOutDegAverageStrengthCoefficient(NodeIterator* nodes);
 
         virtual double getOutDegAverageStrengthCoefficient();
 	/**
@@ -86,11 +86,11 @@ class DirectedWeightedNetwork : public DirectedNetwork {
 	 * @return the correlation coefficient between the degree and strength
 	 * IMPORTANT: all input nodes must have outdegree >= 1
 	 */
-	virtual double getOutDegStrengthCoefficient(NodePSet& nodes);
+	virtual double getOutDegStrengthCoefficient(NodeIterator* nodes);
 
         virtual double getOutDegStrengthCoefficient();
 
-	virtual std::map<double, int> getNodeOutStrengthDist(NodePSet& nodes);
+	virtual std::map<double, int> getNodeOutStrengthDist(NodeIterator* nodes);
 
 	virtual std::map<double, int> getNodeOutStrengthDist();
 	/**
@@ -108,7 +108,7 @@ class DirectedWeightedNetwork : public DirectedNetwork {
 	 * @param nodes set of nodes we are looking at the moment of
 	 * @return <outstrength^m> for the node_set
 	 */
-        double getOutStrengthMoment(int m, const NodePSet& nodes) const;
+        double getOutStrengthMoment(int m, NodeIterator* nodes) const;
 	/**
 	 * @param m moment we are computing
 	 * @return <(out_strength/k_out)^m> for the out_node_set
@@ -119,10 +119,10 @@ class DirectedWeightedNetwork : public DirectedNetwork {
 	 * @param nodes set of nodes we are looking at the moment of
 	 * @return <(out_strength/k_out)^m> for the node_set
 	 */
-        double getOutAverageStrengthMoment(int m, const NodePSet& nodes) const;
+        double getOutAverageStrengthMoment(int m, NodeIterator* nodes) const;
 
 	//the below two functions are not too useful!
-	void printOutDegStrengthPlot(NodePSet& nodes, std::ostream& out);
+	void printOutDegStrengthPlot(NodeIterator* ni, std::ostream& out);
 
 	void printOutDegStrengthPlot(std::ostream& out);
 
@@ -143,7 +143,6 @@ class DirectedWeightedNetwork : public DirectedNetwork {
 	 * Prints all the edges in the network and the weights associated with each edge.
 	 */
 	void printWeights(std::ostream& out) const;
-
 
 };
 	
