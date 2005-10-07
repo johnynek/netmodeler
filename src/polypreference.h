@@ -30,7 +30,7 @@ namespace Starsky {
 
  /**
   * a preferential attachment function of the form:
-  * \alpha k ^{\beta} + \gamma
+  * alpha k ^{beta} + gamma
   * where k is the degree
   */
 class PolyPreference : public DegreePreferenceFunction {

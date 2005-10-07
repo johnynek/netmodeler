@@ -38,6 +38,7 @@ class ConstDRV : public DiscreteRandVar {
 	 */
 	ConstDRV(int val) { _val = val; }
 	/**
+	 * @param degree the value to get the probability of
 	 * @return the probability that the distribution takes a particular value
 	 */
         double getProbabilityOf(int degree) const

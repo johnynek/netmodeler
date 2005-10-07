@@ -31,11 +31,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "node.h"
 #include "edge.h"
 
+namespace Starsky {
+
 /**
  * The weight of each edge in the network is defined as the # of times that the edge has been traveled.
  */
 
-namespace Starsky {
 	
 class DirectedWeightedNetwork : public DirectedNetwork {
 

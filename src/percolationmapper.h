@@ -42,7 +42,7 @@ class PercolationMapper : public INetworkMapper {
      * Returns the expected theshold of an infinite random
      * graph with the same degree distribution as the given
      * graph.
-     * @return <k>/<k(k-1)>
+     * @return < k >/< k(k-1) >
      */
     static double getExpectedThreshold(Network* net) {
       double k1 = net->getDegreeMoment(1);

@@ -71,6 +71,10 @@ class PrefAtNetwork : public SimpleRuleNet {
 	 * @return true unless the new_node is not new, in which case nothing happens.
 	 */
 	bool add(Node* new_node);
+	/**
+	 * Add a new edge to this network
+	 * @param new_edge
+	 */
 	bool add(Edge* new_edge);
 
 	//The below are inherited. @see Starsky::SimpleRuleNet

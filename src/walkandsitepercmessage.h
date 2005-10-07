@@ -44,12 +44,18 @@ class WalkAndSitePercMessage : public SitePercMessage {
 
     public:
 	/**
+	 * @param r RNG
 	 * @param p probability that each node broadcasts the message
 	 * @param walkttl the total depth from start node the walk will go
 	 * @param percttl the depth the percolation will go
 	 */
         WalkAndSitePercMessage(Random& r, double p, int walkttl, int percttl=-1);
-	void visit(Node*, Network& aNet);
+	/**
+	 * Start a message at the given node.
+	 * @param n the node to start at
+	 * @param aNet the network to visit
+	 */
+	void visit(Node* n, Network& aNet);
     protected:
 	Random& _rand;
 	AnycastMessage _ac_mes;

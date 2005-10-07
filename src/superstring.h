@@ -27,12 +27,28 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 namespace Starsky {
 
+/**
+ * This class is to add methods that most modern languages have
+ * to the string class.  The idea is to make it easier to parse
+ * files with a more poweful string class
+ */
 class SuperString : public std::string {
 
     public:
+	/**
+	 * Make an empty Superstring
+	 */
 	SuperString();
+	/**
+	 * Make a new superstring from the given string
+	 */
         SuperString(const std::string& astring);
         
+	/**
+	 * Split the current string around a given delimeter.
+	 * @param delim the delimeter around which to split the string
+	 * @return a vector of SuperString.
+	 */
 	std::vector<SuperString> split(const std::string& delim) const;
 };
 	

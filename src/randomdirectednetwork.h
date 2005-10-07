@@ -26,11 +26,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "random.h"
 #include "directededge.h"
 
+namespace Starsky {
+
  /**
   * Produces random networks where each edge exists with probability p
   */
 
-namespace Starsky {
 
 class RandomDirectedNetwork : public DirectedNetwork {
 

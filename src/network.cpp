@@ -262,8 +262,8 @@ double Network::getAssortativity() const {
   double r, t;
 
   /*
-   * r = \frac{M^{-1}(\sum_i j_i k_i) - \left(M^{-1}\sum_i \frac{j_i + k_i}{2}\right)^{2}}
-   *          {M^{-1}\sum_i\frac{j_i^2 k_i^2}{2} - \left(M^{-1}\sum_i \frac{j_i + k_i}{2}\right)^2}
+   * r = frac{M^{-1}(sum_i j_i k_i) - \left(M^{-1}sum_i frac{j_i + k_i}{2}\right)^{2}}
+   *          {M^{-1}sum_ifrac{j_i^2 k_i^2}{2} - \left(M^{-1}sum_i frac{j_i + k_i}{2}\right)^2}
    */
   t = m_inv * 0.5 * (double)(sum_j + sum_k);
   r = (m_inv * (double)(sum_jk) - t*t) / (m_inv * 0.5 * (double)(sum_j2 + sum_k2) - t*t);

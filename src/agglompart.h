@@ -67,7 +67,7 @@ class AgglomPart : public INetworkPartitioner {
      * @param net the network we are working with
      * @param community_map The current mapping of node to community
      * @param e_ij the fraction of edges going from com i to com j
-     * @param a_i the fraction of edges that are in com i (\sum_j e_{ij})
+     * @param a_i the fraction of edges that are in com i (sum_j e_{ij})
      * @param com1 the community to merge with com2
      * @param com2 the community to merge with com1
      * @return the change in modularity

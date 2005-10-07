@@ -79,7 +79,8 @@ namespace Starsky
       std::vector<double>  getPrincipalEigVector(std::vector<Node*> matrix_order, std::set<Node*> pre_trusted,
 					    RealContentNetwork* rc_net, const double eps);     
 
-      /* Same as the above functioin, but calculation is done in the log domain
+      /** 
+       * Same as the above functioin, but calculation is done in the log domain
        */
       std::vector<double>  getPrincipalEigVectorLog(std::vector<Node*> matrix_order, std::set<Node*> pre_trusted, const double eps);      
 

@@ -45,7 +45,11 @@ class SitePercMessage : public Message {
 	 * means infinity
 	 */
         SitePercMessage(Random& r, double p, int ttl = -1);
-        virtual void visit(Node*, Network& aNet); 
+	/**
+	 * @param aNode the node to start at
+	 * @param aNet the Network the message is sent on
+	 */
+        virtual void visit(Node* aNode, Network& aNet); 
 	
     protected:
 	Random& _rand;

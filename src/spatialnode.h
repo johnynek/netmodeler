@@ -37,10 +37,27 @@ namespace Starsky {
 class SpatialNode : public Node {
 
     public:
+	/**
+	 * Create a node at a position selected uniformly
+	 * from the dim dimensional cube.
+	 * @param rand the Random to use
+	 * @param dim the Dimension of the space
+	 */
         SpatialNode(Random& rand, int dim);
+	/**
+	 * Create a node at the point specified by 
+	 * the vector
+	 */
 	SpatialNode(const std::vector<double>& pos);
 	
+	/**
+	 * @return the position of the current node
+	 */
 	const std::vector<double>& getPosition() const;
+	/**
+	 * @param aNode another spatial node
+	 * @return magnitude of the euclidean distance to that node
+	 */
         double getDistanceTo(SpatialNode* aNode) const;
 	
     protected:

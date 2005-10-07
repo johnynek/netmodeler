@@ -40,18 +40,29 @@ class Random {
      */
     virtual double getDouble01() = 0;
 
+    /**
+     * Uniformly select over the integers.
+     * @param high the largest value to return
+     * @param low the lowest value to return
+     * @return an integer less than or equal to high, and greater than or equal to low
+     */
     virtual int getInt(int high, int low=0);
     
     /**
      * Get a bool that is 50/50 
      */
     //virtual bool getBool();
+
+    /**
+     * @return a bool which is true with probability p
+     */
     virtual bool getBool(double p) {return (getDouble01() < p); }
 
     /**
      * Shuffle a vector
      * The first element is start, the
      * last element is end.
+     * @param coll the collection to shuffle in place
      * @param start the first element to shuffle
      * @param end the last element
      */

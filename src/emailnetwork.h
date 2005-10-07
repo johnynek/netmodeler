@@ -31,12 +31,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "node.h"
 #include "edge.h"
 
+namespace Starsky {
+
 /**
  * This class is specifically designed to process the network from the paper "Scale-free topology of
  * email network" by Ebel et.al..
  */
 
-namespace Starsky {
 	
 class EmailNetwork : public DirectedWeightedNetwork {
 

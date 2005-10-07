@@ -141,9 +141,9 @@ double DirectedNetwork::getAssortativity() const {
 
   /**
    *
-   * r = \frac{(\sum_i j_i k_i) - M^{-1}(\sum_i j_i)(\sum_i k_i)}
-   *          {\sqrt{[(\sum_i j_i^2) - M^{-1}(\sum_i j_i)^2]
-   *                    [(\sum_i k_i^2) - M^{-1}(\sum_i k_i)^2]}
+   * r = frac{(sum_i j_i k_i) - M^{-1}(sum_i j_i)(sum_i k_i)}
+   *          {sqrt{[(sum_i j_i^2) - M^{-1}(sum_i j_i)^2]
+   *                    [(sum_i k_i^2) - M^{-1}(sum_i k_i)^2]}
    * 
    */
 

@@ -22,15 +22,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef starsky__ran1random_h
 #define starsky__ran1random_h
 
+#include "random.h"
+
+namespace Starsky {
+
  /**
   * Random number generator which wraps a classic random
   * number generator "ran1".
   * @see http://ciks.cbt.nist.gov/~bentz/flyash/node14.html
   */
 
-#include "random.h"
 
-namespace Starsky {
 
 class Ran1Random : public Random {
 
