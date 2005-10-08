@@ -26,10 +26,9 @@ using namespace std;
 
 BroadcastMessage::BroadcastMessage(int ttl) : _ttl(ttl)
 {
-  forgetVisitedNodes();
 }
 
-void BroadcastMessage::visit(Node* n, Network& net)
+Network* BroadcastMessage::visit(Node* n, Network& net)
 {
     Network::ConnectedNodePSet::const_iterator n_it;
 
@@ -38,7 +37,8 @@ void BroadcastMessage::visit(Node* n, Network& net)
     Network::NodePSet::iterator a_it;
 
     to_visit[0].insert(n);
-    _visited_nodes.insert(n);
+    Network* new_net = net.newNetwork();
+    new_net->add( n );
     int this_distance;
     //We loop through at each TTL:
     tv_it = to_visit.begin();
@@ -46,21 +46,24 @@ void BroadcastMessage::visit(Node* n, Network& net)
         this_distance = tv_it->first + 1;
         //Here are all the nodes at this distance:
         for( a_it = tv_it->second.begin(); a_it != tv_it->second.end(); a_it++) {
-            Network* neighbors = net.getNeighbors(*a_it);
-            auto_ptr<NodeIterator> ni( neighbors->getNodeIterator() );
-            while( ni->moveNext() ) {
-              Node* this_node = ni->current();
-                if( _visited_nodes.find( this_node ) == _visited_nodes.end() ) {
-                    //We have not seen this one yet.
-                    to_visit[this_distance].insert( this_node );
-                    _visited_nodes.insert( this_node );
-                }
+            auto_ptr<EdgeIterator> ei( net.getEdgeIterator(*a_it) );
+            while( ei->moveNext() ) {
+	      Edge* this_edge = ei->current();
+              Node* this_node = this_edge->getOtherNode(*a_it);
+	      //Make sure to consider potential directionality 
+              if( this_edge->connects(*a_it, this_node) ) {
+		 if( !new_net->has( this_node ) ) {
+                  //We have not seen this one yet.
+                  to_visit[this_distance].insert( this_node );
+		  new_net->add( this_node );
+		 }
+		 //We have to cross it, only the other node knows if it should pass it
+		 new_net->add( this_edge );
+              }
             }
-	    //We must cross all neighbor edges except the one we came in on
-	    _crossed_edges += neighbors->getNodeSize() - 1;
-            delete neighbors;
         }
         to_visit.erase(tv_it);
         tv_it = to_visit.begin();
     }
+    return new_net;
 }

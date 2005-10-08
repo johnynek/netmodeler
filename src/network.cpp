@@ -31,6 +31,7 @@ using namespace Starsky;
 //Initialization of the static empty node set
 const Network::NodePSet Network::_empty_nodeset;
 const Network::EdgeSet Network::_empty_edgeset;
+const Network Network::_empty_net;
 
 map<Node*, int> Network::_node_ref_count;
 map<Edge*, int> Network::_edge_ref_count;

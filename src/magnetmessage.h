@@ -31,13 +31,20 @@ namespace Starsky {
  * A message which is passed to a random neighbor with probability
  * (1-p) and to go to the neighbor with maximum degree with
  * probability p.
+ *
+ * Currently, this node treats all edges without directionality.
  */
 	
 class MagnetMessage : public Message {
 
     public:
         MagnetMessage(Random& r, double p, int ttl=-1);
-	void visit(Node* n, Network& aNet);
+	/**
+	 * Return the nodes and edges passed by this visit
+	 * @param n the node to visit
+	 * @param aNet the network to visit
+	 */
+	virtual Network* visit(Node* n, Network& aNet);
 	
     protected:
 	Random& _rand;

@@ -27,7 +27,7 @@ using namespace std;
 AmnesiacMessage::AmnesiacMessage(Random& r,
 				       int ttl)
 : _rand(r), _ttl(ttl) {
-  forgetVisitedNodes();
+
 }
 
 /**
@@ -36,9 +36,8 @@ AmnesiacMessage::AmnesiacMessage(Random& r,
  * the below function will be at most the size of the network
  */
 
-void AmnesiacMessage::visit(Node* n, Network& _my_net) {
+Network* AmnesiacMessage::visit(Node* n, Network& _my_net) {
 	
-   Network::ConnectedNodePSet neighbors;
    set< pair<Node*,int> > to_visit;
    int new_ttl = _ttl, n_count = 0, rand_neighbor;
 
@@ -66,8 +65,6 @@ void AmnesiacMessage::visit(Node* n, Network& _my_net) {
 	     //We know the TTL was > 0, so new_ttl is a legitimate number
 	     new_ttl = j->second - 1; 
 	     to_visit.insert( pair<Node*,int>(rand_neigh,new_ttl) ); 
-	     //We must cross one edge to visit the above node:
-	     _crossed_edges++;
 	   }
 	   //Get rid of these neighbors:
 	   delete star;
@@ -78,5 +75,7 @@ void AmnesiacMessage::visit(Node* n, Network& _my_net) {
        //So we reset it:
        j = to_visit.begin();
    }
-   _visited_nodes.insert( last_node );
+   Network* net = _my_net.newNetwork();
+   net->add( last_node );
+   return net;
 }

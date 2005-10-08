@@ -33,7 +33,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 namespace Starsky {
 
 /**
- * Randomly percolates through a network.
+ * Randomly bond percolates through a network.
  */
 class PercolationMessage : public Message {
 
@@ -45,7 +45,13 @@ class PercolationMessage : public Message {
 	 * means infinity
 	 */
         PercolationMessage(Random& r, double p, int ttl = -1);
-        virtual void visit(Node*, Network& aNet); 
+	/**
+	 * Make a network by bond percolating from a starting point
+	 * @param start Node to start at
+	 * @param aNet the network to visit
+	 * @return a Network with all the Node and Edge objects visited
+	 */
+        virtual Network* visit(Node* start, Network& aNet); 
 	
     protected:
 	Random& _rand;

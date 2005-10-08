@@ -23,7 +23,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define starsky__message_h
 
 
-#include <set>
 #include "node.h"
 #include "network.h"
 
@@ -40,29 +39,15 @@ class Message {
     public:
 	virtual ~Message() { };
 	/**
-	 * Tells the message to forget where it has been.  Basically reset.
-	 */
-	void forgetVisitedNodes();
-	/**
-	 * @return the number of edges crossed
-	 */
-	int getCrossedEdgeCount() const { return _crossed_edges; }
-	/**
-	 * @return set of all nodes visited by this message.
-	 */
-	const std::set<Node*>& getVisitedNodes() const;
-	/**
+	 * This function visits a network and then makes a new network
+	 * which only contains the visited edges and nodes.  The caller
+	 * is responsible for deleting this Network.
+	 *
 	 * @param aNode the node to start visiting at
 	 * @param aNet the network to walk on
+	 * @return the visited subset of the network as a new network (caller must delete)
 	 */
-	virtual void visit(Node* aNode, Network& aNet)=0;
-
-    protected:
-	/**
-	 * holds the set of visited nodes
-	 */
-	std::set<Node*> _visited_nodes;
-	int _crossed_edges;
+	virtual Network* visit(Node* aNode, Network& aNet)=0;
 };
 	
 }

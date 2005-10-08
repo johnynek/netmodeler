@@ -57,24 +57,20 @@ class ContentNetwork : public Network {
 	const std::set<ContentNode*>& getContent() const;
 	/**
 	 * @param c the content to get all nodes which hold it.
-	 * @return the set of all nodes which hold content c
+	 * @return the set of all nodes which hold content c (caller must delete)
 	 */
-	const Network::NodePSet& getNodesHoldingContent(ContentNode* c) const;
+	virtual const Network& getNodesHoldingContent(ContentNode* c) const;
 	/**
-	 * @param node the node that inserts the content.
 	 * @param content the content to be inserted
-	 * @param amessage the message which starts at node, and all visited nodes get content
+	 * @param ni insert the content on all nodes iterated over
 	 */
-	virtual void insertContent(Node* node, ContentNode* content, Message& amessage);
+	virtual void insertContent(ContentNode* content, NodeIterator* ni);
 	/**
-	 * @param node the node to start the query at
 	 * @param content the content we are searching for
-	 * @param amessage the message to carry the query
-	 * @return set of nodes which are reached by the message and have the content
+	 * @param node_to_search the nodes to check for the content
+	 * @return subset of nodes that have the content (caller must delete)
 	 */
-	virtual Network::NodePSet queryForContent(Node* node,
-			                  ContentNode* content,
-					  Message& amessage);
+	virtual Network* queryForContent(ContentNode* content, NodeIterator* ni);
 
 
     protected:
@@ -89,7 +85,7 @@ class ContentNetwork : public Network {
 	/**
 	 * holds the nodes which hold a given content:
 	 */
-	std::map<ContentNode*, Network::NodePSet> _content_to_nodes;
+	std::map<ContentNode*, Network> _content_to_nodes;
 	/**
 	 * holds the set of all content
 	 */

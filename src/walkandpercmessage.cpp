@@ -31,13 +31,14 @@ WalkAndPercMessage::WalkAndPercMessage(Random& r, double p, int walkttl, int per
 /**
  * this algorithm is based on the breadth first search Starsky::Network::getDistance.
  */
-void WalkAndPercMessage::visit(Node* n, Network& net) {
+Network* WalkAndPercMessage::visit(Node* n, Network& net) {
 
-    _ac_mes.forgetVisitedNodes();
-    _ac_mes.visit(n,net);
-    _crossed_edges += _ac_mes.getCrossedEdgeCount();
-    set<Node*>::const_iterator v_it;
-    for(v_it = _ac_mes.getVisitedNodes().begin(); v_it != _ac_mes.getVisitedNodes().end(); v_it++) {
-        PercolationMessage::visit(*v_it,net);
+    Network* new_net = _ac_mes.visit(n,net);
+    auto_ptr<NodeIterator> ni( new_net->getNodeIterator() );
+    while( ni->moveNext() ) {
+      Node* this_node = ni->current();
+      auto_ptr<Network> tmp_net( PercolationMessage::visit(this_node,net) );
+      new_net->add( tmp_net.get() );
     }
+    return new_net;
 }

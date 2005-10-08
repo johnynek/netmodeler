@@ -44,18 +44,19 @@ int main(int argc, char* argv[]) {
          content_vector.push_back(new ContentNode);
      }
      
-     ifstream input("internal.dat");
      Network* my_net = 0;
      //my_net = new PrefDelCompNetwork(RandomNetwork(10,1.0,r1),r1,0.75,1,0.6666);
      //my_net = new DoublePrefAtNetwork( RandomNetwork(10,0.6,r1), r1, 1 );
      //my_net = new PrefAtNetwork( RandomNetwork(2,1.0,r1), r1, 1 );
-     my_net = new Network(input);
+     //ifstream input("internal.dat");
+     //my_net = new Network(input);
      /*while(my_net->getNodes().size() < 40000) {
        dynamic_cast<Incrementable*>(my_net)->incrementTime();
        }*/
      //The exponent -2.236 is what we fit to DPA network of the same size
-     //PowerLawProbabilityFunction pl(-2.3,2,1000);
-     //my_net = new DegreeLawRandomNetwork(40000,pl,r1,true);
+     PowerLawDRV pl(r1, -2.3,2,1000);
+     DegreeLawNetFac nf(40000, pl, r1, true);
+     my_net = nf.create();
 		    
      //my_net = new DegreeLawRandomNetwork(nodes, *pl, r1);
      //my_net = new GnutellaNetwork(argv[1],"limecrawler");
@@ -79,8 +80,9 @@ int main(int argc, char* argv[]) {
      }
      else{
        //The exponent -1.81 is what we want for the email network
-       PowerLawDRV pl(r1,-1.81,1,500);
-       DegreeLawNetFac my_fact(800, pl, r1, true);
+       int nodes = 10000;
+       PowerLawDRV pl(r1,-2.1,2,(int)sqrt(nodes));
+       DegreeLawNetFac my_fact(nodes, pl, r1, true);
        net = my_fact.create();
      }
      cout << endl;
@@ -106,7 +108,7 @@ int main(int argc, char* argv[]) {
      double av_edges = 0.0;
      double av_nodes = 0.0;
      double p, delta_p = 0.01;
-     int ttl=30;
+     int ttl=15;
      //for(ttl = 2; ttl < 12; ttl++)
      {
        p = 0.01;
@@ -131,7 +133,9 @@ int main(int argc, char* argv[]) {
 	 {
 	     a_node = node_vector[ r3.getInt( node_vector.size() - 1 ) ];
 	     c_node = content_vector[i];
-	     my_cnet->insertContent(a_node, c_node, *implant);
+	     auto_ptr<Network> implantnet( implant->visit( a_node, *net) );
+	     auto_ptr<NodeIterator> nit( implantnet->getNodeIterator() );
+	     my_cnet->insertContent(c_node, nit.get() );
          }
          //Do a random search for each node and see how many are successful.
          Network::NodePSet res_nodes;
@@ -141,12 +145,15 @@ int main(int argc, char* argv[]) {
          for(int i = 0; i < runs; i++) {
 	     a_node = node_vector[ r3.getInt( node_vector.size() - 1 ) ];
 	     c_node = content_vector[ i % cont_count ];
-	     res_nodes = my_cnet->queryForContent(a_node, c_node, *query);
-	     if( res_nodes.size() != 0) {
+	     auto_ptr<Network> visited( query->visit(a_node, *net) );
+	     auto_ptr<NodeIterator> nit( visited->getNodeIterator() );
+	     auto_ptr<Network> res_nodes(
+			     my_cnet->queryForContent(c_node, nit.get() ) );
+	     if( res_nodes->getNodeSize() != 0) {
 	       ++hits;
 	     }
-	     hit_nodes += query->getVisitedNodes().size();
-	     crossed_edges += query->getCrossedEdgeCount();
+	     hit_nodes += visited->getNodeSize();
+	     crossed_edges += visited->getEdgeSize();
          }
 	 hit_rate = (double)hits/(double)runs;
 	 av_edges = (double)crossed_edges/(double)runs;

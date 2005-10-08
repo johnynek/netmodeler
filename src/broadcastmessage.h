@@ -43,10 +43,13 @@ class BroadcastMessage : public Message {
   public:
     BroadcastMessage(int ttl=-1);
     /**
+     * This will return all the nodes and edges in the
+     * out component of a particular Node within a number of hops
      * @param anode the node to start the message at
      * @param aNet the network that the message will travel on
+     * @return a network consisting of all the nodes and edges crossed in a broadcast.
      */
-    virtual void visit(Node* anode, Network& aNet);	
+    virtual Network* visit(Node* anode, Network& aNet);	
   protected:
     int _ttl;
 };

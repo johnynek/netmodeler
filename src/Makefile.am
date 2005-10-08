@@ -80,7 +80,6 @@ mergenetwork.h \
 mergenetwork.cpp \
 messagebuiltnetwork.cpp \
 messagebuiltnetwork.h \
-message.cpp \
 message.h \
 mrucache.cpp \
 mrucache.h \

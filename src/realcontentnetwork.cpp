@@ -80,13 +80,12 @@ double RealContentNetwork::getTotalTrust(Network::NodePSet source_nodes, double 
   return tot_trust;
 }
 
-void RealContentNetwork::insertContent(Node* node, std::set<ContentNode*> content_set, NodePSet target_nodes){
+void RealContentNetwork::insertContent(Node* node, std::set<ContentNode*> content_set,
+		                       NodeIterator* target_nodes){
 
-    Network::NodePSet::const_iterator n_it;
-    for(n_it = target_nodes.begin(); n_it != target_nodes.end(); n_it++) {
-
-	node_to_real_node[*n_it]->implantPublicCache(node, content_set);
-
+    while( target_nodes->moveNext() ) {
+	Node* this_node = target_nodes->current();
+	node_to_real_node[this_node]->implantPublicCache(node, content_set);
     }//end of outer for-loop
     node_to_real_node[node]->clearNewInsertKeys();
 }
@@ -94,11 +93,10 @@ void RealContentNetwork::insertContent(Node* node, std::set<ContentNode*> conten
 void RealContentNetwork::insertContent(Node* node, set<ContentNode*> content_set, Message& amessage) {
 
     //The first thing we do is forget where this message has been:
-    amessage.forgetVisitedNodes();
-    amessage.visit(node, _my_net);
-    Network::NodePSet nodes_visited = amessage.getVisitedNodes();
+    auto_ptr<Network> visited( amessage.visit(node, _my_net) );
+    auto_ptr<NodeIterator> ni( visited->getNodeIterator() );
     try{
-      RealContentNetwork::insertContent(node, content_set, nodes_visited);
+      RealContentNetwork::insertContent(node, content_set, ni.get() );
     }
     catch(...){
       cout << "Error in insertContent realcontentnetwork.cpp" << endl;
@@ -129,16 +127,15 @@ void RealContentNetwork::notifyAccess(Network::NodePSet accessed_nodes, ContentN
 Network::NodePSet RealContentNetwork::queryForContent(Node* node, ContentNode* content, Message& amessage, double time_now){
 
     //The first thing we do is forget where this message has been:
-    amessage.forgetVisitedNodes();
-    amessage.visit(node, _my_net);
-    const Network::NodePSet& content_searchers = amessage.getVisitedNodes();
-    Network::NodePSet::const_iterator n_it;
+    auto_ptr<Network> content_searchers( amessage.visit(node, _my_net) );
     Network::NodePSet ret_val;
     std::set<ContentNode*>::iterator c_it;
-    for(n_it = content_searchers.begin(); n_it != content_searchers.end(); n_it++) {
-      RealNode* rnode = node_to_real_node[*n_it];
+    auto_ptr<NodeIterator> ni( content_searchers->getNodeIterator() );
+    while( ni->moveNext() ) {
+      Node* this_node = ni->current();
+      RealNode* rnode = node_to_real_node[this_node];
 #ifdef DEBUG
-	cout << "One node found is: " << (*n_it)->toString() << endl;
+	cout << "One node found is: " << this_node->toString() << endl;
 	//rnode->print();
 #endif
       c_it = rnode->getCCSet().find(content);
@@ -147,7 +144,7 @@ Network::NodePSet RealContentNetwork::queryForContent(Node* node, ContentNode* c
 	cout << "The content is: " << content->getID() << " and content cached is: " << (*c_it)->getID() << endl;
 	//rnode->print();
 #endif
-	ret_val.insert(*n_it);
+	ret_val.insert(this_node);
       }
     }
     //notify this set of nodes in ret_val that their content was being accessed so that they can change the 

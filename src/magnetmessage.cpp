@@ -28,10 +28,9 @@ MagnetMessage::MagnetMessage(Random& r, double p, int ttl) : _rand(r),
 	                                                     _p(p),
 							     _ttl(ttl)
 {
-  forgetVisitedNodes();
 }
 
-void MagnetMessage::visit(Node* n, Network& net)
+Network* MagnetMessage::visit(Node* n, Network& net)
 {
     map<int, Network::NodePSet > to_visit;
     map<int, Network::NodePSet >::iterator tv_it;
@@ -40,7 +39,8 @@ void MagnetMessage::visit(Node* n, Network& net)
     int this_distance, routes, rand_node;
 
     to_visit[0].insert(n);
-    _visited_nodes.insert(n);
+    Network* new_net = net.newNetwork();
+    new_net->add(n);
     
     //We loop through at each TTL:
     tv_it = to_visit.begin();
@@ -54,39 +54,39 @@ void MagnetMessage::visit(Node* n, Network& net)
 	     a_it++)
 	{
             //Now look for a random node to go to:
-	    auto_ptr<Network> neighbors( net.getNeighbors( *a_it ) );
-	    //Make sure there are some neighbors to go to:
-	    if( neighbors->getNodeSize() > 0 ) {
-	      Node* vnode = 0;
-	      if( _rand.getBool( _p ) ) {
-                //select the neighbor with maximum degree
-		int max_deg = -1;
-		vnode = *n_it;
-		auto_ptr<NodeIterator> ni( neighbors->getNodeIterator() );
-		while( ni->moveNext() ) {
-	          Node* this_node = ni->current();
-                  if(max_deg < net.getDegree( this_node )) {
+	    auto_ptr<EdgeIterator> ei( net.getEdgeIterator( *a_it ) );
+	    Edge* vedge = 0;
+	    Node* vnode = 0;
+	    if( _rand.getBool( _p ) ) {
+              //select the neighbor with maximum degree
+	      int max_deg = -1;
+	      while( ei->moveNext() ) {
+		Edge* this_edge = ei->current();
+                Node* this_node = this_edge->getOtherNode( *a_it );
+                if(max_deg < net.getDegree( this_node )) {
                     max_deg = net.getDegree( this_node );
 		    vnode = this_node;
-		  }
+		    vedge = this_edge;
 		}
 	      }
-	      else {
-                //select a random node:
-	        rand_node = _rand.getInt( neighbors->getNodeSize() - 1 );
-		auto_ptr<NodeIterator> ni( neighbors->getNodeIterator() );
-		ni->moveNext();
-	        while( rand_node-- > 0 ) { ni->moveNext(); }
-		vnode = ni->current();
-	      }
+	    }
+	    else {
+              //select a random edge:
+	      int rand_edge = _rand.getInt( net.getDegree( *a_it ) - 1 );
+	      ei->moveNext();
+	      while( rand_edge-- > 0 ) { ei->moveNext(); }
+	      vedge = ei->current();
+	      vnode = vedge->getOtherNode( *a_it );
+	    }
+	    if( vnode != 0 ) {
 	      //Visit the randomly selected node:
 	      to_visit[this_distance].insert( vnode );
-	      _visited_nodes.insert( vnode );
-	      //We must cross exactly one edge to visit the above node:
-	      _crossed_edges++;
+	      new_net->add( vnode );
+	      new_net->add( vedge );
 	    }
         }
         to_visit.erase(tv_it);
         tv_it = to_visit.begin();
     }
+  return new_net;
 }

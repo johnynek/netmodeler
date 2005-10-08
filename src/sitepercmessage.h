@@ -28,8 +28,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "node.h"
 #include "random.h"
 
-#include <set>
-
 namespace Starsky {
 
 /**
@@ -48,8 +46,9 @@ class SitePercMessage : public Message {
 	/**
 	 * @param aNode the node to start at
 	 * @param aNet the Network the message is sent on
+	 * @return all the Nodes and Edges reached by this process
 	 */
-        virtual void visit(Node* aNode, Network& aNet); 
+        virtual Network* visit(Node* aNode, Network& aNet); 
 	
     protected:
 	Random& _rand;

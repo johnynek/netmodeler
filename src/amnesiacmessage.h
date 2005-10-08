@@ -39,13 +39,11 @@ class AmnesiacMessage : public Message {
 
     public:
         AmnesiacMessage(Random& r, int ttl);
-	//This is a recursive function
-        void visit(Node*, Network& aNet); 
+        virtual Network* visit(Node*, Network& aNet); 
 	
     protected:
 	Random& _rand;
 	int _ttl;
-	
 };
 	
 }

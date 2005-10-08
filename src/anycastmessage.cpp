@@ -28,7 +28,6 @@ AnycastMessage::AnycastMessage(Random& r,
 				       int max_routes,
 				       int ttl)
 : _rand(r), _max(max_routes), _ttl(ttl) {
-  forgetVisitedNodes();
 }
 
 /**
@@ -37,7 +36,7 @@ AnycastMessage::AnycastMessage(Random& r,
  * the below function will be at most the size of the network
  */
 
-void AnycastMessage::visit(Node* n, Network& net) {
+Network* AnycastMessage::visit(Node* n, Network& net) {
 
     map<int, Network::NodePSet > to_visit;
     map<int, Network::NodePSet >::iterator tv_it;
@@ -45,9 +44,9 @@ void AnycastMessage::visit(Node* n, Network& net) {
     Network::ConnectedNodePSet::iterator n_it;
     Network::NodePSet::iterator a_it;
     int this_distance, routes, rand_node;
-
+    Network* new_net = net.newNetwork();
     to_visit[0].insert(n);
-    _visited_nodes.insert(n);
+    new_net->add(n);
     
     //We loop through at each TTL:
     tv_it = to_visit.begin();
@@ -70,9 +69,9 @@ void AnycastMessage::visit(Node* n, Network& net) {
 		Node* other = ei->current()->getOtherNode( *a_it );
 		//Visit the randomly selected node:
 		to_visit[this_distance].insert( other );
-		_visited_nodes.insert( other );
-		//We must cross one edge to visit the above node:
-		_crossed_edges++;
+		//We are crossing the current edge:
+		new_net->add( ei->current() );
+		new_net->add( other );
 		//Remove this node from consideration for next time:
 		star->remove( ei->current() );
 	      }
@@ -81,4 +80,5 @@ void AnycastMessage::visit(Node* n, Network& net) {
         to_visit.erase(tv_it);
         tv_it = to_visit.begin();
     }
+    return new_net;
 }

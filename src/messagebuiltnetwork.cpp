@@ -84,17 +84,16 @@ Node* MessageBuiltNetwork::findPartnerFor(Node* start)
     begin = ni->current();
   }
   //Start at the start, and visit the nodes.
-  _message.forgetVisitedNodes();
-  _message.visit(begin, *this );
+  auto_ptr<Network> visited( _message.visit(begin, *this ) );
   //Count how many of the visited nodes we are not connected to:
   int num = 0;
-  for(nit = _message.getVisitedNodes().begin();
-      nit != _message.getVisitedNodes().end();
-      nit++)
+  auto_ptr<NodeIterator> ni( visited->getNodeIterator() );
+  while( ni->moveNext() ) 
   {
       //If this node is not where we started or one of our neighbors,
       //increment the count.
-      if( (*nit != start) && (getEdge(start, *nit) == 0) )
+      Node* this_node = ni->current();
+      if( (this_node != start) && (getEdge(start, this_node) == 0) )
       {
         num++;
       }
@@ -106,23 +105,29 @@ Node* MessageBuiltNetwork::findPartnerFor(Node* start)
   if( num == 0) { return 0; }
   //Select one of the nodes we are not already connected to:
   rn = _rand.getInt(num-1);
-  nit = _message.getVisitedNodes().begin();
-  //If this is one of the nodes we should not connect to, go on
-  while( (*nit == start) || (getEdge(start, *nit) != 0) )
+  auto_ptr<NodeIterator> n2( visited->getNodeIterator() );
+  n2->moveNext();
+  //Move to the first node we are not already connected to:
+  Node* target = n2->current();
+  while( ( target == start ) || ( getEdge(start, target) != 0 ) )
   {
-    nit++;
+    n2->moveNext();
+    target = n2->current();
   }
+  //Now n2 points to the first okay node.
   //Select a random node:
   while( rn-- > 0)
   {
-    nit++;
+    n2->moveNext();
+    target = n2->current();
     //Skip all the nodes that we are connected to:
-    while( (*nit == start) || (getEdge(start, *nit) != 0) )
+    while( (target == start) || (getEdge(start, target) != 0) )
     {
-      nit++;
+      n2->moveNext();
+      target = n2->current();
     }
   }
-  return *nit;
+  return n2->current();
 }
 
 #if 0

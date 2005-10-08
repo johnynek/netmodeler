@@ -54,8 +54,9 @@ class WalkAndSitePercMessage : public SitePercMessage {
 	 * Start a message at the given node.
 	 * @param n the node to start at
 	 * @param aNet the network to visit
+	 * @return Network reached by this message
 	 */
-	void visit(Node* n, Network& aNet);
+	virtual Network* visit(Node* n, Network& aNet);
     protected:
 	Random& _rand;
 	AnycastMessage _ac_mes;

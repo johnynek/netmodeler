@@ -61,7 +61,7 @@ class RealContentNetwork : public Network {
 	 * @param content_set the set of contents to be inserted
 	 * @param target_nodes these nodes get the content from 'node'
 	 */
-	void insertContent(Node* node, std::set<ContentNode*> content_set, Network::NodePSet target_nodes);
+	void insertContent(Node* node, std::set<ContentNode*> content_set, NodeIterator* target_nodes);
        	/**
 	 * @param node the node that inserts the content.
 	 * @param content_set the set of contents to be inserted

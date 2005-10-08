@@ -29,11 +29,10 @@ SitePercMessage::SitePercMessage(Random& r,
 				       int ttl)
 : _rand(r), _prob(p), _ttl(ttl) {
 
-    forgetVisitedNodes();	
 }
 
 
-void SitePercMessage::visit(Node* n, Network& net)
+Network* SitePercMessage::visit(Node* n, Network& net)
 {
     Network::ConnectedNodePSet::const_iterator n_it;
 
@@ -42,7 +41,8 @@ void SitePercMessage::visit(Node* n, Network& net)
     Network::NodePSet::iterator a_it;
 
     to_visit[0].insert(n);
-    _visited_nodes.insert(n);
+    Network* new_net = net.newNetwork();
+    new_net->add(n);
     int this_distance;
     //We loop through at each TTL:
     tv_it = to_visit.begin();
@@ -52,23 +52,22 @@ void SitePercMessage::visit(Node* n, Network& net)
         //Here are all the nodes at this distance:
         for( a_it = tv_it->second.begin(); a_it != tv_it->second.end(); a_it++) {
 	  if( _rand.getBool(_prob) ) {
-            NodeIterator* ni = net.getNeighborIterator( *a_it );
-	    while( ni->moveNext() ) {
-              Node* this_neigh = ni->current();
-                if( _visited_nodes.find( this_neigh ) == _visited_nodes.end() ) {
+            auto_ptr<EdgeIterator> ei( net.getEdgeIterator( *a_it ) );
+	    while( ei->moveNext() ) {
+	      Edge* this_edge = ei->current();
+              Node* this_neigh = this_edge->getOtherNode( *a_it );
+	      if( !new_net->has( this_neigh ) ) {
                     //We have not seen this one yet.
                     to_visit[this_distance].insert( this_neigh );
-                    _visited_nodes.insert( this_neigh );
-                }
+                    new_net->add( this_neigh );
+              }
+	      new_net->add( this_edge );  
             }
-	    delete ni;
-	    ni = 0;
-	    //We must cross all neighbor edges except the one we came in on
-	    _crossed_edges += net.getDegree(*a_it) - 1;
 	  }//end of if-loop for _prob
         }
         to_visit.erase(tv_it);
         tv_it = to_visit.begin();
     }
+    return new_net;
 }
 

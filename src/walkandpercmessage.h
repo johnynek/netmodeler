@@ -47,9 +47,10 @@ class WalkAndPercMessage : public PercolationMessage {
 	 * @param p probability that each edge gets the message
 	 * @param walkttl the total depth from start node the walk will go
 	 * @param percttl the depth the percolation will go
+	 * @return a Network with all visited Node and Edge objects
 	 */
         WalkAndPercMessage(Random& r, double p, int walkttl, int percttl=-1);
-	void visit(Node*, Network& aNet);
+	virtual Network* visit(Node*, Network& aNet);
     protected:
 	Random& _rand;
 	AnycastMessage _ac_mes;

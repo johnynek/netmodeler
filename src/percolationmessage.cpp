@@ -29,7 +29,6 @@ PercolationMessage::PercolationMessage(Random& r,
 				       int ttl)
 : _rand(r), _prob(p), _ttl(ttl) {
 
-    forgetVisitedNodes();	
 }
 
 /**
@@ -38,7 +37,7 @@ PercolationMessage::PercolationMessage(Random& r,
  * the below function will be at most the size of the network
  */
 
-void PercolationMessage::visit(Node* n, Network& net) {
+Network* PercolationMessage::visit(Node* n, Network& net) {
 
     Network::ConnectedNodePSet::const_iterator n_it;
 
@@ -47,7 +46,8 @@ void PercolationMessage::visit(Node* n, Network& net) {
     Network::NodePSet::iterator a_it;
 
     to_visit[0].insert(n);
-    _visited_nodes.insert(n);
+    Network* new_net = net.newNetwork();
+    new_net->add( n );
     int this_distance;
     //We loop through at each TTL:
     tv_it = to_visit.begin();
@@ -56,21 +56,23 @@ void PercolationMessage::visit(Node* n, Network& net) {
         //Here are all the nodes at this distance:
         for( a_it = tv_it->second.begin(); a_it != tv_it->second.end(); a_it++) {
             //Now do each randomly:
-	    auto_ptr<NodeIterator> ni( net.getNeighborIterator(*a_it) );
-	    while( ni->moveNext() ) {
-		Node* neigh = ni->current();
+	    auto_ptr<EdgeIterator> ei( net.getEdgeIterator(*a_it) );
+	    while( ei->moveNext() ) {
+		Edge* edge = ei->current();
+		Node* neigh = edge->getOtherNode( *a_it );
                 if( _rand.getBool(_prob) ) {
-		  //We must cross exactly one edge to see if we visit this node
-		  _crossed_edges++;
-	          if(_visited_nodes.find( neigh ) == _visited_nodes.end()) {
+		  if( ! new_net->has( neigh ) ) { 
                     //We have not seen this one yet.
                     to_visit[this_distance].insert( neigh );
-                    _visited_nodes.insert( neigh );
+                    new_net->add( neigh );
                   }
+		  //We must cross exactly one edge to see if we visit this node
+		  new_net->add( edge );
 		}
             }
         }
         to_visit.erase(tv_it);
         tv_it = to_visit.begin();
     }
+    return new_net;
 }

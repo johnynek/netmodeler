@@ -44,46 +44,36 @@ const set<ContentNode*>& ContentNetwork::getContent() const {
     return _content_set;
 }
 
-const Network::NodePSet& ContentNetwork::getNodesHoldingContent(ContentNode* c) const {
-    map<ContentNode*,Network::NodePSet>::const_iterator c_it;
+const Network& ContentNetwork::getNodesHoldingContent(ContentNode* c) const {
+    map<ContentNode*,Network>::const_iterator c_it;
     c_it = _content_to_nodes.find(c);
     if( c_it != _content_to_nodes.end() ) {
+      
       return c_it->second;
     }
     else {
-      ///\todo This network needs "de-stl-izing"
-      return Network::_empty_nodeset;
+      return Network::_empty_net;
     }
 }
 
-void ContentNetwork::insertContent(Node* node, ContentNode* content, Message& amessage) {
+void ContentNetwork::insertContent(ContentNode* content, NodeIterator* ni) {
 
     _content_set.insert(content);
-    //The first thing we do is forget where this message has been:
-    amessage.forgetVisitedNodes();
-    amessage.visit(node, _my_net);
-    const Network::NodePSet& content_getters = amessage.getVisitedNodes();
-    Network::NodePSet::const_iterator n_it;
-    for(n_it = content_getters.begin(); n_it != content_getters.end(); n_it++) {
-        _content_map[*n_it].insert(content);
-	_content_to_nodes[content].insert( *n_it );
+    while( ni->moveNext() ) {
+      Node* this_node = ni->current();
+      _content_map[this_node].insert(content);
+      _content_to_nodes[content].add( this_node );
     }
-    
 }
 
-Network::NodePSet ContentNetwork::queryForContent(Node* node,
-		                                  ContentNode* content,
-						  Message& amessage) {
+Network* ContentNetwork::queryForContent(ContentNode* content, NodeIterator* ni) {
     //The first thing we do is forget where this message has been:
-    amessage.forgetVisitedNodes();
-    amessage.visit(node, _my_net);
-    const Network::NodePSet& content_searchers = amessage.getVisitedNodes();
-    Network::NodePSet::const_iterator n_it;
-    Network::NodePSet ret_val;
-    for(n_it = content_searchers.begin(); n_it != content_searchers.end(); n_it++) {
-        if( _content_map[*n_it].find(content) != _content_map[*n_it].end()) {
-            ret_val.insert( *n_it );
-	}
+    Network* ret_val = new Network();
+    while( ni->moveNext() ) {
+      Node* this_node = ni->current();
+      if( _content_map[this_node].find(content) != _content_map[this_node].end()) {
+        ret_val->add( this_node );
+      }
     }
     return ret_val;
 }

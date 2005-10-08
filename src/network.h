@@ -509,6 +509,7 @@ class Network {
 	     */
 	    static const NodePSet _empty_nodeset;
 	    static const EdgeSet _empty_edgeset;
+	    static const Network _empty_net;
 	    /**
 	     * reference counting for Nodes and Edges.  This is done
 	     * when we copy stuff around.

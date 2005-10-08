@@ -46,8 +46,13 @@ class AnycastMessage : public Message {
 	 * @param ttl max number of steps taken.  copies inherit this value.
 	 */
         AnycastMessage(Random& r, int max_routes=1, int ttl = -1);
-	//This is a recursive function
-        void visit(Node*, Network& aNet); 
+	/**
+	 * Create a new network containing the nodes and edges
+	 * reached by visiting the given network
+	 * @param start the Node to start at
+	 * @param aNet the Network to visit
+	 */
+        virtual Network* visit(Node* start, Network& aNet); 
 	
     protected:
 	Random& _rand;
