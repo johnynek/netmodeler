@@ -45,7 +45,6 @@ Network* AmnesiacMessage::visit(Node* n, Network& _my_net) {
    
    to_visit.insert( pair<Node*,int>(n,_ttl) );
    set< pair<Node*,int> >::iterator j = to_visit.begin();
-   Network::ConnectedNodePSet::const_iterator i;
    while( j != to_visit.end() ) {
        if( j->second > 0 ) {
            //We don't forward messages with 0 TTL and we never forward TTL == -1

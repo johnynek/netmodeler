@@ -30,8 +30,6 @@ BroadcastMessage::BroadcastMessage(int ttl) : _ttl(ttl)
 
 Network* BroadcastMessage::visit(Node* n, Network& net)
 {
-    Network::ConnectedNodePSet::const_iterator n_it;
-
     map<int, Network::NodePSet > to_visit;
     map<int, Network::NodePSet >::iterator tv_it;
     Network::NodePSet::iterator a_it;

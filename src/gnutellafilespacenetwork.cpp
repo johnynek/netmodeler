@@ -59,7 +59,6 @@ map<double,int> GnutellaFileSpaceNetwork::getContentWeights() const {
   map<double,int> weights;
   const NodePSet& content = getNodes(content_type);
   NodePSet::const_iterator it;
-  ConnectedNodePSet::const_iterator nit;
   map<int,NodePSet>::const_iterator mit;
   int node_neighbors, query_neighbors;
   

@@ -29,23 +29,27 @@ int main(int argc, char* argv[]) {
 	//Make a network:
 	Ran1Random my_rand, my_rand2(-100), my_rand3(-1000);
 	Network my_net(cin);
-
+        NodeIntStats ns(true);
+	ns.collect(&my_net, &Network::getDegree);
+	ns.collectByEdge(&my_net, &Network::getDegree);
+	double h1, h2, h3;
+	ns.getEdgeEntropy(h1,h2,h3);
         cout << "#loaded network" << endl;	
-	cout << "#assortativity: " << my_net.getAssortativity() << endl;
+	cout << "#assortativity: " << ns.getEdgeCorrelation() << endl;
 	cout << "#cluster coeff: " << my_net.getClusterCoefficient() << endl;
 	cout << "#transitivity: " << my_net.getTransitivity() << endl;
 	cout << "#nodes: " << my_net.getNodeSize() << endl;
 	cout	     << "#edges: " << my_net.getEdgeSize() << endl;
-	cout	     << "#<k>: " << my_net.getDegreeMoment(1) << endl;
-	cout	     << "#<k^2>: " << my_net.getDegreeMoment(2) << endl;
-	cout	     << "#H(degs): " << my_net.getDegreeEntropy() << endl;
-	cout	     << "#H(e_i): " << my_net.getEdgeEntropy().first << endl;
-	cout	     << "#H(e_ij): " << my_net.getEdgeEntropy().second << endl;
-	cout	     << "#EdgeMI: " << my_net.getEdgeMutualInfo() << endl;
+	cout	     << "#<k>: " << ns.getAverage() << endl;
+	cout	     << "#<k^2>: " << ns.getMoment(2.0) << endl;
+	cout	     << "#H(degs): " << ns.getEntropy() << endl;
+	cout	     << "#H(e_i): " << h1 << endl;
+	cout	     << "#H(e_ij): " << h3 << endl;
+	cout	     << "#EdgeMI: " << ns.getEdgeMutualInfo() << endl;
 	
 	//Print out the degree distribution:
-	map<int, int> deg_dist = my_net.getDegreeDist();
-        map<int, int>::iterator deg_it = deg_dist.begin();
+	const map<int, int>& deg_dist = ns.getDist();
+        map<int, int>::const_iterator deg_it = deg_dist.begin();
 	cout << "#printing out degree distribution" << endl;
 	for(;deg_it != deg_dist.end(); deg_it++ ) {
           cout << deg_it->first << " " << deg_it->second << endl;

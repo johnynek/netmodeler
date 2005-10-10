@@ -53,7 +53,6 @@ Node* NoisyStarDNet::findPartnerFor(Node* s)
   }
   //else:
   //we connect to tmp's neighbor of greatest degree:
-  ConnectedNodePSet::const_iterator c_it;
   int max_degree = getDegree(tmp);
   Node* max_node = tmp;
   //Hack to randomly connect to a neighbor:

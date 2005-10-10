@@ -33,6 +33,15 @@ PercolationMapper::PercolationMapper(Random& rand,
 
 }
 
+double PercolationMapper::getExpectedThreshold(const Network* net)
+{
+  NodeIntStats ns;
+  ns.collect(net, &Network::getDegree);
+  double k1 = ns.getAverage();
+  double k2 = ns.getMoment2();
+  return (k1/(k2 - k1));
+}
+
 void PercolationMapper::map(Network* net)
 {
   Network::NodePSet ndel_set;

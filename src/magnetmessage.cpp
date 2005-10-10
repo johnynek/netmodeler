@@ -34,7 +34,6 @@ Network* MagnetMessage::visit(Node* n, Network& net)
 {
     map<int, Network::NodePSet > to_visit;
     map<int, Network::NodePSet >::iterator tv_it;
-    Network::ConnectedNodePSet::iterator n_it;
     Network::NodePSet::iterator a_it;
     int this_distance, routes, rand_node;
 

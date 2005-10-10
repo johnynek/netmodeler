@@ -102,9 +102,7 @@ int main(int argc, char* argv[])
     for(int k = 0; k < count; k++) {
       Network* net = nf->create();
       //Get the percolation threshold:
-      double k1 = net->getDegreeMoment(1);
-      double k2 = net->getDegreeMoment(2);
-      double q_c = k1/(k2 - k1);
+      double q_c = PercolationMapper::getExpectedThreshold(net);
       double q = q_c * (1.0 + eps);
       INetworkMapper* bp = new PercolationMapper(ran, q);
    

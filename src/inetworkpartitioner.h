@@ -25,10 +25,20 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <set>
 #include <map>
 #include <network.h>
-#include <netfunctors.h>
 
 namespace Starsky {
 
+/**
+ * @todo remove this and the set<Network*> and replace it with
+ * a Network of Networks.
+ * This is so we can sort set<Network*> as a function of size
+ */
+struct networkptr_gt : public std::binary_function<Network*, Network*, bool> {
+  bool operator()(Network* x, Network* y) {
+    return !(*x < *y);
+  }
+};
+	
    /**
     * This function deletes the result of a previous
     * partition.  This should be called when the

@@ -106,7 +106,7 @@ bool Network::add(Edge* edge) {
     return success;
 }
 
-void Network::add(Network* net) {
+void Network::add(const Network* net) {
   auto_ptr<NodeIterator> ni( net->getNodeIterator() );
   while( ni->moveNext() ) { add( ni->current() ); }
   auto_ptr<EdgeIterator> ei( net->getEdgeIterator() );
@@ -162,6 +162,35 @@ void Network::clear() {
       decrementEdgeRefCount( ei->current() );
     }
     _node_to_edges.clear();
+}
+
+void Network::addJoiningEdgesFrom(const Network* net)
+{
+  auto_ptr<NodeIterator> ni( getNodeIterator() );
+  while(ni->moveNext()) {
+    Node* this_node = ni->current();
+    //Iterate over all the edges this node has in
+    //the other network and and them if both ends
+    //are in this network:
+    EdgeIterator* eip = net->getEdgeIterator(this_node); 
+    if( eip != 0 ) {
+      //This node is in the network
+      auto_ptr<EdgeIterator> ei( eip );
+      while( ei->moveNext() ) {
+        Edge* this_edge = ei->current();
+        Node* other = this_edge->getOtherNode(this_node);
+        if( has(other) ) {
+          add( this_edge );
+        }
+        else {
+          //The other end is not in this network.
+        }
+      }
+    }
+    else {
+      //This node is not in net.
+    }
+  }
 }
 
 void Network::clearEdges() {
@@ -222,61 +251,6 @@ int Network::decrementNodeRefCount(Node* node) {
     
 }
 
-double Network::getAssortativity() const {
-
-  /*
-   * We need to use doubles because we can easily have sums
-   * which exceed the maximum size of an integer.
-   */
-	
-  //int j,k,sum_j, sum_k, sum_jk, sum_j2, sum_k2;
-  double j,k,sum_j, sum_k, sum_jk, sum_j2, sum_k2;
-  sum_j = 0;
-  sum_k = 0;
-  sum_jk = 0;
-  sum_j2 = 0;
-  sum_k2 = 0;
-  //Add the neighbors:
-  DEBUG_MSG("About to get EdgeIterator"); 
-  auto_ptr<EdgeIterator> ei( getEdgeIterator() );
-  while( ei->moveNext() ) {
-    DEBUG_MSG("Got EdgeIterator, about to get current");
-    Edge* this_edge = ei->current();
-    //We need "remaining degree" for this calculation
-    j = (double)(getDegree( (this_edge)->first ) - 1);
-    k = (double)(getDegree( (this_edge)->second ) - 1);
-    //DEBUG:
-    DEBUG_MSG("j: " << j << " k: " << k);
-    sum_j += j;
-    sum_k += k;
-    sum_jk += j * k;
-    sum_j2 += j * j;
-    sum_k2 += k * k;
-  }
-  double m_inv = 1.0 / (double)(getEdgeSize());
-  double r, t;
-
-  /*
-   * r = frac{M^{-1}(sum_i j_i k_i) - \left(M^{-1}sum_i frac{j_i + k_i}{2}\right)^{2}}
-   *          {M^{-1}sum_ifrac{j_i^2 k_i^2}{2} - \left(M^{-1}sum_i frac{j_i + k_i}{2}\right)^2}
-   */
-  t = m_inv * 0.5 * (double)(sum_j + sum_k);
-  r = (m_inv * (double)(sum_jk) - t*t) / (m_inv * 0.5 * (double)(sum_j2 + sum_k2) - t*t);
-  /*
-  //DEBUG:
-  cerr << "sum_j: " << sum_j << endl
-       << "sum_k: " << sum_k << endl
-       << "sum_jk: " << sum_jk << endl
-       << "sum_j2: " << sum_j2 << endl
-       << "sum_k2: " << sum_k2 << endl
-       << "m_inv: " << m_inv << endl
-       << "edge_set.size(): " << edge_set.size() << endl
-       << "t: " << t << endl
-       << "r: " << r << endl;
-       */
-  return r;
-}
-
 int Network::getAssociatedNumber(Node* aNode) const {
 
     /**
@@ -284,22 +258,6 @@ int Network::getAssociatedNumber(Node* aNode) const {
      * in networks with more than one component
      */
     return getDistance(aNode);
-}
-
-map<int, int> Network::getAssociatedNumberDist() const {
-    int this_an;
-    map<int, int> ret_val;
-   
-    auto_ptr<NodeIterator> ni( getNodeIterator() );
-    while( ni->moveNext() ) {
-      this_an = getAssociatedNumber( ni->current() );
-      ret_val[this_an] = ret_val[this_an] + 1;
-    }
-    return ret_val;
-}
-
-double Network::getAverageDegree(NodeIterator* nodes) const {
-  return getDegreeMoment(1,nodes);
 }
 
 double Network::getAverageDegree() const {
@@ -389,40 +347,6 @@ double Network::getCCStdErr() const {
   return sqrt( (n_count - 1.0) * sigma2/n_count );
 }
 
-double Network::getDegreeMoment(int m) const
-{
-  auto_ptr<NodeIterator> ni( getNodeIterator() );
-  return getDegreeMoment(m, ni.get() );
-}
-
-double Network::getDegreeMoment(int m, NodeIterator* nodes) const
-{
-    double ave = 0.0;
-    int tot = 0;
-    if( m == 1) {
-      while( nodes->moveNext() ) {
-          Node* this_node = nodes->current();
-          ave += (double)getDegree( this_node );
-          tot++;
-      }
-    }
-    else if( m == 2) {
-      while( nodes->moveNext() ) {
-          Node* this_node = nodes->current();
-          ave += (double)(getDegree( this_node ) * getDegree( this_node ));
-          tot++;
-      }	
-    }
-    else {
-      while( nodes->moveNext() ) {
-          Node* this_node = nodes->current();
-          ave += pow( (double)getDegree( this_node ), m);
-          tot++;
-      }
-    }
-    return ave / (double)( tot );
-}
-
 NodeIterator* Network::getNeighborIterator(Node* n) const {
   map<Node*, EdgeSet>::const_iterator neit = _node_to_edges.find(n);
   if( neit == _node_to_edges.end() ) {
@@ -503,42 +427,6 @@ int Network::getDegree(Node* node) const {
     else {
       return 0;
     }
-}
-
-map<int, int> Network::getDegreeDist(NodeIterator* nodes) const {
-
-  map<int, int> deg_dist;
-  int deg = 0;
-  
-  while( nodes->moveNext() ) {
-    Node* this_node = nodes->current();
-    deg = getDegree( this_node );
-    if( deg_dist.count(deg) == 1 ) {
-      deg_dist[deg] = deg_dist[deg] + 1;
-    }
-    else {
-      deg_dist[deg] = 1;
-    }
-  }
-  return deg_dist;
-}
-
-map<int, int> Network::getDegreeDist() const {
-  auto_ptr<NodeIterator> ni( getNodeIterator() );
-  return getDegreeDist( ni.get() );
-}
-
-double Network::getDegreeEntropy() const {
-	
-  map<int, int> deg_dist = getDegreeDist();
-  map<int, int>::const_iterator deg_it;
-  double entropy = 0;
-  for(deg_it = deg_dist.begin(); deg_it != deg_dist.end(); deg_it++) {
-    entropy -= deg_it->second * log( (double)deg_it->second );
-  }
-  entropy /= getNodeSize();
-  entropy += log( (double)getNodeSize() );
-  return entropy;
 }
 
 int Network::getDistancesFrom(Node* start,
@@ -899,72 +787,6 @@ EdgeIterator* Network::getEdgeIterator(Node* n) const
   return ei;
 }
 
-map< pair<int,int>, int > Network::getEdgeDist() const {
-  map<pair<int,int>, int > result;
-  int d1, d2;
-  auto_ptr<EdgeIterator> ei( getEdgeIterator() );
-  while( ei->moveNext() ) {
-     Edge* this_edge = ei->current();
-     d1 = getDegree( (this_edge)->first );
-     d2 = getDegree( (this_edge)->second );
-     if( result.count( pair<int,int>(d1,d2) ) == 1) {
-      result[ pair<int,int>(d1,d2) ] += 1;
-     }
-     else {
-      result[ pair<int,int>(d1,d2) ] = 1;
-     }
-     if( result.count( pair<int,int>(d2,d1) ) == 1) {
-      result[ pair<int,int>(d2,d1) ] += 1;
-     }
-     else {
-      result[ pair<int,int>(d2,d1) ] = 1;
-     }
-  }
-  return result;
-}
-
-pair<double,double> Network::getEdgeEntropy() const {
-
-  map<pair<int, int>,int > eij_count = getEdgeDist();
-  map<pair<int,int>, int >::const_iterator it1;
-  
-  //Get the e_k probability distribution:
-  map<int, int> edge_degs;
-  for(it1 = eij_count.begin(); it1 != eij_count.end(); it1++) {
-    edge_degs[it1->first.first] += it1->second;
-  }
-  
-  map<int, int>::const_iterator it2;
-  //Here is H(e_k):
-  double h_ek = 0.0;
-  for( it2 = edge_degs.begin(); it2 != edge_degs.end(); it2++) {
-    if( it2->second > 0) {
-      h_ek -= it2->second * log( (double)it2->second );
-    }
-  }
-  h_ek /= (2 * getEdgeSize());
-  h_ek += log( (double)2 * getEdgeSize() );
- 
-  //Here is H(e_ij):
-  double h_eij = 0.0;
-  for(it1 = eij_count.begin(); it1 != eij_count.end(); it1++) {
-      if( it1->second > 0 ) {
-        h_eij -= it1->second * log( (double) it1->second );
-      }
-  }
-  h_eij /= (2 * getEdgeSize());
-  h_eij += log( (double)2 * getEdgeSize() );
-
-  return pair<double,double>(h_ek, h_eij);
-}
-
-double Network::getEdgeMutualInfo() const {
-  pair<double, double> entropies = getEdgeEntropy();
-  double h_i = entropies.first;
-  double h_ij = entropies.second;
-  return ( 2 * h_i - h_ij );
-}
-
 Edge* Network::getEdgePtr(const Edge& edge) const {
     
     //Find the ptr of the matching edge:
@@ -1001,17 +823,29 @@ int Network::getEdgeSize() const {
 
 double Network::getExpectedTransitivity() const {
   
-  double k2, k, exp_cc;
+  double exp_cc;
   int n = getNodeSize();
   double edges = (double)getEdgeSize();
-  map<int, int> degdist = getDegreeDist();
-  map<int, int> degdist2 = degdist;
-  map<int, int>::iterator degit,degit2;
+  /*
+   * First we need to compute the degree distribution
+   */
+  double k = 0.0;
+  map<int, int> degdist;
+  auto_ptr<NodeIterator> ni( getNodeIterator() );
+  while( ni->moveNext() ) {
+    int deg = getDegree( ni->current() );
+    degdist[deg] = degdist[deg] + 1;
+    k += (double)deg; 
+  }
+  k = k/(double)getNodeSize();
+  /*
+   * Now we have the degree distribution
+   */
+  map<int, int>::const_iterator degit,degit2;
   exp_cc = 0.0;
   double coeff;
   double deg,deg2,dcount,dcount2;
-  k = getDegreeMoment(1);
-  for(degit2=degdist2.begin(); degit2!=degdist2.end(); degit2++) {
+  for(degit2=degdist.begin(); degit2!=degdist.end(); degit2++) {
     for(degit=degdist.begin(); degit!=degdist.end(); degit++) {
       deg = (double)degit->first - 1.0; //Excess degree
       dcount = (double)degit->second/((double)n) * (deg + 1.0)/k;
@@ -1025,27 +859,6 @@ double Network::getExpectedTransitivity() const {
   return exp_cc;
 }
 
-
-Network* Network::getNeighborhood(Node* n) const {
-  Network* net = newNetwork();
-  auto_ptr<EdgeIterator> ei( getEdgeIterator(n) );
-  while( ei->moveNext() ) {
-    Edge* ea = ei->current();
-    net->add( ea );
-    auto_ptr<EdgeIterator> ei2( ei->clone() );
-    while( ei2->moveNext() ) {
-      Edge* eb = ei->current();
-      Node* a = ea->getOtherNode( n );
-      Node* b = eb->getOtherNode( n );
-      //See if there is an edge between these two:
-      Edge* ec = getEdge( a, b );
-      if( ec != 0 ) {
-        net->add( ec );
-      }
-    }
-  }
-  return net;
-}
 
 #ifndef HIDE_STL
 
@@ -1078,31 +891,6 @@ int Network::getNodeSize() const {
   return _node_to_edges.size();
 }
 
-Network* Network::getSubNet(NodeIterator* nodes) const {
-  //Return a Network with just the nodes given
-  Network* out = newNetwork();
-  //First add all the nodes:
-  while( nodes->moveNext() ) {
-    Node* this_node = nodes->current();
-    out->add( this_node );
-  }
-  //Now we have all the nodes, add the edges we want:
-  auto_ptr<NodeIterator> ni( out->getNodeIterator() );
-  while( ni->moveNext() ) {
-    Node* this_node = ni->current();
-    auto_ptr<EdgeIterator> ei( getEdgeIterator(this_node) );
-    while( ei->moveNext() ) {
-      Edge* this_edge = ei->current();
-      Node* other = this_edge->getOtherNode(this_node);
-      if( out->has( other ) ) {
-        //Both ends are in the network, add the edge:
-        out->add( this_edge );
-      }
-    }
-  }
-  return out;
-}
-
 double Network::getTransitivity() const {
   int triangles, wedges;
   getTrianglesWedges(triangles,wedges);
@@ -1117,8 +905,10 @@ int Network::getTriangles(Node* n) const {
    * are distance 1 or less from n, so get the neighborhood
    * and remove n
    */
-  DEBUG_MSG("About to getNeighborhood");
-  auto_ptr<Network> hood( getNeighborhood(n) );
+  auto_ptr<Network> hood( getEdges(n) );
+  hood->addJoiningEdgesFrom( this );
+  //Remove the node in question, what remains
+  //is the edges between the neighbors:
   hood->remove(n);
   return hood->getEdgeSize();
 }
@@ -1224,20 +1014,11 @@ void Network::getTrianglesWedges(int& triangles, int& wedges) const {
   wedges /= 2;
 }
 
-int Network::getWedgeCount() const {
-  map<int, int> deg_dist = getDegreeDist();
-  /*
-   * W = n <k(k-1)/2> = n sum{ p_k k(k-1)/2 }
-   */
-  map<int,int>::const_iterator dit;
-  int wedges = 0;
-  for(dit = deg_dist.begin(); dit != deg_dist.end(); dit++) {
-    int k, n_k;
-    k = dit->first;
-    n_k = dit->second;
-    wedges += n_k * (k * (k - 1))/2;
-  }
-  return wedges;
+int Network::getWedges(Node* n) const
+{
+  int w = getDegree(n);
+  w = w * (w - 1)/2;
+  return w;
 }
 
 bool Network::has(const Edge& edge) const {
@@ -1700,8 +1481,6 @@ void Network::printToGDL(ostream& out) const {
    */
 	
   NodePSet::const_iterator i;
-  ConnectedNodePSet::const_iterator j;
-  map< Node*, ConnectedNodePSet >::const_iterator k;
   string label;
   int node_count = 0;
     

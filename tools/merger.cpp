@@ -69,12 +69,14 @@ int main(int argc, char* argv[])
     p = (2.0)/((double)n);
     MergeNetwork* net = new MergeNetwork(RandomNetwork(n, p, r), r, cons);
     net->incrementTime( (int)pow(n,1.5) );
-    map<int, int> deg_dist = net->getDegreeDist();
+    NodeIntStats ns(true);
+    ns.collect(net, &Network::getDegree);
+    const map<int, int>& deg_dist = ns.getDist();
     map<int, int>::const_reverse_iterator rit;
     rit = deg_dist.rbegin();
     int k_max = rit->first;
-    double k_ave = net->getDegreeMoment(1);
-    double k2_ave = net->getDegreeMoment(2);
+    double k_ave = ns.getAverage();
+    double k2_ave = ns.getMoment2();
     cout << net->getNodeSize() << "\t"
 	 << k_ave << "\t"
 	 << k2_ave << "\t"

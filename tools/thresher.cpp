@@ -238,17 +238,18 @@ int main(int argc, char* argv[])
   DEBUG("Made net");  
     cout << "#loaded network" << endl;	
     DEBUG("Made net");  
-    cout << "#assortativity: " << net->getAssortativity() << endl;
+    NodeIntStats ns(true);
+    ns.collect(net, &Network::getDegree);
+    ns.collectByEdge(net, &Network::getDegree);
+    cout << "#assortativity: " << ns.getEdgeCorrelation() << endl;
     cout << "#cluster coeff: " << net->getClusterCoefficient() << endl;
     cout << "#transitivity: " << net->getTransitivity() << endl;
     cout << "#nodes: " << net->getNodeSize() << endl;
     cout << "#edges: " << net->getEdgeSize() << endl;
-    cout     << "#<k>: " << net->getDegreeMoment(1) << endl;
-    cout     << "#<k^2>: " << net->getDegreeMoment(2) << endl;
-    cout     << "#H(degs): " << net->getDegreeEntropy() << endl;
-    cout     << "#H(e_i): " << net->getEdgeEntropy().first << endl;
-    cout     << "#H(e_ij): " << net->getEdgeEntropy().second << endl;
-    cout     << "#EdgeMI: " << net->getEdgeMutualInfo() << endl;
+    cout     << "#<k>: " << ns.getAverage() << endl;
+    cout     << "#<k^2>: " << ns.getMoment2() << endl;
+    cout     << "#H(degs): " << ns.getEntropy() << endl;
+    cout     << "#EdgeMI: " << ns.getEdgeMutualInfo() << endl;
     //Here is the expected threshold:
     double exp_th = PercolationMapper::getExpectedThreshold(net);
     cout << "#q_c: " << exp_th << endl;

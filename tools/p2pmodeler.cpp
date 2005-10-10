@@ -87,10 +87,12 @@ int main(int argc, char* argv[]) {
      }
      cout << endl;
      //use the biggest connected component;
+     NodeIntStats ns;
+     ns.collect(net, &Network::getDegree);
      cout << "#nodes: " << net->getNodeSize() << endl 
           << "#edges: " << net->getEdgeSize() << endl
-	  << "#<k>: " << net->getDegreeMoment(1) << endl
-	  << "#<k^2>: " << net->getDegreeMoment(2) << endl;
+	  << "#<k>: " << ns.getAverage() << endl
+	  << "#<k^2>: " << ns.getMoment2() << endl;
      cout << "#ttl p hit_rate edges_crossed nodes_reached" << endl;
      //Put the nodes into a vector so we can randomly select them easier:
      node_vector.clear();

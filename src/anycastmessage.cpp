@@ -40,8 +40,6 @@ Network* AnycastMessage::visit(Node* n, Network& net) {
 
     map<int, Network::NodePSet > to_visit;
     map<int, Network::NodePSet >::iterator tv_it;
-    Network::ConnectedNodePSet neighbors;
-    Network::ConnectedNodePSet::iterator n_it;
     Network::NodePSet::iterator a_it;
     int this_distance, routes, rand_node;
     Network* new_net = net.newNetwork();

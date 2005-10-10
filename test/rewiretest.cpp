@@ -26,18 +26,19 @@ using namespace std;
 
 void printInfo(Network& my_net)
 {
+        NodeIntStats ns(true);
+	ns.collect(&my_net, &Network::getDegree);
+	ns.collectByEdge(&my_net, &Network::getDegree);
         cout << "#loaded network" << endl;
-        cout << "#assortativity: " << my_net.getAssortativity() << endl
+        cout << "#assortativity: " << ns.getEdgeCorrelation() << endl
              << "#cluster coeff: " << my_net.getClusterCoefficient() << endl
              << "#transitivity: " << my_net.getTransitivity() << endl
              << "#nodes: " << my_net.getNodeSize() << endl
              << "#edges: " << my_net.getEdgeSize() << endl
-             << "#<k>: " << my_net.getDegreeMoment(1) << endl
-             << "#<k^2>: " << my_net.getDegreeMoment(2) << endl
-             << "#H(degs): " << my_net.getDegreeEntropy() << endl
-             << "#H(e_i): " << my_net.getEdgeEntropy().first << endl
-             << "#H(e_ij): " << my_net.getEdgeEntropy().second << endl
-             << "#EdgeMI: " << my_net.getEdgeMutualInfo() << endl;
+             << "#<k>: " << ns.getAverage() << endl
+             << "#<k^2>: " << ns.getMoment2() << endl
+             << "#H(degs): " << ns.getEntropy() << endl
+             << "#EdgeMI: " << ns.getEdgeMutualInfo() << endl;
 }
 
 int main(int argc, char* argv[])

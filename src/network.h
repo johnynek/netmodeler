@@ -86,12 +86,8 @@ class Network {
    */
 	///only to make life easy
         typedef std::set<Node*> NodePSet;	
-        //typedef std::multiset<Node*> ConnectedNodePSet;
         //typedef std::multiset<Edge> EdgeSet;
 	//The below makes sure that each edge appears only once
-	///only to make life easy
-	typedef std::set<Node*> ConnectedNodePSet;
-	///only to make life easy
 	typedef std::set<Edge*> EdgeSet;
 	
 	/**
@@ -111,7 +107,7 @@ class Network {
 	/**
 	 * Add all the nodes and edges of a given network to this one
 	 */
-	virtual void add(Network* n);
+	virtual void add(const Network* n);
 	/**
 	 * @return false if the Node* is already in the network, else true
 	 */
@@ -121,6 +117,14 @@ class Network {
 	 */
 	virtual void add(INetworkMonitor* nm);
 	/**
+	 * Add edges *BUT NOT NODES* from the given network.
+	 * This means, we add all the edges from the given
+	 * network that go between the nodes already present
+	 * in this network
+	 * @param net the Network to add edges from
+	 */
+	virtual void addJoiningEdgesFrom(const Network* net);
+	/**
 	 * Empties the network and deletes all the Node*
 	 */
 	virtual void clear();
@@ -129,48 +133,19 @@ class Network {
 	 * Removes all edges from the network, but leaves the nodes
 	 */
 	virtual void clearEdges();
-#ifndef HIDE_STL
 	/**
-	 * Use STL algorithm for_each on all the nodes
-	 */
-	template <class T>
-	T forEachNode(T fun)
-	{
-          return for_each(node_set.begin(), node_set.end(), fun);
-        }
-	/**
-	 * Use STL algorithm for_each on all the edges 
-	 */
-	template <class T>
-	T forEachEdge(T fun)
-	{
-          return for_each(edge_set.begin(), edge_set.end(), fun);
-        }
-#endif
-        /**
-	 * This measures the correlation of degrees at either ends of edges.
-	 * @see cond-mat/0205405
-	 * @return the assortativity of the network (1.0 to -1.0)
-	 */
-	double getAssortativity() const;
-	/**
+	 * This is identical to Network::getDistance(aNode);
 	 * @param aNode the node to compute the Associated number of.
 	 * @return maximum distance of from aNode to any other Node in the network. (-1 == infinity)
 	 */
 	int getAssociatedNumber(Node* aNode) const;
 	/**
-	 * @returns number of nodes at each associated number for all valid values in the network
-	 */
-	std::map<int, int> getAssociatedNumberDist() const;
-	/**
+	 * This is a special statistic in that in can be obtained
+	 * from 2E/N, so we leave this in since this is O(1),
+	 * whereas using NodeIntStats would be O(N)
 	 * @return average degree of the all nodes in the network
 	 */
 	double getAverageDegree() const;
-	/**
-	 * @param nodes a subset of nodes to consider
-	 * @return the average over this subset
-	 */
-	double getAverageDegree(NodeIterator* nodes) const;
 	/**
 	 * @param bin_count the number of evenly spaced bins
 	 * @return a histogram evenly spaced over clustering coefficients
@@ -202,33 +177,6 @@ class Network {
 	 * @return degree of a given node
 	 */
 	int getDegree(Node* node) const;
-	/**
-	 * @return for each degree, the number of nodes which have that degree
-	 */
-	std::map<int, int> getDegreeDist() const;
-	/**
-	 * @param nodes the set of nodes to look at
-	 * @return for each degree, the number of nodes which have that degree
-	 */
-	std::map<int, int> getDegreeDist(NodeIterator* nodes) const;
-
-	/**
-	 * @return the entropy of the degree distribution
-	 */
-	double getDegreeEntropy() const;
-
-	/**
-	 * @param m moment we are computing
-	 * @param nodes set of nodes we are looking at the moment of
-	 * @return <k^m> for the set of node_set
-	 */
-        double getDegreeMoment(int m, NodeIterator* nodes) const;
-	/**
-	 * @param m moment we are computing
-	 * @return <k^m> for the set of node_set
-	 */
-        double getDegreeMoment(int m) const;
-
 	/**
 	 * This function is the underlying function for all the
 	 * distance functions.  It does a breadth first search,
@@ -313,23 +261,6 @@ class Network {
 	 * @return an iterator to all edges connected to a given node
 	 */
 	virtual EdgeIterator* getEdgeIterator(Node* n) const;
-	/**
-	 * @return a map such that result[pair<int,int>(i,j)] = number of edges which
-	 * go from degree i to degree j plus the number that go from j to i
-	 */
-	virtual std::map< std::pair<int,int>,  int > getEdgeDist() const;
-	
-	/**
-	 * @return a pair with the first being entropy of degree of
-	 * one side of a node.  the second being the entropy of both
-	 * sides of the node.
-	 */
-	virtual std::pair<double, double> getEdgeEntropy() const;
-	/**
-	 * @return how much mutual information the degree of a node at one
-	 * end of an edge has about another
-	 */
-        virtual double getEdgeMutualInfo() const;
 	
 	/**
 	 * @param edge The edge to check for a ptr to it in this network
@@ -341,8 +272,10 @@ class Network {
 	 */
 	int getEdgeSize() const;
 	/**
-	 * Get the expected transitivity in the random model,
-	 * given the degree distribution
+	 * Get the expected transitivity if the current graph
+	 * were a random graph (same degree distribution).
+	 *
+	 * @return the expected transitivity of the graph
 	 */
 	virtual double getExpectedTransitivity() const;
 	/**
@@ -354,12 +287,6 @@ class Network {
          * which are neighbors of the given node, and no edges
          */
         virtual Network* getNeighbors(Node* node) const;
-        /**
-         * Get the neighborhood of a node, all nodes, and edges between
-         * those nodes.
-         * This includes the node argument:
-         */
-        virtual Network* getNeighborhood(Node* node) const;
 
 #ifndef HIDE_STL
 	/**
@@ -375,15 +302,6 @@ class Network {
 	 * @return the number of nodes
 	 */
 	int getNodeSize() const;
-	/**
-	 * Get a subgraph of this graph using only the given nodes.
-	 * The edges in the returned graph are all the edges
-	 * that exist between the given nodes
-	 * The caller must delete the returned network when done.
-	 * @param nodes the nodes for which to build the subgraph
-	 * @return the Network which is the subgraph
-	 */
-	virtual Network* getSubNet(NodeIterator* nodes) const;
 	/**
 	 * This is an alternative definition of clustering
 	 * for the entire graph.  It is:
@@ -407,11 +325,10 @@ class Network {
 	 */
 	virtual void getTrianglesWedges(int& triangles, int& wedges) const;
 	/**
-	 * Return the number of Wedges in the network.
-	 * A wedge is a pair of edges that share exactly
-	 * one node
+	 * Useful for calculating transitivity, which is Triangles/Wedges
+	 * @return the number of wedges at this node k(k-1)/2
 	 */
-	virtual int getWedgeCount() const;
+	virtual int getWedges(Node* n) const;
 	/**
 	 * @return true if the network has an equivalent edge
 	 */
@@ -427,7 +344,7 @@ class Network {
 	/**
 	 * @return true if this node is in the network
 	 */
-	bool has(Node* node) const;
+	virtual bool has(Node* node) const;
 	/**
 	 * @return a new network of the same type as the one called on
 	 */

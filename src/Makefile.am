@@ -19,6 +19,7 @@ cache.cpp \
 callawaynetwork.cpp \
 callawaynetwork.h \
 constdrv.h \
+containernode.h \
 contentnetwork.cpp \
 contentnetwork.h \
 contentnode.h \
@@ -92,6 +93,7 @@ node.h \
 node.cpp \
 nodefactory.h nodefactory.cpp \
 nodeiterator.h \
+nodeintstats.h nodeintstats.cpp \
 noisystardnet.h \
 noisystardnet.cpp \
 npartitenetwork.cpp  npartitenetwork.h \

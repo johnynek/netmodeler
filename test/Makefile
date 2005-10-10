@@ -1,4 +1,4 @@
-PROGS = functest rewiretest partdisttest makenet
+PROGS = rewiretest partdisttest makenet stattest
 NMDIR = ../src
 LIBNM = $(NMDIR)/libnetmod.a
 

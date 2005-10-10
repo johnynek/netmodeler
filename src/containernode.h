@@ -19,47 +19,45 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef starsky__percolationmapper_h
-#define starsky__percolationmapper_h
+#ifndef starsky__containernode_h
+#define starsky__containernode_h
 
-#include <network.h>
-#include <random.h>
-#include <inetworkmapper.h>
-#include <nodeintstats.h>
-#include <memory>
+#include <node.h>
 
 namespace Starsky {
 
-class PercolationMapper : public INetworkMapper {
+/**
+ * Templated class which holds pointers to other objects.
+ * This allows us to put anything in a Network and use
+ * it as a general container type, or do things like
+ * define a ContainerNode<Network> which allows us to make
+ * networks of networks.
+ */
+template<typename T>
+class ContainerNode : public Node {
 
   public:
     /**
-     * We keep each edge with probability bond_p,
-     * we keep each node with probability site_p
+     * @param item object to hold
+     * @param own if true, delete the item when we are deleted.
      */
-    PercolationMapper(Random& rand, double bond_p, double site_p = 1.0);
-
+    ContainerNode(T* item, bool own = true) { _item = item; _own = own; }
+    ~ContainerNode() { if( _own ) { delete _item; } _item = 0; }
     /**
-     * Returns the expected theshold of an infinite random
-     * graph with the same degree distribution as the given
-     * graph.
-     * @return < k >/< k(k-1) >
+     * @return to the pointer to the object being contained.
      */
-    static double getExpectedThreshold(const Network* net);
-    
+    T* get() const { return _item; }
     /**
-     * This "percolates" the given network
-     * modifying it in place.
+     * If you change your mind and don't want the item to be deleted
+     * when the node is deleted, call this function.
      */
-    virtual void map(Network* net);
-
+    void release() { _own = false; }
   protected:
-    double _bond_p;
-    double _site_p;
-    Random& _rand;
-	
+    T* _item; 
+    bool _own;
 };
 	
 }
 
 #endif
+

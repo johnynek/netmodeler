@@ -329,8 +329,6 @@ void DirectedNetwork::printTo(ostream& out) const {
    */
 	
   NodePSet::const_iterator i;
-  ConnectedNodePSet::const_iterator j;
-  map< Node*, ConnectedNodePSet >::const_iterator k;
   string label;
   int node_count = 0;
   ///\todo fix this:
