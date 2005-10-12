@@ -240,6 +240,22 @@ class Network {
 	Edge* getEdgeBetweenness(std::map<Edge*, double>& betweenness) const;
         
 	/**
+	 * This is kind of "dual" to getClusterCoefficent(Node* n).
+	 * We look at the number of triangles that involve and edge,
+	 * 2 T_e/W_e, where W_e is the number of wedges an edge is
+         * in, and T_e is the number of triangles an edges is in.
+         * W_e = getDegree(e->first) + getDegree(e->second) - 2
+         * and T_e we get from getTriangles(Edge* e)
+         *
+         * This does not make sense when getWedges(edge) == 0.
+	 */ 
+        double getEdgeCC(Edge* edge) const;
+        /**
+         * Average of getEdgeCC over all edges (defining
+         * getEdgeCC == 0 when there are no wedges).
+         */
+        double getEdgeCC() const;
+	/**
          * @return a network that contains the edges in this network which
          * have one end with node
          * This is the star network (tree) with node in the center
@@ -329,6 +345,12 @@ class Network {
 	 * @return the number of wedges at this node k(k-1)/2
 	 */
 	virtual int getWedges(Node* n) const;
+        /**
+         * Useful for getEdgeCC
+         * wedges = getDegree(e->first) + getDegree(e->second) - 2;
+         * @return the number of wedges the edge is in.
+         */
+        virtual int getWedges(Edge* e) const;
 	/**
 	 * @return true if the network has an equivalent edge
 	 */

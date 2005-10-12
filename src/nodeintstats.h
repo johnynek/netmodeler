@@ -53,7 +53,7 @@ class NodeIntStats {
      * Collect statistics from the given network
      * @param net the Network to get the values from
      * @param mem the function to look at statistics of
-     * @param ni if not zero, iterate over these nodes and delete the iterator
+     * @param ni if not zero, iterate over these nodes
      */
     void collect(const Network* net, NodeIntMember mem, Iterator<Node>* ni = 0);
     /**

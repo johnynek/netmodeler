@@ -1,7 +1,6 @@
 /*
 This program is part of Netmodeler, a library for graph and network
 modeling and simulation.
-Copyright (C) 2005  University of California
 Copyright (C) 2005  P. Oscar Boykin <boykin@pobox.com>, University of Florida
 
 This program is free software; you can redistribute it and/or
@@ -55,8 +54,10 @@ void NodeIntStats::collect(const Network* net, NodeIntMember mem, NodeIterator* 
     if( _min_net != 0 ) { delete _min_net; }
     _max_net = net->newNetwork();
   }
+  bool del_ni = false;
   if( ni == 0 ) {
     ni = net->getNodeIterator();
+    del_ni = true;
   }
   
   //Now its time to iterate:
@@ -89,15 +90,18 @@ void NodeIntStats::collect(const Network* net, NodeIntMember mem, NodeIterator* 
     first = false;
   }
   
-  //We delete the iterator no matter what
-  delete ni;
+  if( del_ni ) {
+    delete ni;
+  }
 }
 
 void NodeIntStats::collectByEdge(const Network* net, NodeIntMember mem, EdgeIterator* ei)
 {
+  bool del_ei = false;
   _edge_dist.clear();
   if( ei == 0 ) {
     ei = net->getEdgeIterator();
+    del_ei = true;
   }
   while( ei->moveNext() ) {
     Edge* this_edge = ei->current();
@@ -116,7 +120,9 @@ void NodeIntStats::collectByEdge(const Network* net, NodeIntMember mem, EdgeIter
             _edge_dist[ std::pair<int,int>(val2, val1) ]  + 1;
     }
   }
-  delete ei;
+  if( del_ei ) {
+    delete ei;
+  }
 }
 
 int NodeIntStats::getCount() const { return _calls; }

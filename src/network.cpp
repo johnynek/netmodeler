@@ -405,9 +405,9 @@ double Network::getClusterCoefficient(NodeIterator* nodes) const {
 	//Skip nodes that have 1 degrees or less
         if( getDegree( this_node ) > 1 ) {
           this_cc = getClusterCoefficient(this_node);
-	  ++nodes_count;
           out += this_cc;
 	}
+	++nodes_count;
     }
     if ( nodes_count == 0 ) { return 0.0; }
     return out / (double)( nodes_count );
@@ -720,6 +720,42 @@ Edge* Network::getEdgeBetweenness(map<Edge*, double>& betweenness) const {
   return max_edge;
 }
 
+double Network::getEdgeCC(Edge* e) const {
+
+  /*
+   * First get the number of wedges:
+   */
+  int w = getWedges(e);
+  if( w > 0 ) {
+    double wedges = (double)w;
+  /*
+   * Each edge can be in two wedges in a particular triangle,
+   * and each wedge can be in at most one triangle, so
+   * we define the edgeCC as the ratio of the number of 
+   * of triangles to wedges/2:
+   */
+    double triangles = (double)getTriangles(e);
+    double cc = 2.0 * triangles/wedges;
+    return cc;
+  }
+  else {
+    return 0.0;
+  }
+}
+
+double Network::getEdgeCC() const {
+  auto_ptr<EdgeIterator> ei( getEdgeIterator() );
+
+  double tot = 0.0;
+  int count = 0;
+  while( ei->moveNext() ) {
+    Edge* e = ei->current();
+    tot += getEdgeCC( e );
+    count++;
+  }
+  return tot/(double)count;
+}
+
 Network* Network::getEdges(Node* node) const {
   Network* net = newNetwork();
   map<Node*, EdgeSet>::const_iterator neit = _node_to_edges.find(node);
@@ -1021,6 +1057,11 @@ int Network::getWedges(Node* n) const
   return w;
 }
 
+int Network::getWedges(Edge* e) const
+{
+  int wedges = getDegree(e->first) + getDegree(e->second) - 2;
+  return wedges;
+}
 bool Network::has(const Edge& edge) const {
     return ( 0 != getEdgePtr(edge));
 }

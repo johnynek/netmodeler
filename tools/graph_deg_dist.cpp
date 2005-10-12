@@ -37,6 +37,7 @@ int main(int argc, char* argv[]) {
         cout << "#loaded network" << endl;	
 	cout << "#assortativity: " << ns.getEdgeCorrelation() << endl;
 	cout << "#cluster coeff: " << my_net.getClusterCoefficient() << endl;
+	cout << "#edgecc: " << my_net.getEdgeCC() << endl;
 	cout << "#transitivity: " << my_net.getTransitivity() << endl;
 	cout << "#nodes: " << my_net.getNodeSize() << endl;
 	cout	     << "#edges: " << my_net.getEdgeSize() << endl;
