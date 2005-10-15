@@ -33,8 +33,7 @@ const Network::NodePSet Network::_empty_nodeset;
 const Network::EdgeSet Network::_empty_edgeset;
 const Network Network::_empty_net;
 
-map<Node*, int> Network::_node_ref_count;
-map<Edge*, int> Network::_edge_ref_count;
+map<void*, int> Network::_ref_count;
 
 
 Network::Network()  {
@@ -82,7 +81,7 @@ bool Network::add(Edge* edge) {
       //Account for the edges and nodes
 
       //This is a new edge, so bump the ref count:
-      incrementEdgeRefCount(edge);
+      incrementRefCount((void*)edge);
       //make sure these nodes are in the network
       add(edge->first);
       add(edge->second);
@@ -122,7 +121,7 @@ bool Network::add(Node* node) {
       (*nm_it)->preNodeAdd(node);
     }
     _node_to_edges[ node ] = _empty_edgeset;
-    incrementNodeRefCount(node);
+    incrementRefCount((void*)node);
     for(nm_it = _net_mon.begin(); nm_it != _net_mon.end(); nm_it++) {
       (*nm_it)->postNodeAdd(node);
     }
@@ -150,7 +149,8 @@ void Network::clear() {
 #ifdef DEBUG
       cout << "Decrementing: " << ni->current() << endl;
 #endif
-      decrementNodeRefCount( ni->current() );
+      Node* node = ni->current();
+      if( decrementRefCount( (void*)node ) == 0 ) { delete node; }
     }
 
 #ifdef DEBUG
@@ -158,7 +158,8 @@ void Network::clear() {
 #endif
     auto_ptr<EdgeIterator> ei( getEdgeIterator() );
     while(ei->moveNext()) {
-      decrementEdgeRefCount( ei->current() );
+      Edge* e = ei->current();
+      if( decrementRefCount( (void*)e ) == 0 ) { delete e; }
     }
     _node_to_edges.clear();
 }
@@ -202,52 +203,27 @@ void Network::clearEdges() {
            eit != neit->second.end();
            eit++ ) {
         //Decrement this edge:
-        decrementEdgeRefCount( *eit );
+        if( decrementRefCount( (void*) *eit ) == 0 ) { delete *eit; }
       }
       //Clear this set of edges:
       neit->second.clear();
     }
 }
 
-int Network::decrementEdgeRefCount(Edge* edge) {
+int Network::decrementRefCount(void* p) {
     int ret = -1;
-    map<Edge*, int>::iterator ref_it = _edge_ref_count.find(edge);
-    if( ref_it != _edge_ref_count.end() ) {
+    map<void*, int>::iterator ref_it = _ref_count.find(p);
+    if( ref_it != _ref_count.end() ) {
       ref_it->second = ref_it->second - 1;
       ret = ref_it->second;
-      if( ref_it->second == 0 ) {
-        delete edge;
-	_edge_ref_count.erase( ref_it );
+      if( ret == 0 ) {
+	_ref_count.erase( ref_it );
       }
     }
     else {
-      cerr << "tried to decrement edge: " << edge << " past 0" << endl;
-    }
-    return -1;
-}
-
-int Network::decrementNodeRefCount(Node* node) { 
-    int ret = -1;
-    map<Node*, int>::iterator ref_it = _node_ref_count.find(node);
-    if( ref_it != _node_ref_count.end() ) {
-        ref_it->second = ref_it->second - 1;
-        ret = ref_it->second;
-	if( ref_it->second == 0) {
-#ifdef DEBUG
-          cout << "About to delete: " << node << " : " << node->toString() << endl;
-#endif
-          delete node;
-#ifdef DEBUG
-          cout << "deleted node: " << node << endl;
-#endif
-	  _node_ref_count.erase( ref_it );
-	}
-    }
-    else {
-      cerr << "tried to decrement node: " << node << " past 0" << endl;
+      cerr << "tried to decrement: " << p << " past 0" << endl;
     }
     return ret;
-    
 }
 
 int Network::getAssociatedNumber(Node* aNode) const {
@@ -1081,37 +1057,17 @@ bool Network::has(Node* node) const {
     return (_node_to_edges.find(node) != _node_to_edges.end());
 }
 
-int Network::incrementEdgeRefCount(Edge* edge) {
-    map<Edge*, int>::iterator ref_it = _edge_ref_count.find(edge);
-    if( ref_it != _edge_ref_count.end() ) {
-      if( ref_it->second == 0 ) { cerr << "going from 0 -> 1:edge:"<< edge << endl; } 
+int Network::incrementRefCount(void* p) {
+    map<void*, int>::iterator ref_it = _ref_count.find(p);
+    if( ref_it != _ref_count.end() ) {
+      if( ref_it->second == 0 ) { cerr << "going from 0 -> 1 "<< p << endl; } 
       ref_it->second = ref_it->second + 1;
       return ref_it->second;
     }
     else {
-      _edge_ref_count[edge] = 1;
+      _ref_count[p] = 1;
       return 1;
     }
-    return -1;
-}
-
-int Network::incrementNodeRefCount(Node* node) {
-    map<Node*, int>::iterator ref_it = _node_ref_count.find(node);
-    if( ref_it != _node_ref_count.end() ) {
-      if( ref_it->second == 0 ) { cerr << "going from 0 -> 1:node:"<< node << endl; } 
-      ref_it->second = ref_it->second + 1;
-#ifdef DEBUG
-      cout << "Incrementing: " << node << " count: " << ref_it->second << endl;
-#endif
-      return ref_it->second;
-    }
-    else {
-      _node_ref_count[node] = 1;
-#ifdef DEBUG
-      cout << "Incrementing: " << node << " count: 1" << endl;
-#endif
-      return 1;
-    } 
     return -1;
 }
 
@@ -1272,7 +1228,7 @@ int Network::remove(Edge* e_p) {
     //remove a reference to the edge:
     //This should be done last, other wise the postEdgeRemove may get
     //a deleted pointer
-    decrementEdgeRefCount(e_p);
+    if( decrementRefCount((void*)e_p) == 0 ) { delete e_p; }
     return 1;
   }
   else {
@@ -1302,7 +1258,7 @@ int Network::remove(Node* node) {
       (*nm_it)->postNodeRemove(node);
     }
     //Get rid of one of the references to this node, possibly deleting it.
-    decrementNodeRefCount(node);
+    if( decrementRefCount((void*)node) == 0 ) { delete node; }
   }
   return removed_edges;
 }
@@ -1387,14 +1343,14 @@ Network& Network::operator=(const Network& aNet) {
       _node_to_edges = aNet._node_to_edges;
       
       //Bump the reference count on each of the nodes:
-      auto_ptr<NodeIterator> ni( getNodeIterator() );
+      auto_ptr<NodeIterator> ni( aNet.getNodeIterator() );
       while(ni->moveNext()) {
-        incrementNodeRefCount( ni->current() );
+        incrementRefCount( (void*)ni->current() );
       }
       //Bump the reference count on each of the edges:
-      auto_ptr<EdgeIterator> ei( getEdgeIterator() );
+      auto_ptr<EdgeIterator> ei( aNet.getEdgeIterator() );
       while(ei->moveNext()) {
-        incrementEdgeRefCount( ei->current() );
+        incrementRefCount( (void*)ei->current() );
       }
   }
   return (*this);

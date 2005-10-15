@@ -450,21 +450,23 @@ class Network {
 	    static const EdgeSet _empty_edgeset;
 	    static const Network _empty_net;
 	    /**
-	     * reference counting for Nodes and Edges.  This is done
+	     * reference counting. This is done
 	     * when we copy stuff around.
+	     * @return the number of counts
 	     */
-	    int incrementEdgeRefCount(Edge* edge);
+	    int incrementRefCount(void* p);
 	    /**
-	     * deletes the memory for edge when there are no references to it.
+	     * decrement the counts to p.  If the return value
+	     * is 0, p should be deleted by the caller.  This 
+	     * can't be done inside, since we cannot delete a pointer
+	     * to void
+	     * @return the number of counts left in the system.
 	     */
-	    int decrementEdgeRefCount(Edge* edge);
-	    int incrementNodeRefCount(Node* node);
+	    int decrementRefCount(void* p);
 	    /**
-	     * delete the memory for node when there are no references to it.
+	     * Here is the table of refernce counts
 	     */
-	    int decrementNodeRefCount(Node* node);
-	    static std::map<Node*, int> _node_ref_count;
-	    static std::map<Edge*, int> _edge_ref_count;
+	    static std::map<void*, int> _ref_count;
 
 	    /**
 	     * Here are some inner classes to implement some interators
