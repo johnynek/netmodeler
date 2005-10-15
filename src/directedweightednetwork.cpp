@@ -42,27 +42,28 @@ bool DirectedWeightedNetwork::add(Edge* aEdge) {
  
   if( d_edge == 0) {
     //This is not a directed edge:
-	  return false;  
-	}
-  
-	if( has(*d_edge) == true) {
-     //We don't add edges twice, we will increment its weight
-     //Note that Joe has added the following lines
-      Edge* e = getEdge(d_edge->first, d_edge->second);
-      if( e != 0 ) {
-        e->setWeight( e->getWeight() + 1.0 );
-      }
-      else {
-        e = getEdge( d_edge->first, d_edge->second );
-        if( e != 0 ) {
-          e->setWeight( e->getWeight() + 1.0 );
-        }
-      }
-      //end of Joe's modification	
-    return false;
+    return false;  
   }
-  //Else this is the regular directed add:
-  return DirectedNetwork::add(aEdge); 
+  
+  Edge* e = getEdge(d_edge->getStartNode(), d_edge->getEndNode());
+  
+  if( e != 0 ) {
+    //We don't add edges twice, we will increment its weight
+    //Note that Joe has added the following lines
+    //Make a new edge with the new weight
+    /**
+     * @todo I think this can leak memory since the caller assumes
+     * aEdge is being managed by the network, but it is not.  We
+     * probably need some reference counting checks here
+     */
+    double new_weight = e->getWeight() + d_edge->getWeight();
+    d_edge = new DirectedWeightedEdge( d_edge->getStartNode(),
+		                       d_edge->getEndNode(),
+				       new_weight );
+    remove(e);
+  }
+  //Okay, now we are sure d_edge should be added
+  return DirectedNetwork::add(d_edge);
 }
 
 double DirectedWeightedNetwork::getAverageWeight(Node* node) const{

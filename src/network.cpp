@@ -64,8 +64,7 @@ bool Network::add(const Edge& e) {
 		<< ")"  << endl;
    }
    if( n_e == 0 ) {
-     n_e = new Edge();
-     *n_e = e;
+     n_e = new Edge(e);
    }
    return add(n_e);
 }

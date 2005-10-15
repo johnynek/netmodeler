@@ -24,15 +24,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 using namespace Starsky;
 using namespace std;
 
-DirectedEdge::DirectedEdge(Node* start, Node* end) {
+DirectedEdge::DirectedEdge(Node* start, Node* end) : Edge(start,end) {
     if( start < end) {
-        first = start;
-	second = end;
 	_dir_first_to_second = true;
     }
     else {
-        first = end;
-	second = start;
 	_dir_first_to_second = false;
     }
 }
@@ -64,13 +60,21 @@ Node* DirectedEdge::getEndNode() const{
     }
 }
 
-void DirectedEdge::reverse() {
+DirectedEdge* DirectedEdge::reverse() const {
     //Switch the direction:
     if( _dir_first_to_second == true) {
-      _dir_first_to_second = false;
+      /*
+       * this edge is first->second,
+       * so return a new one that is second->first
+       */
+      return new DirectedEdge(second, first);
     }
     else {
-      _dir_first_to_second = true;
+      /*
+       * this edge is second->first,
+       * so return a new one that is first->second
+       */
+      return new DirectedEdge(first, second);
     }
 }
 

@@ -1,7 +1,6 @@
 /*
 This program is part of Netmodeler, a library for graph and network
 modeling and simulation.
-Copyright (C) 2005  University of California
 Copyright (C) 2005  P. Oscar Boykin <boykin@pobox.com>, University of Florida
 
 This program is free software; you can redistribute it and/or
@@ -19,34 +18,27 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include "randomdirectednetwork.h"
+#ifndef starsky__directedweightededge_h
+#define starsky__directedweightededge_h
 
-using namespace Starsky;
-using namespace std;
+#include "directededge.h"
+#include "weightededge.h"
 
-RandomDirectedNetwork::RandomDirectedNetwork(int nodes,
-                             double p,
-			     Random& rand) : 
-                                              _rand_gen(rand) {
-  create(nodes,p);
+namespace Starsky {
+
+class DirectedWeightedEdge : public DirectedEdge {
+
+  public:
+    DirectedWeightedEdge(Node* start, Node* end, double w);
+
+    virtual double getWeight() const { return _weight; }
+    virtual bool operator<(const Edge& e) const;
+    virtual bool operator==(const Edge& e) const;
+
+  protected:
+    double _weight;
+};
+	
 }
-		
-void RandomDirectedNetwork::create(int nodes, double p) {
 
-    for(int k = 0; k < nodes; k++) {
-      Network::add( new Node() );
-    }
-
-    set<Node*>::iterator i,j;
-    auto_ptr<NodeIterator> ni( getNodeIterator() );
-    auto_ptr<NodeIterator> nj( getNodeIterator() );
-    while( ni->moveNext() ) {
-      while( nj->moveNext() ) {
-        if( _rand_gen.getBool(p) ) {
-          Node* nodei = ni->current();
-	  Node* nodej = nj->current();
-          add(DirectedEdge(nodei,nodej));
-	}
-      }
-    }
-}
+#endif

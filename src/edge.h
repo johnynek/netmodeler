@@ -43,7 +43,7 @@ namespace Starsky {
      * creates an edge between start and end.  For undirected nodes, order does
      * not matter.  @see Starsky::DirectedNode
      */
-    Edge (Node * start = 0, Node * end = 0, double a_weight=1.0);
+    Edge (Node * start, Node * end);
     /**
      * Make an edge with the given attributes.  This
      * edge only supports a weight (double in the string)
@@ -60,7 +60,7 @@ namespace Starsky {
     /**
      * @return true if this node is in this edge
      */
-    virtual bool contains(Node* n) const {
+    bool contains(Node* n) const {
       return ((first == n) || (second == n));
     };
     /**
@@ -71,21 +71,12 @@ namespace Starsky {
      * Returns the attributes of this edge.  Useful in EdgeFactories
      */
     virtual std::string getAttributes() const;
-    /**
-     * @return true of this Node is first or second
-     */
-    bool hasNode (Node *) const;
     virtual std::string toString() const;
 
-    double getWeight() const;
-    void setWeight(double a_weight);
+    virtual double getWeight() const;
 			
     virtual bool operator<(const Edge& a) const;
     virtual bool operator==(const Edge& a) const;
-	protected:
-		///the weight of the edge
-		double weight;
-	
   };
 
 }

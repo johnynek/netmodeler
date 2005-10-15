@@ -302,7 +302,7 @@ void WeightedNetwork::readFrom(istream& in) {
       }
       //Add the edge:
       if( first && second ) {
-        add( Edge(first, second, weight) );
+        add( WeightedEdge(first, second, weight) );
       }
     }
   }

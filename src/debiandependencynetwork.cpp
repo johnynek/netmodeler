@@ -215,7 +215,7 @@ void DebianDependencyNetwork::readPackageFile(const string& filename) {
              provides = split_string[1].split(", ");
 	     for(unsigned int i = 0; i < provides.size(); i++) {
                  this_node = new DebianAliasNode( provides[i] );
-		 add( this_node );
+		 Network::add( (Node*)this_node );
 		 name_node_map[ provides[i] ] = this_node;
 	     }
 	  }
@@ -223,7 +223,7 @@ void DebianDependencyNetwork::readPackageFile(const string& filename) {
 	else {
         //This is a package separator line, so it is time to make the node
 	    this_node = new DebianPackageNode(package, version, size);
-	    add( this_node );
+            Network::add( (Node*)this_node );
 	    name_node_map[ package ] = this_node;
 	}
     }

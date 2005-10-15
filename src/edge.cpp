@@ -26,8 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 using namespace Starsky;
 
-Edge::Edge (Node * start, Node * end, double a_weight)
-: weight(a_weight)
+Edge::Edge (Node * start, Node * end)
 {
   first = std::min(start, end);
   second = std::max(start, end);
@@ -37,7 +36,6 @@ Edge::Edge(Node* start, Node* end, const std::string& attr)
 {
   first = std::min(start, end);
   second = std::max(start, end);
-  weight = atof( attr.c_str() );
 }
 
 bool Edge::connects (Node * start, Node * end) const
@@ -61,39 +59,24 @@ Node* Edge::getOtherNode (Node * start) const
 
 std::string Edge::getAttributes() const
 {
-  if( weight != 1.0 ) {
-    std::stringstream attrs;
-    attrs << getWeight();
-    return attrs.str();
-  }
-  else {
-    return "";
-  }
-}
-
-bool Edge::hasNode (Node * node) const
-{
-  return (first == node) || (second == node);
+  return "";
 }
 
 double Edge::getWeight() const
 {
-  return weight;
+  return 1.0;
 }
 		
-void Edge::setWeight(double a_weight)
-{
-  weight = a_weight;
-}
-
 std::string Edge::toString() const {
   //std::cout << "About to call Edge::toString" << std::endl;
   std::stringstream out;
   out << first->toString() << " : " <<
 	 second->toString();
+#if 0
   if( weight != 1.0 ) {
     out << " : " << weight;
   }
+#endif
   return out.str();
 }
 

@@ -29,6 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "network.h"
 #include "node.h"
 #include "edge.h"
+#include "weightededge.h"
 
 
 namespace Starsky {

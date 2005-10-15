@@ -32,17 +32,37 @@ namespace Starsky {
 class DirectedEdge : public Edge {
 
     public: 
-        DirectedEdge(Node* start=0, Node* end=0);
+	/**
+	 * Make a new directed edge that goes from start to end
+	 */
+        DirectedEdge(Node* start, Node* end);
+	/**
+	 * @param start a node to check to see if it is the start
+	 * @param end the node to check to see if it is the end
+	 * @return true if this edge goes from start -> end
+	 */
         virtual bool connects(Node* start, Node* end) const;
+	/**
+	 * @return the starting node of the directed edge
+	 */
 	Node* getStartNode() const;
+	/**
+	 * @return the ending node of the directed edge
+	 */
 	Node* getEndNode() const;
+	/**
+	 * @return true if this node goes from first -> second
+	 */
 	bool pointsFirstToSecond() const { return _dir_first_to_second; }
-	void reverse();
+	/**
+	 * @return a new edge which is the same as this one, but reversed
+	 */
+	virtual DirectedEdge* reverse() const;
 
-	std::string toString() const;
+	virtual std::string toString() const;
     
-        bool operator<(const Edge& a) const; 
-        bool operator==(const Edge& a) const;
+        virtual bool operator<(const Edge& a) const; 
+        virtual bool operator==(const Edge& a) const;
     
     protected:
         bool _dir_first_to_second; // is true of the direction is from first to second

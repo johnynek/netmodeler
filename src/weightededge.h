@@ -19,29 +19,44 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef starsky__weightededgefactory_h
-#define starsky__weightededgefactory_h
+#ifndef starsky_weightededge_h
+#define starsky_weightededge_h
 
-#include <edge.h>
-#include <weightededge.h>
+#include "edge.h"
 
 namespace Starsky {
 
-/**
- * A templated class to create
- * edges.  Any attribute other
- * than the direction of the edge
- * are passed as a string
- */
-class WeightedEdgeFactory : public EdgeFactory {
-  public:
-    virtual Edge* create(Node* from, Node* to) { return new WeightedEdge(from, to); }
-    virtual Edge* create(Node* from, Node* to, const std::string& attr) {
-      double weight = atof(attr.c_str());
-      return new WeightedEdge(from, to, weight);
-    }
-};
+class WeightedEdge : public Edge {
 
+  public:
+    /**
+     * Create a new weighted edge with a given weight
+     * @param start the first node
+     * @param end the second node
+     * @param weight the weight of the edge
+     */
+    WeightedEdge(Node* start, Node* end, double weight = 1.0);
+    /**
+     * Create a new edge
+     * @param start the first node
+     * @param end the second node
+     * @param attrs the weight of the edges as string
+     */
+    WeightedEdge(Node* start, Node* end, const std::string& attrs);
+    
+    virtual std::string getAttributes() const;
+    virtual double getWeight() const;
+    /**
+     * @return a string representation of the edge
+     */
+    virtual std::string toString() const;
+
+    virtual bool operator<(const Edge& a) const;
+    virtual bool operator==(const Edge& a) const;
+  protected:
+    double _weight;
+};
+	
 }
 
 #endif

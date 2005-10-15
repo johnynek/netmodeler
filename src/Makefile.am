@@ -38,6 +38,8 @@ directededge.cpp \
 directededge.h \
 directednetwork.cpp \
 directednetwork.h \
+directedweightededge.h \
+directedweightededge.cpp \
 directedweightednetwork.cpp \
 directedweightednetwork.h \
 doublembnet.h \
@@ -153,6 +155,8 @@ walkandpercmessage.cpp \
 walkandpercmessage.h \
 walkandsitepercmessage.cpp \
 walkandsitepercmessage.h \
+weightededge.h \
+weightededge.cpp \
 weightednetwork.h \
 weightednetwork.cpp \
 weightednetworkfactory.h weightednetworkfactory.cpp

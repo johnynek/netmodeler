@@ -79,7 +79,7 @@ void VazquezDirectedNetwork::incrementTime(int steps) {
         add( DirectedEdge(n,*a_it) );
       }
     }
-    add(n);
+    Network::add(n);
     _node_vec.push_back(n);
   }
 }

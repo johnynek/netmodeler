@@ -41,8 +41,7 @@ bool DirectedNetwork::add(const Edge& edge) {
 
     if( n_edge == 0) {
       //This is a new edge:
-	    DirectedEdge* d_edge = new DirectedEdge();
-	    *d_edge = d_e;
+	    DirectedEdge* d_edge = new DirectedEdge(d_e);
 	    n_edge = d_edge;
     }
     return add(n_edge);
@@ -360,9 +359,30 @@ void DirectedNetwork::reverseEdges() {
 
   DirectedEdge* d_e;
   auto_ptr<EdgeIterator> ei( getEdgeIterator() );
-  while( ei->moveNext() ) {
-      d_e = dynamic_cast<DirectedEdge*>( ei->current() );
-      d_e->reverse();
+  bool keep_going = ei->moveNext();
+  while( keep_going ) {
+      Edge* e = ei->current();
+      keep_going = ei->moveNext();
+      d_e = dynamic_cast<DirectedEdge*>( e );
+      DirectedEdge* d_e2 = d_e->reverse();
+      if( has( *d_e2) ) {
+        /*
+	 * The network already has the reversed edge,
+	 * in this case do nothing, both of these
+	 * would be reversed "into" each other.
+	 *
+	 * Delete this memory and forget about it
+	 */
+        delete d_e2;
+      }
+      else {
+        /*
+	 * The reversed edge is not in the network, so remove
+	 * the current one and add the new one:
+	 */
+        remove(d_e); 
+        add(d_e2);
+      }
   }
 }
 
@@ -520,7 +540,7 @@ void DirectedNetwork::readFrom(std::istream& in){
       if( result[0] != "" ) {
         first = new Node(result[0]);
         name_map[ result[0] ] = first;
-        add( first );
+	Network::add( first );
       }
     }
     else {
@@ -540,7 +560,7 @@ void DirectedNetwork::readFrom(std::istream& in){
 	if( *sit != "" ) {
           second = new Node( *sit );
           name_map[ *sit ] = second;
-	  add( second );
+	  Network::add( second );
 	}
       }
       else {
@@ -550,7 +570,7 @@ void DirectedNetwork::readFrom(std::istream& in){
       if( first && second ) {
 	//the following line is the only different line from the readFrom fcn in network.cpp
 	//simply changed Edge to Directed Edge
-        add( DirectedEdge::DirectedEdge(first, second) );
+        add( DirectedEdge(first, second) );
 	
       }
     }
