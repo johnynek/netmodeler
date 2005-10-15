@@ -454,7 +454,11 @@ class Network {
 	     * when we copy stuff around.
 	     * @return the number of counts
 	     */
-	    int incrementRefCount(void* p);
+	    int incrementvRefCount(void* p);
+	    template<typename T>
+	    void incrementRefCount(T* p) {
+              incrementvRefCount((void*)p);
+            }
 	    /**
 	     * decrement the counts to p.  If the return value
 	     * is 0, p should be deleted by the caller.  This 
@@ -462,7 +466,12 @@ class Network {
 	     * to void
 	     * @return the number of counts left in the system.
 	     */
-	    int decrementRefCount(void* p);
+	    int decrementvRefCount(void* p);
+            
+            template<typename T>
+            void decrementRefCount(T* p) {
+              if( decrementvRefCount((void*)p) == 0 ) { delete p; }
+            }
 	    /**
 	     * Here is the table of refernce counts
 	     */
