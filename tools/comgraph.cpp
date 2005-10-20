@@ -63,8 +63,8 @@ void printCommunities(AgglomPart* ap, ostream& out, string prefix, const Network
     }
     cout << "stepmax: " << step << endl;
    */
-   //if( q_t[step] > 0.25 ) {
-   if( net.getNodeSize() > 1 ) {
+   if( q_t[step] > 0.25 ) {
+   //if( net.getNodeSize() > 1 ) {
       out << "#" << prefix << "=" << q_t[step] << endl;
       //cout << "Getting best split"<< endl;
       set< Network* >* comms = ap->getCommunity(net, step, joins);
@@ -126,6 +126,7 @@ int main(int argc, char* argv[]) {
   opts.push_back("iterations");
   opts.push_back("seed");
   opts.push_back("prob");
+  opts.push_back("weighted");
   
   map<string, string> popts;
   try { 
@@ -188,7 +189,7 @@ int main(int argc, char* argv[]) {
     net = nf->create(input);
   }
   Network& my_net = *net;
- 
+  cout << "#loaded net" << endl; 
   ComponentPart cp;
   set<Network*>* comms = cp.partition(my_net);
   vector<Network*> vcoms;

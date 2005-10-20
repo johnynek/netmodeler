@@ -307,3 +307,27 @@ void WeightedNetwork::readFrom(istream& in) {
     }
   }
 }
+
+void WeightedNetwork::printTo(std::ostream& out) const
+{
+   /*
+    * This a really simple format:
+    * node1 : node2 : weight
+    */
+  auto_ptr<EdgeIterator> ei( getEdgeIterator() );
+  while( ei->moveNext() ) {
+    Edge* e1 = ei->current();
+    //Print all its neighbors:
+    Node* start;
+    Node* end;
+    if( e1->connects(e1->first, e1->second) ) {
+      start = e1->first;
+      end = e1->second;
+    }
+    else { 
+      end = e1->first;
+      start = e1->second;
+    }
+    out << start->toString() << " : " << end->toString() << " : " << e1->getWeight() << endl;
+  }
+}

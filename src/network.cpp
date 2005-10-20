@@ -63,7 +63,7 @@ bool Network::add(const Edge& e) {
 		<< ")"  << endl;
    }
    if( n_e == 0 ) {
-     n_e = new Edge(e);
+     n_e = e.clone();
    }
    return add(n_e);
 }

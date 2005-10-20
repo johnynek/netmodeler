@@ -21,6 +21,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <weightednetworkfactory.h>
 
+//#define DEBUG(msg) std::cout << msg << std::endl;
+#define DEBUG(msg)
+
 using namespace std;
 using namespace Starsky;
 
@@ -37,7 +40,7 @@ WeightedNetworkFactory::WeightedNetworkFactory(NodeFactory* nf, EdgeFactory* ef)
 
 Network* WeightedNetworkFactory::create(istream& in)
 {
-  Network* net = new Network();
+  Network* net = new WeightedNetwork();
   SuperString line;
   while( getline(in, line, '\n') ) {
     if( line[0] == '#' ) { //This is a comment
@@ -48,47 +51,39 @@ Network* WeightedNetworkFactory::create(istream& in)
     Node* second = 0;
     first = _nf->create(result[0]);
     net->add( first ); 
+    DEBUG("Added" << first->toString() );
     if( result.size() == 1 ) { //There was no neighbors
       continue;
     }
-    EdgeIterator* ei = net->getEdgeIterator(first);
+    double weight = 1.0;
+    if( result.size() > 2 ) {
+      weight = atof( result[2].c_str() );
+    }
+    DEBUG("weight:" << weight );
     //There is a list of second nodes:
-    result = result[1].split(" ");
+    vector<SuperString> nodes = result[1].split(" ");
     vector<SuperString>::iterator sit;
-    for(sit = result.begin();
-	sit != result.end();
+    for(sit = nodes.begin();
+	sit != nodes.end();
 	sit++) {
       second = 0;
       second = _nf->create( *sit );
       net->add( second );
       //Find any existing edge for this Node:
-      Network::EdgeSet::const_iterator e_it;
-      Edge* existing = 0;
-      ei->reset();
-      while( ei->moveNext() ) {
-        Edge* this_edge = ei->current();
-        if( this_edge->connects(first, second) ) {
-          existing = this_edge;
-	  break;
-	}
-      }
-      double weight = 0.0;
+      
+      Edge* existing = net->getEdge(first, second);
+      
       if( existing != 0 ) {
-        weight = existing->getWeight();
+        weight += existing->getWeight();
+        DEBUG("existing:" << existing->toString() );
+        net->remove(existing);
       }
       //Delete the existing edge:
-      net->remove(existing);
       Edge* e = 0;
-      if( result.size() > 2 ) {
-	weight += atof( result[2].c_str() );
-      }
-      else {
-        //The weight must be 1.0:
-	weight += 1.0;
-      }
       stringstream attr;
       attr << weight;
       e = _ef->create(first, second, attr.str() );
+      DEBUG("Made new edge: " << e->toString());
       //Add the edge:
       if( e ) {
 	/**
@@ -100,8 +95,6 @@ Network* WeightedNetworkFactory::create(istream& in)
       }
       delete e;
     }
-    delete ei;
-    ei = 0;
   }
   return net;
 }

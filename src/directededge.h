@@ -36,6 +36,14 @@ class DirectedEdge : public Edge {
 	 * Make a new directed edge that goes from start to end
 	 */
         DirectedEdge(Node* start, Node* end);
+	virtual DirectedEdge* clone() const {
+          if( _dir_first_to_second ) {
+	    return new DirectedEdge(first, second);
+	  }
+	  else {
+            return new DirectedEdge(second, first);
+	  }
+	}
 	/**
 	 * @param start a node to check to see if it is the start
 	 * @param end the node to check to see if it is the end

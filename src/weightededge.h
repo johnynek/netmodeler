@@ -44,6 +44,7 @@ class WeightedEdge : public Edge {
      */
     WeightedEdge(Node* start, Node* end, const std::string& attrs);
     
+    virtual WeightedEdge* clone() const { return new WeightedEdge(first, second, _weight); }
     virtual std::string getAttributes() const;
     virtual double getWeight() const;
     /**

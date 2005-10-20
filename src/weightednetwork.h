@@ -76,6 +76,7 @@ class WeightedNetwork : public Network {
 	 * Prints all the edges in the network and the weights associated with each edge.
 	 */
 	void printWeights(std::ostream& out) const;
+	virtual void printTo(std::ostream& out) const;
     protected:
 	virtual void readFrom(std::istream& in);
 

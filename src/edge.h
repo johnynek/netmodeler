@@ -51,6 +51,7 @@ namespace Starsky {
     Edge(Node* start, Node* end, const std::string& attrs);
 
     virtual ~Edge() { };
+    virtual Edge* clone() const { return new Edge(first,second); }
     /**
      * @param start
      * @param end

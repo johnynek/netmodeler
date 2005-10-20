@@ -31,6 +31,14 @@ class DirectedWeightedEdge : public DirectedEdge {
   public:
     DirectedWeightedEdge(Node* start, Node* end, double w);
 
+    virtual DirectedWeightedEdge* clone() const {
+      if( pointsFirstToSecond() ) {
+        return new DirectedWeightedEdge(first, second, _weight);
+      }
+      else {
+        return new DirectedWeightedEdge(second, first, _weight);
+      }
+    }
     virtual double getWeight() const { return _weight; }
     virtual bool operator<(const Edge& e) const;
     virtual bool operator==(const Edge& e) const;
