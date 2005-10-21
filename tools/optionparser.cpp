@@ -40,8 +40,12 @@ bool OptionParser::getBoolOpt(string opt, bool def)
   map<string, string>::iterator mit = _options.find(opt);
   if( mit != _options.end() ) {
     string val = mit->second;
-    if( (val== "true") || (val == "True") || (val == "TRUE") ) {
+    if( (val== "1") || (val == "") || (val== "true") || (val == "True") || (val == "TRUE") ) {
       ret_val = true;
+    }
+    else if( (val == "false") || (val=="0")
+             || (val == "False") || (val == "FALSE") ) {
+      ret_val = false;
     }
     else {
       ret_val = atoi( val.c_str() ) > 0;

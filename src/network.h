@@ -148,6 +148,10 @@ class Network {
 	virtual void clear();
 
 	/**
+	 * @return a new copy of this network.
+	 */
+	virtual Network* clone() const;
+	/**
 	 * Removes all edges from the network, but leaves the nodes
 	 */
 	virtual void clearEdges();

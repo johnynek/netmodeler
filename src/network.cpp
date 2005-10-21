@@ -210,6 +210,12 @@ void Network::clearEdges() {
     }
 }
 
+Network* Network::clone() const {
+  Network* net = newNetwork();
+  *net = *this;
+  return net;
+}
+
 int Network::decrementvRefCount(void* p) {
     int ret = -1;
     map<void*, int>::iterator ref_it = _ref_count.find(p);

@@ -31,7 +31,7 @@ using namespace Starsky;
 
 #define FOREACH(it, col) for(it = col.begin(); it != col.end(); it++)
 
-#define DEBUG 0
+#define DEBUG 1
 
 long expected_comnorm(set<Network*>* part)
 {
@@ -46,29 +46,23 @@ long expected_comnorm(set<Network*>* part)
   return (norm - nodes)/2;
 }
 
-void printCommunities(AgglomPart* ap, ostream& out, string prefix, const Network& net) {
+void printCommunities(INetworkPartitioner* ap,
+		      ostream& out, string prefix, const Network& net) {
     stringstream community;
 #ifdef DEBUG
     cout << prefix << endl;
 #endif
     community << prefix << ".";
     //Print out the communities:
-    vector< pair<int, int> > joins;
-    vector<double> q_t;
-    int step = ap->getCommunities(net, q_t, joins);
-    /*
-    for(int i = 0; i < q_t.size(); i++) {
-      cout << "q_t[" << i << "] = " << q_t[i] <<
-	      " join(" << joins[i].first << ", " << joins[i].second << ")" << endl;;
-    }
-    cout << "stepmax: " << step << endl;
-   */
-   if( q_t[step] > 0.25 ) {
-   //if( net.getNodeSize() > 1 ) {
-      out << "#" << prefix << "=" << q_t[step] << endl;
+   set<Network*>* comms = ap->partition(net);
+   double mod = ap->modularityOf(comms, net);
+   if( true ) 
+   //if( mod > 0.0 ) 
+   //if( net.getNodeSize() > 1 ) 
+   {
+      out << "#" << prefix << "=" << mod << endl;
       //cout << "Getting best split"<< endl;
-      set< Network* >* comms = ap->getCommunity(net, step, joins);
-#if 1
+#if 0
       //Compute the distance to the Newman partition:
       NewmanCom ncom;
       set<Network*>* newman_c = ncom.partition( net );
@@ -79,9 +73,7 @@ void printCommunities(AgglomPart* ap, ostream& out, string prefix, const Network
               << expected_comnorm(newman_c) << endl;
       ncom.deletePartition(newman_c);
 #endif
-      //Double check the modularity:
-      double qmod = ap->modularityOf(comms, net);
-      cout << "mod: " << qmod << endl;
+      cout << "mod: " << mod << endl;
       //cout << "Got best split"<< endl;
       vector<Network*> vcoms;
       vcoms.insert(vcoms.begin(), comms->begin(), comms->end());
@@ -107,9 +99,9 @@ void printCommunities(AgglomPart* ap, ostream& out, string prefix, const Network
 	//Recurse:
 	//printCommunities(ap, out, this_com.str(), *this_comnet);
       }
-      //Free up the memory
-      ap->deletePartition(comms);
     }
+    //Free up the memory
+    ap->deletePartition(comms);
 }
 
 
@@ -128,51 +120,35 @@ int main(int argc, char* argv[]) {
   opts.push_back("prob");
   opts.push_back("weighted");
   
-  map<string, string> popts;
+  OptionParser op(reqs, opts);
   try { 
-    popts = OptionParser::getOpts(argc, argv, reqs, opts);
+    op.parse(argc, argv);
   }
   catch (exception x) {
-    cout << "usage: " << argv[0] << OptionParser::getUsageString(reqs,opts) << endl;
+    cout << "usage: " << argv[0] << op.getUsageString() << endl;
     return -1;
   } 
-  map<string,string>::iterator mit;
-  
-  int iterations = 1;
-  mit = popts.find("iterations");
-  if( mit != popts.end() ) {
-    //We have this option:
-    iterations = atoi( popts["iterations"].c_str() );
-  }
-  int seed = -1;
-  mit = popts.find("seed");
-  if( mit != popts.end() ) {
-    //We have this option:
-    seed = atoi( popts["seed"].c_str() );
-  }
-  
-  double prob;
-  mit = popts.find("prob");
-  if( mit != popts.end() ) {
-    //We have this option:
-    prob = atof( popts["prob"].c_str() );
-  }
+  int iterations = op.getIntOpt("iterations", 1);
+  int seed = op.getIntOpt("seed", -1);
+  double prob = op.getDoubleOpt("prob", 0.0);
   Ran1Random r(seed);
     /**
      * Here is where we select which community finding algorithm to use
      */
-  AgglomPart* comfinder = 0;
-  if( popts["method"] == "Newman" ) {
+  INetworkPartitioner* comfinder = 0;
+  if( op.getStringOpt("method", "") == "Newman" ) {
     comfinder = new NewmanCom();
   }
+  else if ( op.getStringOpt("method", "") == "ClusterPart" ) {
+    comfinder = new ClusterPart(prob);
+  }
   else {
-    comfinder = new RandAgPart(r, popts["method"] ,prob);
+    comfinder = new RandAgPart(r, op.getStringOpt("method","") ,prob);
   }
   
   //Here we can choose what kind of network to use:
   NetworkFactory* nf;
-  mit = popts.find("weighted");
-  if( mit != popts.end() ) {
+  if( op.getBoolOpt("weighted", false) ) {
     nf = new WeightedNetworkFactory();
     comfinder->useWeights(true);
   }
@@ -181,11 +157,11 @@ int main(int argc, char* argv[]) {
     nf = new NetworkFactory();
   }
   Network* net;
-  if( popts["input"] == "-" ) {
+  if( op.getStringOpt("input", "-") == "-" ) {
     net = nf->create(cin);
   }
   else {
-    ifstream input( popts["input"].c_str() );
+    ifstream input( op.getStringOpt("input","").c_str() );
     net = nf->create(input);
   }
   Network& my_net = *net;
@@ -200,9 +176,18 @@ int main(int argc, char* argv[]) {
   NewmanCom ncom;
   while(iterations-- > 0 ) {
     stringstream name;
-    name << popts["outfile"] << "_com_" << popts["method"] << "." << iterations;
+    name << op.getStringOpt("outfile","") << "_com_" << op.getStringOpt("method","")
+	    << "." << iterations;
     cout << name.str() << endl;
     ofstream out(name.str().c_str());
+    //Output the command we used to produce the data.
+    out << "#usage:\t" <<  op.getUsageString() << endl;
+    out << "#command:\t";
+    for(int i = 0; i < argc; i++) {
+      out << argv[i] << " ";
+    }
+    out << std::endl;
+
     //Look on components:
     vector< Network* >::iterator comit;
     int community = 0;
@@ -215,8 +200,8 @@ int main(int argc, char* argv[]) {
       //Recursively print the communities
       printCommunities(comfinder, out, com.str(), *this_component );
       //Print Newman:
-      out << "#Newman::" << endl;
-      printCommunities(&ncom, out, com.str(), *this_component );
+      //out << "#Newman::" << endl;
+      //printCommunities(&ncom, out, com.str(), *this_component );
     }
   }
   //Delete the memory we allocated:

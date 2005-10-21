@@ -78,6 +78,13 @@ class INetworkPartitioner {
     */
    virtual long distance(std::set<Network*>* A, std::set<Network*>* B,
 		        long& norm_a, long& norm_b);
+    /**
+     * Use the weights of the edges in computing modularity
+     * The default is to ignore the weights
+     */
+    virtual void useWeights(bool weights) { _weighted = weights; }
+  protected:
+     bool _weighted;
 };
 	
 }

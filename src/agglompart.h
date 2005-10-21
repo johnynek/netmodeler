@@ -77,12 +77,6 @@ class AgglomPart : public INetworkPartitioner {
 		               const std::vector< std::vector<double> >& e_ij,
 			       const std::vector< double >& a_i,
 			       int& com1, int& com2) = 0;
-    /**
-     * Use the weights of the edges in computing modularity
-     * The default is to ignore the weights
-     */
-    virtual void useWeights(bool weights);
-	 
   protected:
     /**
      * Update the community map, e_ij, and a_i
@@ -90,7 +84,6 @@ class AgglomPart : public INetworkPartitioner {
     void update(std::map<Node*, int>& community_map,
 		std::vector< std::vector<double> >& e_ij,
 		std::vector< double >& a_i, int com1, int com2);
-    double _weighted;
 };
 	
 }

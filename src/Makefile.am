@@ -19,6 +19,8 @@ cache.h \
 cache.cpp \
 callawaynetwork.cpp \
 callawaynetwork.h \
+clusterpart.h \
+clusterpart.cpp \
 constdrv.h \
 containernode.h \
 contentnetwork.cpp \

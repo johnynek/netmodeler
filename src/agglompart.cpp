@@ -223,11 +223,6 @@ set<Network*>* AgglomPart::getCommunity(const Network& net, int step,
   return out;
 }
 
-void AgglomPart::useWeights(bool weights)
-{
-  _weighted = weights;
-}
-
 void AgglomPart::update(std::map<Node*, int>& community_map,
 		        std::vector< std::vector<double> >& e_ij,
 		        std::vector< double >& a_i, int join1, int join2)
