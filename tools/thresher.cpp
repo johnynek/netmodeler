@@ -238,8 +238,9 @@ int main(int argc, char* argv[])
   DEBUG("Made net");  
     cout << "#loaded network" << endl;	
     DEBUG("Made net");  
-    NodeIntStats ns(true);
-    ns.collect(net, &Network::getDegree);
+    IntStats ns;
+    auto_ptr<NodeIterator> ni(net->getNodeIterator());
+    ns.collect(net, &Network::getDegree, ni.get());
     ns.collectByEdge(net, &Network::getDegree);
     cout << "#assortativity: " << ns.getEdgeCorrelation() << endl;
     cout << "#cluster coeff: " << net->getClusterCoefficient() << endl;

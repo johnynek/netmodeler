@@ -67,6 +67,24 @@ typedef Iterator<Node> NodeIterator;
  */
 typedef Iterator<Edge> EdgeIterator;
 
+/**
+ * Pointer to member function which takes a Node and returns an int
+ */
+typedef int (Network::*NodeIntMember)(Node*) const;
+/**
+ * Pointer to member function which takes a Node and returns an double
+ */
+typedef double (Network::*NodeDoubMember)(Node*) const;
+/**
+ * Pointer to member function which takes an Edge and returns an int
+ */
+typedef int (Network::*EdgeIntMember)(Edge*) const;
+/**
+ * Pointer to member function which takes an Edge and returns a double
+ */
+typedef double (Network::*EdgeDoubMember)(Edge*) const;
+
+
 class Network {
 
     public:
@@ -247,14 +265,10 @@ class Network {
          * W_e = getDegree(e->first) + getDegree(e->second) - 2
          * and T_e we get from getTriangles(Edge* e)
          *
-         * This does not make sense when getWedges(edge) == 0.
+         * This does not make sense when getWedges(edge) == 0.  For
+	 * that value we return 0.0 so the average makes sense.
 	 */ 
         double getEdgeCC(Edge* edge) const;
-        /**
-         * Average of getEdgeCC over all edges (defining
-         * getEdgeCC == 0 when there are no wedges).
-         */
-        double getEdgeCC() const;
 	/**
          * @return a network that contains the edges in this network which
          * have one end with node

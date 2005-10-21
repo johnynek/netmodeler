@@ -367,7 +367,7 @@ double Network::getClusterCoefficient(Node* node) const {
   }
   else {
     //This is not well defined;
-    return -1.0;
+    return 0.0;
   }
 }
 
@@ -716,19 +716,6 @@ double Network::getEdgeCC(Edge* e) const {
   else {
     return 0.0;
   }
-}
-
-double Network::getEdgeCC() const {
-  auto_ptr<EdgeIterator> ei( getEdgeIterator() );
-
-  double tot = 0.0;
-  int count = 0;
-  while( ei->moveNext() ) {
-    Edge* e = ei->current();
-    tot += getEdgeCC( e );
-    count++;
-  }
-  return tot/(double)count;
 }
 
 Network* Network::getEdges(Node* node) const {
@@ -1265,30 +1252,38 @@ int Network::remove(Node* node) {
 
 int Network::remove(NodeIterator* nodes) {
     int ret = 0;
-    bool keep_going = nodes->moveNext();
-    while( keep_going ) {
-      Node* this_node = nodes->current();
-      /*
-       * We can't remove the node we are currently pointing
-       * to and then move forward (it is not allowed)
-       */
-      keep_going = nodes->moveNext();
-      ret += remove( this_node );
+    /**
+     * We make a list of the nodes to remove first, so the
+     * iterator is not exposed to a changing network
+     * then we remove the edges.
+     */
+    std::list<Node*> _to_remove;
+    while( nodes->moveNext() ) {
+      _to_remove.push_back( nodes->current() );
+    }
+    std::list<Node*>::iterator rit;
+    for(rit = _to_remove.begin(); rit != _to_remove.end(); rit++)
+    {
+      ret += remove( *rit ); 
     }
     return ret;
 }
 
 int Network::remove(EdgeIterator* edges) {
     int ret = 0;
-    bool keep_going = edges->moveNext();
-    while( keep_going ) {
-      Edge* this_edge = edges->current();
-      /*
-       * We can't remove the edge we are currently pointing
-       * to and then move forward (it is not allowed)
-       */
-      keep_going = edges->moveNext();
-      ret += remove( this_edge );
+    /**
+     * We make a list of the edges to remove first, so the
+     * iterator is not exposed to a changing network
+     * then we remove the edges.
+     */
+    std::list<Edge*> _to_remove;
+    while( edges->moveNext() ) {
+      _to_remove.push_back( edges->current() );
+    }
+    std::list<Edge*>::iterator rit;
+    for(rit = _to_remove.begin(); rit != _to_remove.end(); rit++)
+    {
+      ret += remove( *rit ); 
     }
     return ret;
 }

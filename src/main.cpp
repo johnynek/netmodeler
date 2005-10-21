@@ -419,8 +419,9 @@ int main(int argc, char* argv[]) {
 #endif
 
 #if 1
-        NodeIntStats ns(true);
-	ns.collect(&my_net,&Network::getDegree);
+        IntStats ns(true);
+	auto_ptr<NodeIterator> ni( my_net.getNodeIterator() );
+	ns.collect((Network*)&my_net,&Network::getDegree, ni.get());
 	ns.collectByEdge(&my_net, &Network::getDegree);
         cout << "#loaded network" << endl;	
 	cout << "#assortativity: " << ns.getEdgeCorrelation() << endl

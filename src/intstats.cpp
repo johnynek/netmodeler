@@ -18,11 +18,11 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include "nodeintstats.h"
+#include "intstats.h"
 
 using namespace Starsky;
 
-NodeIntStats::NodeIntStats(bool keep_dist,
+IntStats::IntStats(bool keep_dist,
 			   bool keep_max_net,
 		           bool keep_min_net) : _keep_dist(keep_dist),
                                                 _keep_max_net(keep_max_net),
@@ -32,70 +32,13 @@ NodeIntStats::NodeIntStats(bool keep_dist,
   _max_net = 0;
 }
 
-NodeIntStats::~NodeIntStats()
+IntStats::~IntStats()
 {
   if( _min_net != 0 ) { delete _min_net; }
   if( _max_net != 0 ) { delete _max_net; }
 }
 
-void NodeIntStats::collect(const Network* net, NodeIntMember mem, NodeIterator* ni)
-{
-  _dist.clear();
-  _calls = 0;
-  _sum = 0;
-  _sum2 = 0;
-  _max = 0;
-  _min = 0;
-  if( _keep_max_net ) {
-    if( _max_net != 0 ) { delete _max_net; }
-    _max_net = net->newNetwork();
-  }
-  if( _keep_min_net ) {
-    if( _min_net != 0 ) { delete _min_net; }
-    _max_net = net->newNetwork();
-  }
-  bool del_ni = false;
-  if( ni == 0 ) {
-    ni = net->getNodeIterator();
-    del_ni = true;
-  }
-  
-  //Now its time to iterate:
-  bool first = true;
-  while( ni->moveNext() ) {
-    Node* this_node = ni->current();
-    int val = (net->*mem)(this_node);
-    //Check to see if this is the max:
-    if( first || ( val > _max ) ) {
-      _max = val;
-      if( _keep_max_net ) {
-        _max_net->clear();
-        _max_net->add( this_node );
-      }
-    }
-    //Check to see if this is the min:
-    if( first || (val < _min) ) {
-      _min = val;
-      if( _keep_min_net ) {
-        _min_net->clear();
-        _min_net->add( this_node );
-      }
-    }
-    if( _keep_dist ) {
-      _dist[val] = _dist[val] + 1;
-    }
-    _sum += val;
-    _sum2 += val*val;
-    _calls++;
-    first = false;
-  }
-  
-  if( del_ni ) {
-    delete ni;
-  }
-}
-
-void NodeIntStats::collectByEdge(const Network* net, NodeIntMember mem, EdgeIterator* ei)
+void IntStats::collectByEdge(const Network* net, NodeIntMember mem, EdgeIterator* ei)
 {
   bool del_ei = false;
   _edge_dist.clear();
@@ -125,11 +68,11 @@ void NodeIntStats::collectByEdge(const Network* net, NodeIntMember mem, EdgeIter
   }
 }
 
-int NodeIntStats::getCount() const { return _calls; }
+int IntStats::getCount() const { return _calls; }
 
-const std::map<int, int>& NodeIntStats::getDist() const { return _dist; }
+const std::map<int, int>& IntStats::getDist() const { return _dist; }
 
-double NodeIntStats::getEdgeCorrelation() const
+double IntStats::getEdgeCorrelation() const
 {
   /*
    * We need to use doubles because we can easily have sums
@@ -182,7 +125,7 @@ double NodeIntStats::getEdgeCorrelation() const
   return r;
 }
 
-void NodeIntStats::getEdgeEntropy(double& h_s, double& h_e, double& h_es) const
+void IntStats::getEdgeEntropy(double& h_s, double& h_e, double& h_es) const
 {
   //Get the e_k probability distribution:
   std::map<std::pair<int,int>, int >::const_iterator it1;
@@ -242,17 +185,17 @@ void NodeIntStats::getEdgeEntropy(double& h_s, double& h_e, double& h_es) const
   h_es += log( total )/log(2.0);
 }
 
-int NodeIntStats::getMax() const { return _max; }
+int IntStats::getMax() const { return _max; }
 
-int NodeIntStats::getMin() const { return _min; }
+int IntStats::getMin() const { return _min; }
 
-int NodeIntStats::getSum() const { return _sum; }
+int IntStats::getSum() const { return _sum; }
 
-int NodeIntStats::getSquaredSum() const {return _sum2; }
+int IntStats::getSquaredSum() const {return _sum2; }
 
-double NodeIntStats::getAverage() const { return (double)_sum/(double)_calls; }
+double IntStats::getAverage() const { return (double)_sum/(double)_calls; }
 
-double NodeIntStats::getEntropy() const
+double IntStats::getEntropy() const
 {
   std::map<int, int>::const_iterator deg_it;
   double entropy = 0;
@@ -264,9 +207,9 @@ double NodeIntStats::getEntropy() const
   return entropy;
 }
 
-double NodeIntStats::getMoment2() const {return (double)_sum2/(double)_calls; }
+double IntStats::getMoment2() const {return (double)_sum2/(double)_calls; }
 
-double NodeIntStats::getMoment(double m) const
+double IntStats::getMoment(double m) const
 {
   std::map<int, int>::const_iterator it;
   double tot = 0.0;
@@ -279,7 +222,7 @@ double NodeIntStats::getMoment(double m) const
   return tot;
 }
 
-double NodeIntStats::getVariance() const {
+double IntStats::getVariance() const {
   double m1 = getAverage();
   double m2 = getMoment2();
   return (m2 - m1*m1);

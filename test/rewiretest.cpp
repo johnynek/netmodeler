@@ -26,8 +26,9 @@ using namespace std;
 
 void printInfo(Network& my_net)
 {
-        NodeIntStats ns(true);
-	ns.collect(&my_net, &Network::getDegree);
+        IntStats ns;
+	auto_ptr<NodeIterator> ni( my_net.getNodeIterator() );
+	ns.collect(&my_net, &Network::getDegree, ni.get());
 	ns.collectByEdge(&my_net, &Network::getDegree);
         cout << "#loaded network" << endl;
         cout << "#assortativity: " << ns.getEdgeCorrelation() << endl

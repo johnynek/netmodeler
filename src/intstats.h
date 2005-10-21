@@ -1,7 +1,6 @@
 /*
 This program is part of Netmodeler, a library for graph and network
 modeling and simulation.
-Copyright (C) 2005  University of California
 Copyright (C) 2005  P. Oscar Boykin <boykin@pobox.com>, University of Florida
 
 This program is free software; you can redistribute it and/or
@@ -19,8 +18,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef starsky__nodeintstats_h
-#define starsky__nodeintstats_h
+#ifndef starsky__intstats_h
+#define starsky__intstats_h
 
 #include <map>
 #include <node.h>
@@ -29,33 +28,77 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 namespace Starsky {
 
 /**
- * Pointer to member function which takes a node and returns an int
- */
-typedef int (Network::*NodeIntMember)(Node*) const;
-	
-/**
  * This class collects statistics from functions
- * that take nodes and return ints.
+ * that return ints.
  */
 	
-class NodeIntStats {
+class IntStats {
   public:
     /**
      * @param keep_dist if true, keep the distribution in a map<int, int>
      * @param keep_max_net if true, keep a Network which has nodes with the max
      * @param keep_min_net if true, keep a Network which has node with the min
      */
-    NodeIntStats(bool keep_dist = false, bool keep_max_net = false,
+    IntStats(bool keep_dist = true, bool keep_max_net = false,
 		 bool keep_min_net = false);
     
-    ~NodeIntStats();
+    ~IntStats();
     /**
      * Collect statistics from the given network
      * @param net the Network to get the values from
      * @param mem the function to look at statistics of
      * @param ni if not zero, iterate over these nodes
+     * @return average, which is a common statistic we want to look at
      */
-    void collect(const Network* net, NodeIntMember mem, Iterator<Node>* ni = 0);
+    template<typename N, typename Argname>
+    double collect(const N* net, int (N::*mem)(Argname* ) const, Iterator<Argname>* ni)
+    {
+      _dist.clear();
+      _calls = 0;
+      _sum = 0;
+      _sum2 = 0;
+      _max = 0;
+      _min = 0;
+      if( _keep_max_net ) {
+        if( _max_net != 0 ) { delete _max_net; }
+        _max_net = net->newNetwork();
+      }
+      if( _keep_min_net ) {
+        if( _min_net != 0 ) { delete _min_net; }
+        _max_net = net->newNetwork();
+      }
+      
+      //Now its time to iterate:
+      bool first = true;
+      while( ni->moveNext() ) {
+        Argname* this_node = ni->current();
+        int val = (net->*mem)(this_node);
+        //Check to see if this is the max:
+        if( first || ( val > _max ) ) {
+          _max = val;
+          if( _keep_max_net ) {
+            _max_net->clear();
+            _max_net->add( this_node );
+          }
+        }
+        //Check to see if this is the min:
+        if( first || (val < _min) ) {
+          _min = val;
+          if( _keep_min_net ) {
+            _min_net->clear();
+            _min_net->add( this_node );
+          }
+        }
+        if( _keep_dist ) {
+          _dist[val] = _dist[val] + 1;
+        }
+        _sum += val;
+        _sum2 += val*val;
+        _calls++;
+        first = false;
+      }
+      return getAverage();  
+    }
     /**
      * Collect the join statistics by looking at the values at either
      * end of an edge.  For this to be useful, you must be keeping

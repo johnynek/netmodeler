@@ -25,7 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <network.h>
 #include <random.h>
 #include <inetworkmapper.h>
-#include <nodeintstats.h>
+#include <intstats.h>
 #include <memory>
 
 namespace Starsky {

@@ -71,6 +71,12 @@ class OptionParser {
     
     static std::map<std::string, std::string> getOpts(int argc, char* argv[]);
     /**
+     * @param name the name of the option were are seeking
+     * @param default_val if the option is not there, return this
+     * @return the string option of the given name
+     */
+    std::string getStringOpt(std::string name, std::string default_val);
+    /**
      * @param pos, this contains the name of the i^th unnamed option_key
      */
     static std::map<std::string, std::string> getOpts(int argc,

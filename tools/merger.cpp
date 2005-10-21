@@ -69,8 +69,9 @@ int main(int argc, char* argv[])
     p = (2.0)/((double)n);
     MergeNetwork* net = new MergeNetwork(RandomNetwork(n, p, r), r, cons);
     net->incrementTime( (int)pow(n,1.5) );
-    NodeIntStats ns(true);
-    ns.collect(net, &Network::getDegree);
+    IntStats ns;
+    auto_ptr<NodeIterator> ni( net->getNodeIterator() );
+    ns.collect((Network*)net, &Network::getDegree, ni.get());
     const map<int, int>& deg_dist = ns.getDist();
     map<int, int>::const_reverse_iterator rit;
     rit = deg_dist.rbegin();

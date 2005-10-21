@@ -16,10 +16,11 @@ int main(int argc, char* argv[])
   std::auto_ptr<Network> net( nf->create() );
 
 
-  NodeIntStats ns(true);
-  //ns.collect(net.get(), &Network::getTriangles);
-  ns.collect(net.get(), &Network::getDegree);
-  //ns.collect(net.get(), &Network::getAssociatedNumber);
+  IntStats ns;
+  std::auto_ptr<NodeIterator> ni( net->getNodeIterator() );
+  //ns.collect(net.get(), &Network::getTriangles, ni.get());
+  ns.collect(net.get(), &Network::getDegree, ni.get());
+  //ns.collect(net.get(), &Network::getAssociatedNumber, ni.get());
   //ns.collectByEdge(net.get(), &Network::getTriangles);
   ns.collectByEdge(net.get(), &Network::getDegree);
   double h1, h2, h3;

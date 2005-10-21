@@ -21,20 +21,67 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <netmodeler.h>
 #include <cstdio>
+#include <list>
+#include "optionparser.h"
 
+using namespace Starsky;
 /**
  * This is a very simple tool.  It applies the TriangleMapper on a network
  * and prints the network back out.
  */
 
-using namespace Starsky;
+class Remover {
 
-int main(int argc, char* arvg[]) {
+  public:
+    Network* _net;
+    double _th;
+    Remover(Network* net, double th) {
+      _net = net;
+      _th = th;
+    }
 
-  TriangleMapper tmap;
+    //Remove edges which have low clustering coefficient which are not degree 1
+    bool check(Edge* e) {
+      if( _net->getEdgeCC(e) <= _th && 
+	  ( (_net->getDegree( e->first ) > 1) && (_net->getDegree(e->second) > 1) ) ) {
+        return true;
+      }
+      else {
+        return false;
+      }
+    }
+    
+};
+
+
+int main(int argc, char* argv[]) {
+
+  std::vector<std::string> reqs;
+  std::vector<std::string> opts;
+  opts.push_back("input");
+  opts.push_back("edgecc_thresh");
+  OptionParser op(reqs, opts);
+  try {
+    op.parse(argc, argv);
+  }
+  catch (std::exception x) {
+    std::cout << "usage: " << argv[0] << op.getUsageString() << std::endl;
+    return -1;
+  }
+  Network* net = 0;
   NetworkFactory nf;
-
-  Network* net = nf.create(std::cin);
-  tmap.map(net);
+  if( op.getStringOpt("input","-") == "-" ) {
+    net = nf.create(std::cin);
+  }
+  else {
+    std::ifstream in( op.getStringOpt("input","-").c_str() );
+    net = nf.create(in);
+  }
+  EdgeIterator* ei = net->getEdgeIterator();
+  double thresh = op.getDoubleOpt("edgecc_thresh", 0.0);
+  Remover r(net, thresh);
+  FilteredIterator<Remover, Edge> fi(ei, &r, &Remover::check);
+  net->remove(&fi);
   net->printTo(std::cout);
+  delete net;
 }

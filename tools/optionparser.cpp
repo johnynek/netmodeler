@@ -72,6 +72,15 @@ int OptionParser::getIntOpt(string opt, int def)
   return ret_val;
 }
 
+string OptionParser::getStringOpt(string opt, string def)
+{
+  map<string, string>::iterator mit = _options.find(opt);
+  if( mit != _options.end() ) {
+    return mit->second;
+  }
+  return def;
+}
+
 map<string, string> OptionParser::getOpts(int argc, char* argv[])
 {
   vector<string> empty;

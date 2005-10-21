@@ -35,8 +35,9 @@ PercolationMapper::PercolationMapper(Random& rand,
 
 double PercolationMapper::getExpectedThreshold(const Network* net)
 {
-  NodeIntStats ns;
-  ns.collect(net, &Network::getDegree);
+  IntStats ns;
+  auto_ptr<NodeIterator> ni( net->getNodeIterator() );
+  ns.collect(net, &Network::getDegree, ni.get());
   double k1 = ns.getAverage();
   double k2 = ns.getMoment2();
   return (k1/(k2 - k1));

@@ -1,7 +1,6 @@
 /*
 This program is part of Netmodeler, a library for graph and network
 modeling and simulation.
-Copyright (C) 2005  University of California
 Copyright (C) 2005  P. Oscar Boykin <boykin@pobox.com>, University of Florida
 
 This program is free software; you can redistribute it and/or

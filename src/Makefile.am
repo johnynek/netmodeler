@@ -12,6 +12,7 @@ libnetmod_a_SOURCES = amnesiacmessage.cpp amnesiacmessage.h \
 agglompart.h agglompart.cpp \
 anycastmessage.cpp \
 anycastmessage.h \
+boundingiterator.h \
 broadcastmessage.h \
 broadcastmessage.cpp \
 cache.h \
@@ -46,6 +47,8 @@ doublembnet.h \
 doublembnet.cpp \
 doubleprefatnetwork.cpp \
 doubleprefatnetwork.h \
+doublestats.h \
+doublestats.cpp \
 dynamicnetwork.h \
 edge.cpp \
 edge.h \
@@ -59,6 +62,7 @@ exppreference.cpp \
 exppreference.h \
 expdrv.h \
 expdrv.cpp \
+filterediterator.h \
 gnutellacontent.cpp \
 gnutellacontent.h \
 gnutellafilespacenetwork.cpp \
@@ -74,6 +78,7 @@ inetworkpartitioner.h inetworkpartitioner.cpp \
 inetworkmapper.h \
 inetworkmonitor.h \
 inodeselector.h \
+intstats.h intstats.cpp \
 iterator.h \
 linearpreference.cpp \
 linearpreference.h \
@@ -95,7 +100,6 @@ node.h \
 node.cpp \
 nodefactory.h nodefactory.cpp \
 nodeiterator.h \
-nodeintstats.h nodeintstats.cpp \
 noisystardnet.h \
 noisystardnet.cpp \
 npartitenetwork.cpp  npartitenetwork.h \

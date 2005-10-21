@@ -29,15 +29,23 @@ int main(int argc, char* argv[]) {
 	//Make a network:
 	Ran1Random my_rand, my_rand2(-100), my_rand3(-1000);
 	Network my_net(cin);
-        NodeIntStats ns(true);
-	ns.collect(&my_net, &Network::getDegree);
+	auto_ptr<NodeIterator> ni( my_net.getNodeIterator() );
+	auto_ptr<EdgeIterator> ei( my_net.getEdgeIterator() );
+        IntStats ns;
+	DoubleStats ds;
+	ni->reset();
+	ns.collect(&my_net, &Network::getDegree, ni.get());
 	ns.collectByEdge(&my_net, &Network::getDegree);
 	double h1, h2, h3;
 	ns.getEdgeEntropy(h1,h2,h3);
         cout << "#loaded network" << endl;	
 	cout << "#assortativity: " << ns.getEdgeCorrelation() << endl;
+	ni->reset();
+	cout << "#dcc: " << ds.collect(&my_net, &Network::getClusterCoefficient, ni.get()) << endl;
 	cout << "#cluster coeff: " << my_net.getClusterCoefficient() << endl;
-	cout << "#edgecc: " << my_net.getEdgeCC() << endl;
+	ei->reset();
+	cout << "#edgecc: " << ds.collect(&my_net,&Network::getEdgeCC, ei.get() ) << endl;
+	//cout << "#edgecca: " << my_net.getEdgeCCa() << endl;
 	cout << "#transitivity: " << my_net.getTransitivity() << endl;
 	cout << "#nodes: " << my_net.getNodeSize() << endl;
 	cout	     << "#edges: " << my_net.getEdgeSize() << endl;
