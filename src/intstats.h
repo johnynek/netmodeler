@@ -100,6 +100,22 @@ class IntStats {
       return getAverage();  
     }
     /**
+     * Overloaded method so we don't have to make a NodeIterator
+     * in the most common case
+     */
+    double collect(const Network* net, NodeIntMember mem) {
+      std::auto_ptr<NodeIterator> ni( net->getNodeIterator() );
+      return collect(net, mem, ni.get() );
+    }
+    /**
+     * Overloaded method so we don't have to make a NodeIterator
+     * in the most common case
+     */
+    double collect(const Network* net, EdgeIntMember mem) {
+      std::auto_ptr<EdgeIterator> ni( net->getEdgeIterator() );
+      return collect(net, mem, ni.get() );
+    }
+    /**
      * Collect the join statistics by looking at the values at either
      * end of an edge.  For this to be useful, you must be keeping
      * distributions (see the constructor).  

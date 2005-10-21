@@ -308,6 +308,7 @@ class Network {
 	 * @return the expected transitivity of the graph
 	 */
 	virtual double getExpectedTransitivity() const;
+
 	/**
 	 * @return a node iterator that iterates over a node's neighbors
 	 */

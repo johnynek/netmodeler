@@ -17,12 +17,12 @@ int main(int argc, char* argv[])
 
 
   IntStats ns;
-  std::auto_ptr<NodeIterator> ni( net->getNodeIterator() );
-  //ns.collect(net.get(), &Network::getTriangles, ni.get());
-  ns.collect(net.get(), &Network::getDegree, ni.get());
-  //ns.collect(net.get(), &Network::getAssociatedNumber, ni.get());
+  //ns.collect(net.get(), &Network::getTriangles);
+  ns.collect(net.get(), &Network::getDegree);
+  //ns.collect(net.get(), &Network::getAssociatedNumber;
   //ns.collectByEdge(net.get(), &Network::getTriangles);
-  ns.collectByEdge(net.get(), &Network::getDegree);
+  //ns.collectByEdge(net.get(), &Network::getDegree);
+  ns.collectByEdge(net.get(), &Network::getAssociatedNumber);
   double h1, h2, h3;
   ns.getEdgeEntropy(h1, h2, h3);
   std::cout << "h1: " << h1 << " h2: " << h2 << " h3: " << h3 << std::endl;
