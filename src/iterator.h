@@ -50,9 +50,9 @@ class Iterator {
      * You should copy this, then move to the next position before trying
      * to remove it.
      * @throw an exception if this is called before MoveNext is called once.
-     * @return the pointer that the iterator currently points to
+     * @return a reference that the iterator currently points to
      * */
-    virtual T* current() = 0;
+    virtual const T& current() = 0;
     /**
      * Go to the next item.  Return true if there is another item
      * This must be called before you first call Current.  So,

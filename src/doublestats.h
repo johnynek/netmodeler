@@ -43,7 +43,7 @@ class DoubleStats {
      * collecting for the edges and nodes is identical, use a template
      */
     template<class N, class Argname>
-    double collect(const N* net, double (N::*mem)(Argname*) const,
+    double collect(const N* net, double (N::*mem)(Argname) const,
 	    Iterator<Argname>* ni)
     {
       _calls = 0;
@@ -62,7 +62,7 @@ class DoubleStats {
       //Now its time to iterate:
       bool first = true;
       while( ni->moveNext() ) {
-        Argname* this_node = ni->current();
+        const Argname& this_node = ni->current();
         double val = (net->*mem)(this_node);
         //Check to see if this is the max:
         if( first || ( val > _max ) ) {

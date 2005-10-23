@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
   //Must clone because the filter will delete the iterator when we are done
   std::cout << "Round 2" << std::endl;
   Fittest fittest(net);
-  FilteredIterator<Fittest,Node> fi2(ni2, &fittest, &Fittest::Test);
+  FilteredIterator<Fittest,Node*> fi2(ni2, &fittest, &Fittest::Test);
   while( fi2.moveNext() ) {
     Node* n = fi2.current();
     std::cout << "Node: " << n->toString() << " has: " << net->getTriangles(n)

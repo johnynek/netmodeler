@@ -41,7 +41,7 @@ class BoundingIterator : public Iterator<Arg> {
      * @param eq true if we should include equal
      */
     BoundingIterator(Iterator<Arg>* it, C* obj,
-		     Ret (C::*methpoint) (Arg*) const,
+		     Ret (C::*methpoint) (Arg) const,
 		     Ret value, bool gt, bool eq)
     {
       _it = it;
@@ -65,7 +65,7 @@ class BoundingIterator : public Iterator<Arg> {
 		                             _obj, _methp, _val, _gt, _eq);
     }
 
-    virtual Arg* current() {
+    virtual const Arg& current() {
       return _it->current();
     }
 
@@ -73,7 +73,7 @@ class BoundingIterator : public Iterator<Arg> {
       bool n = _it->moveNext();
       bool cont = true;
       while( n && cont ) {
-	Arg* argument = _it->current();
+	const Arg& argument = _it->current();
         Ret rv = (_obj->*_methp)(argument);
 	if( _eq ) {
           //We should accept values which are equal, so stop if equal:
@@ -121,7 +121,7 @@ class BoundingIterator : public Iterator<Arg> {
   protected:
     Iterator<Arg>* _it;
     C* _obj;
-    Ret (C::*_methp)(Arg*) const;
+    Ret (C::*_methp)(Arg) const;
     Ret _val;
     bool _gt;
     bool _eq;
@@ -129,10 +129,10 @@ class BoundingIterator : public Iterator<Arg> {
 
 //Here are some useful typedefs:
 
-typedef BoundingIterator<Network, double, Edge> NDEBIterator;
-typedef BoundingIterator<Network, int, Edge> NIEBIterator;
-typedef BoundingIterator<Network, double, Node> NDNBIterator;
-typedef BoundingIterator<Network, int, Node> NINBIterator;
+typedef BoundingIterator<Network, double, Edge*> NDEBIterator;
+typedef BoundingIterator<Network, int, Edge*> NIEBIterator;
+typedef BoundingIterator<Network, double, Node*> NDNBIterator;
+typedef BoundingIterator<Network, int, Node*> NINBIterator;
 
 }
 #endif

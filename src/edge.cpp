@@ -44,7 +44,7 @@ bool Edge::connects (Node * start, Node * end) const
     ((first == end) && (second == start));
 }
 
-Node* Edge::getOtherNode (Node * start) const
+Node* const & Edge::getOtherNode (Node * start) const
 {
   if (start == first) {
     return second;

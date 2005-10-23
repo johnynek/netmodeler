@@ -51,7 +51,7 @@ class IntStats {
      * @return average, which is a common statistic we want to look at
      */
     template<typename N, typename Argname>
-    double collect(const N* net, int (N::*mem)(Argname* ) const, Iterator<Argname>* ni)
+    double collect(const N* net, int (N::*mem)(Argname ) const, Iterator<Argname>* ni)
     {
       _dist.clear();
       _calls = 0;
@@ -71,7 +71,7 @@ class IntStats {
       //Now its time to iterate:
       bool first = true;
       while( ni->moveNext() ) {
-        Argname* this_node = ni->current();
+        Argname this_node = ni->current();
         int val = (net->*mem)(this_node);
         //Check to see if this is the max:
         if( first || ( val > _max ) ) {
@@ -120,7 +120,7 @@ class IntStats {
      * end of an edge.  For this to be useful, you must be keeping
      * distributions (see the constructor).  
      */
-    void collectByEdge(const Network* net, NodeIntMember mem, Iterator<Edge>* ei=0);
+    void collectByEdge(const Network* net, NodeIntMember mem, EdgeIterator* ei=0);
     /**
      * @return the number of nodes we iterated over
      */

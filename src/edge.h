@@ -67,7 +67,7 @@ namespace Starsky {
     /**
      * @return first if passed second, second if passed first, and 0 otherwise
      */
-    Node * getOtherNode (Node * start) const;
+    Node* const & getOtherNode (Node * start) const;
     /**
      * Returns the attributes of this edge.  Useful in EdgeFactories
      */

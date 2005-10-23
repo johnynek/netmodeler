@@ -1518,7 +1518,7 @@ NodeIterator* Network::NetNodeIterator::clone()
   return ni;
 }
 
-Node* Network::NetNodeIterator::current()
+Node* const & Network::NetNodeIterator::current()
 {
   
   if( !_called_movenext ) {
@@ -1556,7 +1556,7 @@ EdgeIterator* Network::NetEdgeIterator::clone()
   return ne;
 }
 
-Edge* Network::NetEdgeIterator::current()
+Edge* const & Network::NetEdgeIterator::current()
 {
   
   if( !_called_movenext ) {
@@ -1651,7 +1651,7 @@ NodeIterator* Network::NeighborIterator::clone()
   return ne;
 }
 
-Node* Network::NeighborIterator::current()
+Node* const & Network::NeighborIterator::current()
 {
   return (*_eit)->getOtherNode( _neighbors_of );
 }
@@ -1684,7 +1684,7 @@ EdgeIterator* Network::NeighborEdgeIterator::clone()
   return ne;
 }
 
-Edge* Network::NeighborEdgeIterator::current()
+Edge* const & Network::NeighborEdgeIterator::current()
 {
   return (*_eit);
 }

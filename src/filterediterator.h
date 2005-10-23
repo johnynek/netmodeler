@@ -37,7 +37,7 @@ class FilteredIterator : public Iterator<Arg> {
      * @param obj the object to call the function on
      * @param methpoint the method to execute on obj, we skip this item if false
      */
-    FilteredIterator(Iterator<Arg>* it, C* obj, bool (C::*methpoint) (Arg*))
+    FilteredIterator(Iterator<Arg>* it, C* obj, bool (C::*methpoint) (Arg))
     {
       _it = it;
       _obj = obj;
@@ -56,7 +56,7 @@ class FilteredIterator : public Iterator<Arg> {
       return new FilteredIterator<C,Arg>(new_it, _obj, _methp);
     }
 
-    virtual Arg* current() {
+    virtual const Arg& current() {
       return _it->current();
     }
 
@@ -64,7 +64,7 @@ class FilteredIterator : public Iterator<Arg> {
       bool n = _it->moveNext();
       bool cont = true;
       while( n && cont ) {
-	Arg* argument = _it->current();
+	const Arg& argument = _it->current();
 	//Keep going if we should not return this one
 	cont = ((_obj->*_methp)(argument) == false);
 	if( cont ) {
@@ -81,7 +81,7 @@ class FilteredIterator : public Iterator<Arg> {
   protected:
     Iterator<Arg>* _it;
     C* _obj;
-    bool (C::*_methp)(Arg*);
+    bool (C::*_methp)(Arg);
 };
 }
 #endif

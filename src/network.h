@@ -61,11 +61,11 @@ namespace Starsky {
 /**
  * The NodeIterator is used a lot by this class, so we typedef it here
  */
-typedef Iterator<Node> NodeIterator;
+typedef Iterator<Node*> NodeIterator;
 /**
  * The EdgeIterator is used a lot by this class, so we typedef it here
  */
-typedef Iterator<Edge> EdgeIterator;
+typedef Iterator<Edge*> EdgeIterator;
 
 /**
  * Pointer to member function which takes a Node and returns an int
@@ -505,7 +505,7 @@ class Network {
 	    class NetNodeIterator : NodeIterator {
 	      public: 
 		virtual NodeIterator* clone();
-                virtual Node* current();
+                virtual Node* const & current();
 	        virtual bool moveNext();
 	        virtual void reset();
 		friend class Network;
@@ -522,7 +522,7 @@ class Network {
 	    class NetEdgeIterator : EdgeIterator {
 	      public: 
                 virtual EdgeIterator* clone();
-                virtual Edge* current();
+                virtual Edge* const & current();
 	        virtual bool moveNext();
 	        virtual void reset();
 		friend class Network;
@@ -541,7 +541,7 @@ class Network {
 	    class NeighborIterator : NodeIterator {
 	      public: 
 		virtual NodeIterator* clone();
-                virtual Node* current();
+                virtual Node* const & current();
 	        virtual bool moveNext();
 	        virtual void reset();
 		friend class Network;
@@ -558,7 +558,7 @@ class Network {
 	    class NeighborEdgeIterator : EdgeIterator {
 	      public: 
                 virtual EdgeIterator* clone();
-                virtual Edge* current();
+                virtual Edge* const & current();
 	        virtual bool moveNext();
 	        virtual void reset();
 		friend class Network;
