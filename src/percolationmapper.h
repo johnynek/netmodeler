@@ -26,6 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <random.h>
 #include <inetworkmapper.h>
 #include <intstats.h>
+#include <filterediterator.h>
 #include <memory>
 
 namespace Starsky {
@@ -57,6 +58,21 @@ class PercolationMapper : public INetworkMapper {
     double _bond_p;
     double _site_p;
     Random& _rand;
+
+    /**
+     * This is a class for use with a FilteredIterator that
+     * decides which Edges/Nodes to remove at random
+     */
+    
+    class PercFilter {
+     public: 
+      PercFilter(Random& r);
+      Random& _rand;
+      double _prob;
+      void setProb(double p);
+      bool removeEdge(Edge* e);
+      bool removeNode(Node* n);
+    };
 	
 };
 	

@@ -44,38 +44,22 @@ double PercolationMapper::getExpectedThreshold(const Network* net)
 
 void PercolationMapper::map(Network* net)
 {
-  Network::NodePSet ndel_set;
-  auto_ptr<NodeIterator> ni( net->getNodeIterator() );
-  while( ni->moveNext() ) 
-  {
-    Node* this_node = ni->current();
-    //getBool returns true with probability of the argument
-    if( !_rand.getBool( _site_p ) ) {
-      ndel_set.insert( this_node );
-    }
+  PercFilter pf(_rand);
+  if( _site_p < 1.0 ) {
+    pf.setProb(_site_p);
+    FilteredIterator<PercFilter, Node*> nfi(net->getNodeIterator(), &pf,
+		                            &PercFilter::removeNode);
+    net->remove(&nfi);
   }
-  Network::NodePSet::iterator dnit;
-  for(dnit = ndel_set.begin(); dnit != ndel_set.end(); dnit++)
-  {
-    //Delete these nodes:
-    net->remove( *dnit );
-  }
-  //Free up this memory:
-  ndel_set.clear();
-
-  //Do the same thing for the edges: 
-  Network::EdgeSet del_set;
-  auto_ptr<EdgeIterator> ei( net->getEdgeIterator() );
-  while( ei->moveNext() ) {
-    Edge* this_edge = ei->current();
-    if( !_rand.getBool( _bond_p ) ) {
-      //We delete this one:
-      del_set.insert( this_edge );
-    }
-  }
-  //Actually remove the edges:
-  Network::EdgeSet::iterator e_it;
-  for(e_it = del_set.begin(); e_it != del_set.end(); e_it++) {
-    net->remove( *e_it );
+  if( _bond_p < 1.0 ) {
+    pf.setProb(_bond_p);
+    FilteredIterator<PercFilter, Edge*> efi(net->getEdgeIterator(), &pf,
+		                            &PercFilter::removeEdge);
+    net->remove(&efi);
   }
 }
+
+PercolationMapper::PercFilter::PercFilter(Random& r) : _rand(r) { }
+void PercolationMapper::PercFilter::setProb(double p) { _prob = p; }
+bool PercolationMapper::PercFilter::removeEdge(Edge* e) { return !_rand.getBool(_prob); }
+bool PercolationMapper::PercFilter::removeNode(Node* n) { return !_rand.getBool(_prob); }
