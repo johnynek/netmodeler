@@ -783,12 +783,7 @@ EdgeIterator* Network::getEdgeIterator(Node* n) const
     //No such edge:
     return 0;
   }
-  Network::NeighborEdgeIterator* ei = new Network::NeighborEdgeIterator(); 
-  ei->_beg = neit->second.begin();
-  ei->_end = neit->second.end();
-  ei->_neighbors_of = n;
-  ei->reset();
-  return ei;
+  return new StlIterator<Network::EdgeSet, Edge*>(neit->second);
 }
 
 Edge* Network::getEdgePtr(const Edge& edge) const {
@@ -1264,9 +1259,7 @@ int Network::remove(NodeIterator* nodes) {
      * then we remove the edges.
      */
     std::list<Node*> _to_remove;
-    while( nodes->moveNext() ) {
-      _to_remove.push_back( nodes->current() );
-    }
+    nodes->pushInto( _to_remove );
     std::list<Node*>::iterator rit;
     for(rit = _to_remove.begin(); rit != _to_remove.end(); rit++)
     {
@@ -1283,9 +1276,7 @@ int Network::remove(EdgeIterator* edges) {
      * then we remove the edges.
      */
     std::list<Edge*> _to_remove;
-    while( edges->moveNext() ) {
-      _to_remove.push_back( edges->current() );
-    }
+    edges->pushInto(_to_remove);
     std::list<Edge*>::iterator rit;
     for(rit = _to_remove.begin(); rit != _to_remove.end(); rit++)
     {
@@ -1668,39 +1659,6 @@ bool Network::NeighborIterator::moveNext()
 }
 
 void Network::NeighborIterator::reset()
-{
-  _eit = _beg;
-  _moved_to_first = false;
-}
-
-EdgeIterator* Network::NeighborEdgeIterator::clone()
-{
-  NeighborEdgeIterator* ne = new NeighborEdgeIterator();
-  ne->_neighbors_of = _neighbors_of;
-  ne->_eit = _eit;
-  ne->_beg = _beg;
-  ne->_end = _end;
-  ne->_moved_to_first = _moved_to_first;
-  return ne;
-}
-
-Edge* const & Network::NeighborEdgeIterator::current()
-{
-  return (*_eit);
-}
-
-bool Network::NeighborEdgeIterator::moveNext()
-{
-  if( _moved_to_first ) {
-    _eit++;
-  }
-  else {
-    _moved_to_first = true;
-  }
-  return ( _eit != _end );
-}
-
-void Network::NeighborEdgeIterator::reset()
 {
   _eit = _beg;
   _moved_to_first = false;

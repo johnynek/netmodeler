@@ -27,6 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "node.h"
 #include "edge.h"
 #include "iterator.h"
+#include "stliterator.h"
 #include "inetworkmonitor.h"
 #include "superstring.h"
 #include <set>
@@ -552,24 +553,6 @@ class Network {
 		EdgeSet::const_iterator _end;
 		bool _moved_to_first; //Start before the first
 	    };
-	    /**
-	     * This allows us ot iterate over the edges connected to a node
-	     */
-	    class NeighborEdgeIterator : EdgeIterator {
-	      public: 
-                virtual EdgeIterator* clone();
-                virtual Edge* const & current();
-	        virtual bool moveNext();
-	        virtual void reset();
-		friend class Network;
-	      protected:
-	        Node* _neighbors_of;  //This is the node that we are looking at neighbors of
-		EdgeSet::const_iterator _eit; //Iterator for the edges of this node
-		EdgeSet::const_iterator _beg;
-		EdgeSet::const_iterator _end;
-		bool _moved_to_first; //Start before the first
-	    };
-	    
 	private:
             /**
 	     * Here is our current implementation.  Not even subclasses

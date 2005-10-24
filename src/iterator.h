@@ -54,6 +54,17 @@ class Iterator {
      * */
     virtual const T& current() = 0;
     /**
+     * Starting from the current position, insert all the
+     * elements into the given container.  This container
+     * should support insert like STL sets.
+     */
+    template<typename C>
+    void insertInto(C& c) {
+      while( moveNext() ) {
+        c.insert( current() );
+      }
+    }
+    /**
      * Go to the next item.  Return true if there is another item
      * This must be called before you first call Current.  So,
      * you can think of the Iterator as positioned BEFORE the
@@ -62,6 +73,17 @@ class Iterator {
      * work.
      */
     virtual bool moveNext() = 0;
+    /**
+     * Starting from the current position, insert all the
+     * elements into the given container.  This container
+     * should support push_back like many STL containers.
+     */
+    template<typename C>
+    void pushInto(C& c) {
+      while( moveNext() ) {
+        c.push_back( current() );
+      }
+    }
     /**
      * Go back to the start of the network.
      * Must call MoveNext before we can call current again

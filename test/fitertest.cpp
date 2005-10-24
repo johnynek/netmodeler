@@ -44,4 +44,20 @@ int main(int argc, char* argv[])
     std::cout << "Node: " << n->toString() << " has: " << net->getTriangles(n)
 	    << " triangles" << std::endl;
   }
+
+  //Stl test:
+  fi2.reset();
+  std::list<Node*> node_list;
+  fi2.pushInto(node_list);
+  StlIterator<std::list<Node*>, Node*> stlit(node_list);
+  while( stlit.moveNext() ) {
+    std::cout << stlit.current()->toString() << std::endl;
+  }
+  std::set<Node*> node_set;
+  stlit.reset();
+  stlit.insertInto(node_set);
+  StlIterator<std::list<Node*>, Node*> stlit2(node_list);
+  while( stlit2.moveNext() ) {
+    std::cout << stlit2.current()->toString() << std::endl;
+  }
 }
