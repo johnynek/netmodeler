@@ -56,8 +56,26 @@ int main(int argc, char* argv[])
   std::set<Node*> node_set;
   stlit.reset();
   stlit.insertInto(node_set);
-  StlIterator<std::list<Node*>, Node*> stlit2(node_list);
-  while( stlit2.moveNext() ) {
-    std::cout << stlit2.current()->toString() << std::endl;
+  Iterator<Node*>* stlit2 = new StlIterator<std::list<Node*>, Node*>(node_list);
+  while( stlit2->moveNext() ) {
+    std::cout << stlit2->current()->toString() << std::endl;
   }
+  delete stlit2;
+  std::cout << "StlPIterator test:" << std::endl;
+  std::set<Node*>* ns = new std::set<Node*>( node_set );
+  Iterator<Node*>* pstl1 = new StlPIterator<std::set<Node*>, Node*>(ns);
+  while( pstl1->moveNext() ) {
+    std::cout << pstl1->current()->toString() << std::endl;
+  }
+  std::cout << "Now copy" << std::endl;
+  Iterator<Node*>* pstl2 = pstl1->clone();
+  pstl2->reset();
+  std::cout << "Node delete the first" << std::endl;
+  delete pstl1;
+  while( pstl2->moveNext() ) {
+    std::cout << pstl2->current()->toString() << std::endl;
+  }
+  delete pstl2;
+  //This memory should be deleted by now, so this might (should) segfault
+  std::cout << "Node size is: " << std::endl <<  ns->size() << std::endl;
 }

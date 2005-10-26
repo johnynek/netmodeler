@@ -56,17 +56,14 @@ Network* NetworkFactory::create(istream& in)
     Node* second = 0;
     first = _nf->create(result[0]);
     net->add( first ); 
-    if( result.size() == 1 ) { //There was no neighbors
+    if( result.size() == 1 ) { //There were no neighbors
       continue;
     }
     //There is a list of second nodes:
-    result = result[1].split(" ");
-    vector<SuperString>::iterator sit;
-    for(sit = result.begin();
-	sit != result.end();
-	sit++) {
+    auto_ptr< Iterator<SuperString> > si( result[1].spliterator(" ") );
+    while( si->moveNext() ) {
       second = 0;
-      second = _nf->create( *sit );
+      second = _nf->create( si->current() );
       net->add( second );
       Edge* e = 0;
       if( result.size() > 2 ) {

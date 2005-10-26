@@ -24,6 +24,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <string>
 #include <vector>
+#include "stliterator.h"
+#include "iterator.h"
 
 namespace Starsky {
 
@@ -50,6 +52,12 @@ class SuperString : public std::string {
 	 * @return a vector of SuperString.
 	 */
 	std::vector<SuperString> split(const std::string& delim) const;
+	/**
+	 * @return an iterator of the strings in this split
+	 */
+	Iterator<SuperString>* spliterator(const std::string& delim) const;
+    protected:
+        std::vector<SuperString>* psplit(const std::string& delim) const;
 };
 	
 }
