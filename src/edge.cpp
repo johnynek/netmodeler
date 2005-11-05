@@ -53,7 +53,8 @@ Node* const & Edge::getOtherNode (Node * start) const
     return first;
   }
   else {
-    return 0;
+    //This does not make sense
+    throw std::exception();
   }
 }
 

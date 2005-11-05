@@ -25,7 +25,9 @@ do the following:
 First compile your my.cpp:
 g++ -c my.cpp -I /path/to/headers/
 Then link it:
-g++ -o test my.o /path/to/library/netmodlib.a
+g++ -o test my.o /path/to/library/libnetmod.a
+
+The default path is src/libnetmod.a
 
 now, the executible "test" should be your code.
 

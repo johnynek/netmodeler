@@ -448,7 +448,7 @@ class Network {
 #if 0
 	virtual	bool Network::Merge(const Network& aNet, int aStart);
 #endif
-
+    
     protected:
 	/**
 	 * This is used by the constructor which
