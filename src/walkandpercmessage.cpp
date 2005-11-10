@@ -33,12 +33,18 @@ WalkAndPercMessage::WalkAndPercMessage(Random& r, double p, int walkttl, int per
  */
 Network* WalkAndPercMessage::visit(Node* n, Network& net) {
 
-    Network* new_net = _ac_mes.visit(n,net);
-    auto_ptr<NodeIterator> ni( new_net->getNodeIterator() );
+    Network* new_net = net.newNetwork();
+    auto_ptr<Network> tmp_net( _ac_mes.visit(n,net) );
+    auto_ptr<NodeIterator> ni( tmp_net->getNodeIterator() );
     while( ni->moveNext() ) {
       Node* this_node = ni->current();
-      auto_ptr<Network> tmp_net( PercolationMessage::visit(this_node,net) );
-      new_net->add( tmp_net.get() );
+      if( false == new_net->has(this_node) ) {
+	//Don't visit twice...
+        auto_ptr<Network> tmp_net( PercolationMessage::visit(this_node,net) );
+        new_net->add( tmp_net.get() );
+      }
     }
+    //Add the random walk:
+    new_net->add( tmp_net.get() );
     return new_net;
 }
