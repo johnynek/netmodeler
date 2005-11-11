@@ -4,11 +4,10 @@ netmodeler.h :
 	rm -f netmodeler.h;
 	ls *.h | sed -e 's/\(.*\)/#include "\1"/' > netmodeler.h
 
-noinst_LIBRARIES = libnetmod.a
 noinst_PROGRAMS = netmodeler
 netmodeler_SOURCES = main.cpp
-netmodeler_LDADD = libnetmod.a
-libnetmod_a_SOURCES = amnesiacmessage.cpp amnesiacmessage.h \
+lib_LTLIBRARIES = libnetmod.la
+libnetmod_la_SOURCES = amnesiacmessage.cpp amnesiacmessage.h \
 agglompart.h agglompart.cpp \
 anycastmessage.cpp \
 anycastmessage.h \
@@ -166,5 +165,3 @@ weightededge.cpp \
 weightednetwork.h \
 weightednetwork.cpp \
 weightednetworkfactory.h weightednetworkfactory.cpp
-
-

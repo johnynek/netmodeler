@@ -1,6 +1,6 @@
 #!/bin/sh
 aclocal -I config
-autoconf
+autoconf -I m4
 automake --add-missing
 ./configure
 make

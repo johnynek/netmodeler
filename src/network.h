@@ -71,19 +71,19 @@ typedef Iterator<Edge*> EdgeIterator;
 /**
  * Pointer to member function which takes a Node and returns an int
  */
-typedef int (Network::*NodeIntMember)(Node*) const;
+typedef int (Starsky::Network::*NodeIntMember)(Starsky::Node*) const;
 /**
  * Pointer to member function which takes a Node and returns an double
  */
-typedef double (Network::*NodeDoubMember)(Node*) const;
+typedef double (Starsky::Network::*NodeDoubMember)(Starsky::Node*) const;
 /**
  * Pointer to member function which takes an Edge and returns an int
  */
-typedef int (Network::*EdgeIntMember)(Edge*) const;
+typedef int (Starsky::Network::*EdgeIntMember)(Starsky::Edge*) const;
 /**
  * Pointer to member function which takes an Edge and returns a double
  */
-typedef double (Network::*EdgeDoubMember)(Edge*) const;
+typedef double (Starsky::Network::*EdgeDoubMember)(Starsky::Edge*) const;
 
 
 class Network {

@@ -1,0 +1,9 @@
+This is the swig support for a python version of the library.  To use the
+library, you need three things in the directory of your script:
+
+libnetmod.so
+_pynetmod.so
+pynetmod.py
+
+You can find libnetmod.so in src/.libs/libnetmod.so
+You can find _pynetmod.so in pynm/.libs/_pynetmod.so

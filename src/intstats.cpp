@@ -30,12 +30,34 @@ IntStats::IntStats(bool keep_dist,
 {
   _min_net = 0;
   _max_net = 0;
+
+  //Initialize the member table:
+  _nmems["getAssociatedNumber"] = &Network::getAssociatedNumber;
+  _nmems["getDegree"] = &Network::getDegree;
+  _nmems["getTriangles"] = &Network::getTriangles;
+  _nmems["getWedges"] = &Network::getWedges;
 }
 
 IntStats::~IntStats()
 {
   if( _min_net != 0 ) { delete _min_net; }
   if( _max_net != 0 ) { delete _max_net; }
+}
+
+double IntStats::collectN(const Network* net, std::string method, NodeIterator* ni)
+{
+  std::map<std::string, NodeIntMember>::const_iterator it = _nmems.find(method);
+  if( it != _nmems.end() ) {
+    NodeIntMember mem = it->second;
+    std::auto_ptr<NodeIterator> apni( net->getNodeIterator() );
+    if( ni == 0 ) {
+      ni = apni.get();
+    }
+    return collect(net, mem, ni);
+  }
+  else {
+    throw std::exception();
+  }
 }
 
 void IntStats::collectByEdge(const Network* net, NodeIntMember mem, EdgeIterator* ei)
@@ -65,6 +87,23 @@ void IntStats::collectByEdge(const Network* net, NodeIntMember mem, EdgeIterator
   }
   if( del_ei ) {
     delete ei;
+  }
+}
+
+void IntStats::collectByEdge(const Network* net, std::string method, EdgeIterator* ei)
+{
+  std::map<std::string, NodeIntMember>::const_iterator it = _nmems.find(method);
+  if( it != _nmems.end() ) {
+    NodeIntMember mem = it->second;
+    std::auto_ptr<EdgeIterator> apei( net->getEdgeIterator() );
+    if( ei == 0 ) {
+      ei = apei.get();
+    }
+    collectByEdge(net, mem, ei);
+    return;
+  }
+  else {
+    throw std::exception();
   }
 }
 

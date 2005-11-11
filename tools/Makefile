@@ -4,7 +4,7 @@ PROGS =  p2pmodeler spamgraph comdot graph_deg_dist hoodofmax \
 LIBPROGS = comgraph
 LIBS = optionparser.o
 NMDIR = ../src
-LIBNM = $(NMDIR)/libnetmod.a
+LIBNM = $(NMDIR)/.libs/libnetmod.a
 
 all : $(LIBS) $(LIBPROGS) $(PROGS) 
 

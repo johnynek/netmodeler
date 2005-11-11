@@ -108,6 +108,13 @@ class IntStats {
       return collect(net, mem, ni.get() );
     }
     /**
+     * This is exactly like the above, but instead of calling the function
+     * by using C++ syntax, you use "methodname".  This is a hack to make
+     * wrapping the library easier from other languages.  Note, function
+     * has to be in the table this class keeps.
+     */
+    double collectN(const Network* net, std::string methodname, NodeIterator* ni = 0);
+    /**
      * Overloaded method so we don't have to make a NodeIterator
      * in the most common case
      */
@@ -116,11 +123,16 @@ class IntStats {
       return collect(net, mem, ni.get() );
     }
     /**
-     * Collect the join statistics by looking at the values at either
+     * Collect the joint statistics by looking at the values at either
      * end of an edge.  For this to be useful, you must be keeping
      * distributions (see the constructor).  
      */
     void collectByEdge(const Network* net, NodeIntMember mem, EdgeIterator* ei=0);
+    /**
+     * Same as the above but we use a string to get the methodname.
+     * Here to make wrapping easier
+     */
+    void collectByEdge(const Network* net, std::string methodname, EdgeIterator* ei=0);
     /**
      * @return the number of nodes we iterated over
      */
@@ -201,6 +213,8 @@ class IntStats {
     std::map<int, int> _dist;
     ///Keeps the number of edges which go from valuex to valuey
     std::map< std::pair<int, int>, int> _edge_dist;
+    //Here is a map of the functions:
+    std::map<std::string, NodeIntMember> _nmems;
     bool _keep_dist;
     bool _keep_max_net;
     bool _keep_min_net;
