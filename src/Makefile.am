@@ -5,7 +5,7 @@ netmodeler.h :
 	ls *.h | sed -e 's/\(.*\)/#include "\1"/' > netmodeler.h
 
 noinst_PROGRAMS = netmodeler
-netmodeler_SOURCES = main.cpp
+netmodeler_SOURCES = main.cpp netmodeler.h
 netmodeler_LDADD = libnetmod.la
 lib_LTLIBRARIES = libnetmod.la
 libnetmod_la_SOURCES = amnesiacmessage.cpp amnesiacmessage.h \
