@@ -50,8 +50,8 @@ int main(int argc, char* argv[]) {
   set<Network*> spamg, hamg;
   
      ComponentPart cp;
-     set<Network*>* components = cp.partition(graph);
-     set<Network*>::iterator comp_it;
+     vector<Network*>* components = cp.partition(graph);
+     vector<Network*>::iterator comp_it;
      Edge* cut_edge = 0;
      while( components->size() > 0 ) {
        //Choose the biggest graph
@@ -81,14 +81,14 @@ int main(int argc, char* argv[]) {
            else {
              //Ambiguous
              map<Edge*, double> bet;
-             set<Network*>* split = 0;
 	     Network* this_comp = *comp_it;
              cut_edge = this_comp->getEdgeBetweenness(bet);
              this_comp->remove( cut_edge->first );
              this_comp->remove( cut_edge->second );
 	     
-             split = cp.partition(*this_comp);
-             components->insert( split->begin(), split->end() );
+             vector<Network*>* split = cp.partition(*this_comp);
+             components->insert(components->end(), split->begin(), split->end());
+	     cp.deletePartition( split );
            }
          }
        }
@@ -98,15 +98,16 @@ int main(int argc, char* argv[]) {
 
   //Print out the nodes in each spamg and hamg
   Network::NodePSet::const_iterator nit;
-  for(comp_it = spamg.begin(); comp_it != spamg.end(); comp_it++) {
-    auto_ptr<NodeIterator> ni2( (*comp_it)->getNodeIterator() );
+  set<Network*>::iterator netsetit;
+  for(netsetit = spamg.begin(); netsetit != spamg.end(); netsetit++) {
+    auto_ptr<NodeIterator> ni2( (*netsetit)->getNodeIterator() );
     while( ni2->moveNext() ) {
       Node* this_node = ni2->current();
       spam << this_node->toString() << endl;
     }
   }
-  for(comp_it = hamg.begin(); comp_it != hamg.end(); comp_it++) {
-    auto_ptr<NodeIterator> ni2( (*comp_it)->getNodeIterator() );
+  for(netsetit = hamg.begin(); netsetit != hamg.end(); netsetit++) {
+    auto_ptr<NodeIterator> ni2( (*netsetit)->getNodeIterator() );
     while( ni2->moveNext() ) {
       Node* this_node = ni2->current();
       ham << this_node->toString() << endl;

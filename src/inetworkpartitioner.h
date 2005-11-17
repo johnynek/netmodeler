@@ -47,24 +47,25 @@ struct networkptr_gt : public std::binary_function<Network*, Network*, bool> {
 class INetworkPartitioner {
 
   public:
-   virtual void deletePartition(std::set<Network*>*  part);
-
    /**
-    * @return the largest partition in the set.
+    * Delete the memory of this partition.  If you want to "keep"
+    * a component network, just set that entry to 0 or remove it
+    * from the list.
     */
-   Network* getLargest(std::set<Network*>* part);
-   
+   virtual void deletePartition(std::vector<Network*>*  part);
+
   /**
    * Interface which Community finding algorithms
    * can subclass
    */
-   double modularityOf(std::set<Network*>* partition, const Network& orig);
+   double modularityOf(std::vector<Network*>* partition, const Network& orig);
    /**
     * The caller of this function should delete this memory
-    * when done (Network* and set<>*)
+    * when done (Network* and vector<>*)
     * deletePartition does this for you.
+    * This vector is sorted from largest to smallest ([0] is the biggest)
     */
-   virtual std::set<Network*>* partition(const Network& input) = 0;
+   virtual std::vector<Network*>* partition(const Network& input) = 0;
    
    /**
     * Uses the Frobenius norm to compute |A - B|, |A|, and |B| for
@@ -76,7 +77,7 @@ class INetworkPartitioner {
     * If one set of nodes is larger than the other, the matrix is 0
     * for any missing nodes.
     */
-   virtual long distance(std::set<Network*>* A, std::set<Network*>* B,
+   virtual long distance(std::vector<Network*>* A, std::vector<Network*>* B,
 		        long& norm_a, long& norm_b);
     /**
      * Use the weights of the edges in computing modularity

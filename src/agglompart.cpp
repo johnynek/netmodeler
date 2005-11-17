@@ -28,7 +28,7 @@ AgglomPart::AgglomPart() {
   _weighted = false;
 }
 
-set<Network*>* AgglomPart::partition(const Network& input) {
+vector<Network*>* AgglomPart::partition(const Network& input) {
 
   vector<double> q_t;
   vector< pair<int,int> > joins;
@@ -174,7 +174,7 @@ int AgglomPart::getCommunities(const Network& net, std::vector<double>& q_t,
   return step_max;
 }
 
-set<Network*>* AgglomPart::getCommunity(const Network& net, int step,
+vector<Network*>* AgglomPart::getCommunity(const Network& net, int step,
 		    const std::vector< std::pair<int, int> >& joins)
 {
   //Remake the node_community structure:
@@ -205,13 +205,13 @@ set<Network*>* AgglomPart::getCommunity(const Network& net, int step,
     comm_node[ join2 ]->clear();
   }
   //Prepare the output:
-  set< Network* >* out = new set<Network*>();
+  vector< Network* >* out = new vector<Network*>();
   for(int k = 0; k < comm_node.size(); k++) {
     if( comm_node[k]->getNodeSize() > 0 ) {
       //Add the edges 
       comm_node[k]->addJoiningEdgesFrom( &net );
       //Copy the pointer to the output:
-      out->insert( comm_node[k] );
+      out->push_back( comm_node[k] );
       comm_node[k] = 0;
     }
     else {
@@ -220,6 +220,8 @@ set<Network*>* AgglomPart::getCommunity(const Network& net, int step,
       comm_node[k] = 0;
     }
   }
+  //Sort the output:
+  sort(out->begin(), out->end(), networkptr_gt());
   return out;
 }
 

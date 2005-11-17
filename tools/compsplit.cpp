@@ -32,10 +32,10 @@ int main(int argc, char* argv[]) {
   Network my_net(input);
  
   ComponentPart cp;
-  set<Network*>* components = cp.partition(my_net);
-  set<Network*>::const_reverse_iterator comp_it;
+  vector<Network*>* components = cp.partition(my_net);
+  vector<Network*>::const_iterator comp_it;
   int component = 0;
-  for(comp_it = components->rbegin(); comp_it != components->rend(); comp_it++) {
+  for(comp_it = components->begin(); comp_it != components->end(); comp_it++) {
     stringstream name;
     name << argv[1] << "." << component;
     component++;
@@ -43,5 +43,6 @@ int main(int argc, char* argv[]) {
     Network* this_comp = *comp_it;
     this_comp->printTo(output);
   }
+  cp.deletePartition(components);
   return 1;
 }

@@ -27,40 +27,27 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 using namespace std;
 using namespace Starsky;
 
-void INetworkPartitioner::deletePartition(set<Network*>* part)
+void INetworkPartitioner::deletePartition(vector<Network*>* part)
 {
-  set<Network*>::iterator it;
+  vector<Network*>::iterator it;
   for(it = part->begin(); it != part->end(); it++)
   {
     //Delete the Network:
-    delete *it;
+    if( *it != 0 ) {
+      delete *it;
+    }
   }
   //Delete the Set:
   delete part;
 }
 
-Network* INetworkPartitioner::getLargest(set<Network*>* part) {
-
-  set<Network*>::const_iterator it;
-  Network* ret_val = 0;
-  FOREACH(it, (*part))
-  {
-    Network* this_net = *it;
-    networkptr_gt cmp;
-    if( (ret_val == 0) || cmp(this_net, ret_val) ) {
-      ret_val = this_net;
-    }
-  }
-  return ret_val;
-}
-
-double INetworkPartitioner::modularityOf(set<Network*>* partition,
+double INetworkPartitioner::modularityOf(vector<Network*>* partition,
 		                         const Network& orig)
 {
 
   //Now net_vec indexes the communities
   map<Node*, Network*> node_community;
-  set<Network*>::const_iterator netit;
+  vector<Network*>::const_iterator netit;
   for(netit = partition->begin(); netit != partition->end(); netit++)
   {
     auto_ptr<NodeIterator> ni( (*netit)->getNodeIterator() );
@@ -82,7 +69,7 @@ double INetworkPartitioner::modularityOf(set<Network*>* partition,
     e_total += 2.0;
   }
   //Normalize e_ij:
-  set<Network*>::const_iterator netit2;
+  vector<Network*>::const_iterator netit2;
   for(netit = partition->begin(); netit != partition->end(); netit++)
   {
     Network* ni = *netit;
@@ -117,20 +104,21 @@ double INetworkPartitioner::modularityOf(set<Network*>* partition,
 	
 }
 
-long INetworkPartitioner::distance(std::set<Network*>* A, std::set<Network*>* B,
+long INetworkPartitioner::distance(std::vector<Network*>* A,
+		                   std::vector<Network*>* B,
 		        long& norm_a, long& norm_b)
 {
   //First we make some data structures:
   map<Node*, Network*> a_map, b_map;
-  set<Network*>::iterator nit;
-  Network::NodePSet all_nodes;
+  vector<Network*>::iterator nit;
+  Network all_nodes;
   //Make the a_map
   FOREACH(nit, (*A)) {
     auto_ptr<NodeIterator> ni( (*nit)->getNodeIterator() );
     while(ni->moveNext()) {
       Node* this_node = ni->current();
       a_map[ this_node ] = *nit;
-      all_nodes.insert(this_node);
+      all_nodes.add(this_node);
     }
   }
   //Make the b_map
@@ -139,12 +127,14 @@ long INetworkPartitioner::distance(std::set<Network*>* A, std::set<Network*>* B,
     while(ni->moveNext()) {
       Node* this_node = ni->current();
       b_map[ this_node ] = *nit;
-      all_nodes.insert(this_node);
+      all_nodes.add(this_node);
     }
   }
   //We need a vector to make the algorithm run faster:
   vector<Node*> n_vec;
-  n_vec.insert( n_vec.begin(), all_nodes.begin(), all_nodes.end() );
+  auto_ptr<NodeIterator> ni( all_nodes.getNodeIterator() );
+  n_vec.resize( all_nodes.getNodeSize() );
+  ni->pushInto(n_vec);
   //Get rid of the memory:
   all_nodes.clear();
 

@@ -34,7 +34,7 @@ namespace Starsky {
 class ComponentPart : public INetworkPartitioner {
 
   public:
-    virtual std::set<Network*>* partition(const Network& net);
+    virtual std::vector<Network*>* partition(const Network& net);
 	
 };
 	

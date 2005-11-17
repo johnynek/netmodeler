@@ -54,8 +54,8 @@ void printCommunities(INetworkPartitioner* ap,
 #endif
     community << prefix << ".";
     //Print out the communities:
-   set<Network*>* comms = ap->partition(net);
-   double mod = ap->modularityOf(comms, net);
+   vector<Network*>* vcoms = ap->partition(net);
+   double mod = ap->modularityOf(vcoms, net);
    if( true ) 
    //if( mod > 0.0 ) 
    //if( net.getNodeSize() > 1 ) 
@@ -75,16 +75,11 @@ void printCommunities(INetworkPartitioner* ap,
 #endif
       cout << "mod: " << mod << endl;
       //cout << "Got best split"<< endl;
-      vector<Network*> vcoms;
-      vcoms.insert(vcoms.begin(), comms->begin(), comms->end());
-      //Sort the vector
-      //networkprt_gt is in network.h
-      sort(vcoms.begin(), vcoms.end(), networkptr_gt());
       vector< Network* >::iterator comit;
       Network::NodePSet::const_iterator comnodeit;
       int com = 0;
-      for(comit = vcoms.begin();
-	  comit != vcoms.end();
+      for(comit = vcoms->begin();
+	  comit != vcoms->end();
 	  comit++) {
         stringstream this_com;
         this_com << community.str() << com++;
@@ -101,7 +96,7 @@ void printCommunities(INetworkPartitioner* ap,
       }
     }
     //Free up the memory
-    ap->deletePartition(comms);
+    ap->deletePartition(vcoms);
 }
 
 
@@ -167,11 +162,7 @@ int main(int argc, char* argv[]) {
   Network& my_net = *net;
   cout << "#loaded net" << endl; 
   ComponentPart cp;
-  set<Network*>* comms = cp.partition(my_net);
-  vector<Network*> vcoms;
-  vcoms.insert(vcoms.begin(), comms->begin(), comms->end());
-  //Sort the vector
-  sort(vcoms.begin(), vcoms.end(), networkptr_gt());
+  vector<Network*>* comms = cp.partition(my_net);
   //We also want to compare the output to the Newman:
   NewmanCom ncom;
   while(iterations-- > 0 ) {
@@ -191,7 +182,7 @@ int main(int argc, char* argv[]) {
     //Look on components:
     vector< Network* >::iterator comit;
     int community = 0;
-    for(comit = vcoms.begin(); comit != vcoms.end(); comit++) {
+    for(comit = comms->begin(); comit != comms->end(); comit++) {
       stringstream com;
       com << community++;
       Network* this_component = *comit;

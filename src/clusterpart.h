@@ -43,7 +43,7 @@ class ClusterPart : public INetworkPartitioner {
     /**
      * Run the partitioning algorithm on the given Network
      */
-    virtual std::set<Network*>* partition(const Network& input);
+    virtual std::vector<Network*>* partition(const Network& input);
 
   protected:
     double _min_cc;

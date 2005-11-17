@@ -60,12 +60,12 @@ void printCommunities(AgglomPart& ap, string prefix, const Network& net,
     out << "node [style=filled];" << endl;
     if( q_t[step] > 0.25 ) {
       
-      set< Network* >* comms = ap.getCommunity(net,step, joins);
-      set< Network* >::const_reverse_iterator comit;
+      vector< Network* >* comms = ap.getCommunity(net,step, joins);
+      vector< Network* >::const_iterator comit;
       Network::NodePSet::const_iterator comnodeit;
       int com = 0;
-      for(comit = comms->rbegin();
-	  comit != comms->rend();
+      for(comit = comms->begin();
+	  comit != comms->end();
 	  comit++) {
 	Network* this_commun = *comit;
         stringstream this_com;
@@ -113,15 +113,16 @@ int main(int argc, char* argv) {
   //Look on components:
   ComponentPart cp;
   NewmanCom comfinder;
-  set<Network*>* components = cp.partition(my_net);
-  set<Network*>::const_reverse_iterator comp_it;
+  vector<Network*>* components = cp.partition(my_net);
+  vector<Network*>::const_iterator comp_it;
   int community = 0;
-  for(comp_it = components->rbegin(); comp_it != components->rend(); comp_it++) {
+  for(comp_it = components->begin(); comp_it != components->end(); comp_it++) {
     stringstream com;
     com << community++;
     Network* this_net = *comp_it;
     printCommunities(comfinder, com.str(), *this_net, cout, printed_edges, 1);
   }
+  cp.deletePartition(components);
   printEdges(my_net, printed_edges, "[len=16, color=green]");
   cout << "}" << endl;
   return 1;

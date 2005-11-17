@@ -66,9 +66,9 @@ int main(int argc, char* argv[]) {
      int choice = 2;
      if(choice == 1){
        ComponentPart cp;
-       set<Network*>* net_set = cp.partition(*my_net);
+       vector<Network*>* net_set = cp.partition(*my_net);
        cout << "The number of components of this network is: " << net_set->size() << endl;
-       set<Network*>::const_iterator comp_it;
+       vector<Network*>::const_iterator comp_it;
        cout << "The components have the following sizes: ";
        for(comp_it = net_set->begin(); comp_it != net_set->end(); comp_it++){
 	 net = *(comp_it);

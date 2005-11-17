@@ -37,7 +37,7 @@ class AgglomPart : public INetworkPartitioner {
     /**
      * implements INetworkPartitioner
      */
-    virtual std::set<Network*>* partition(const Network& input);
+    virtual std::vector<Network*>* partition(const Network& input);
 
   /*
    * The "join" number refers to the index of the node in the
@@ -58,7 +58,7 @@ class AgglomPart : public INetworkPartitioner {
   /**
    * using the above, get the particular break down of the communities:
    */
-    virtual std::set<Network*>* getCommunity(const Network& net, int step,
+    virtual std::vector<Network*>* getCommunity(const Network& net, int step,
 		    const std::vector< std::pair<int, int> >& joins);  
 
     /**

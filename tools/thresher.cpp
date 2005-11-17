@@ -162,8 +162,8 @@ void getThresholdPoints(Network* net, int points,
       DEBUG("About to map");
       pm.map( &tmp_net );
       DEBUG("About to partition");
-      set<Network*>* comps = comp_part.partition(tmp_net);
-      Network* largest = comp_part.getLargest( comps );
+      vector<Network*>* comps = comp_part.partition(tmp_net);
+      Network* largest = (*comps)[0];
       nodes_sum += largest->getNodeSize();
       edges_sum += largest->getEdgeSize();
       //Free up the partition memory:

@@ -113,9 +113,9 @@ int main(int argc, char* argv[])
       //Here are the number of edges that remain after percolation
       edges += net->getEdgeSize();
       //Get the components:
-      set<Network*>* comps = cp.partition(*net);
+      vector<Network*>* comps = cp.partition(*net);
       //Here are the number of nodes in the largest component
-      Network* largest = cp.getLargest( comps );
+      Network* largest = (*comps)[0];
       size += largest->getNodeSize();
       //Here are the number of edges in the largest component.
       edges_comp += largest->getEdgeSize();
