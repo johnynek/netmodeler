@@ -4,7 +4,9 @@
 
 from pynetmod import *
 
+
 net = Network(cin)
+
 print "#loaded network"
 ns = IntStats()
 ns.collectN(net,"getDegree")

@@ -24,11 +24,41 @@
 %newobject *::clone;
 
 %include "../src/node.h"
+%extend Starsky::Node {
+  %pythoncode {
+    def __str__(self):
+      return self.toString()
+  }
+}
 %include "../src/edge.h"
+%extend Starsky::Edge {
+  %pythoncode {
+    def __str__(self):
+      return self.toString()
+  }
+}
 %include "../src/iterator.h"
 
 %template(NodeIterator) Starsky::Iterator<Starsky::Node*>;
 %template(EdgeIterator) Starsky::Iterator<Starsky::Edge*>;
+
+//This is so we can do: for n in net.getNodeIterator: in Python
+%extend Starsky::Iterator<Starsky::Node*> {
+  %pythoncode {
+    def __iter__(self):
+     while self.moveNext():
+       yield self.current();
+  }
+}
+
+//This is so we can do: for n in net.getEdgeIterator: in Python
+%extend Starsky::Iterator<Starsky::Edge*> {
+  %pythoncode {
+    def __iter__(self):
+     while self.moveNext():
+       yield self.current();
+  }
+}
 
 %include "../src/inetworkmonitor.h"
 
