@@ -1,3 +1,4 @@
+if USE_SWIG
 BUILT_SOURCE = $(srcdir)/swig_wrap.cpp
 SWIG_SOURCES = swig.i
 
@@ -10,3 +11,4 @@ _pynetmod_la_LIBADD = ../src/libnetmod.la
 
 $(srcdir)/swig_wrap.cpp : $(SWIG_SOURCES)
 	$(SWIG) $(SWIG_PYTHON_OPT) -I$(top_srcdir)/src/ -o $@ $<
+endif

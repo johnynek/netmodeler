@@ -27,7 +27,7 @@ g++ -c my.cpp -I /path/to/headers/
 Then link it:
 g++ -o test my.o /path/to/library/libnetmod.a
 
-The default path is src/libnetmod.a
+The default path is src/.libs/libnetmod.a
 
 now, the executible "test" should be your code.
 
@@ -35,6 +35,17 @@ You may need to give a complete path to the headers (which is represented in
 the above example as /path/to/headers/) and you may need to give the complete
 path to the netmodlib.a file (which is represented above as
 /path/to/library/).
+
+======SWIG/Python Support=====
+
+Netmodeler now has some support for SWIG, which allows us to use netmodeler
+from languages other than C/C++.  To enable this, use:
+
+./configure --enable-swig
+
+This requires swig to be installed as well as the headers for python (and
+in the future maybe other languages).  Go to the pytools directory to see
+some examples of using python with netmodeler.
 
 ======CODE DOCUMENTATION======
 
