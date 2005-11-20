@@ -14,6 +14,13 @@
 #include "../src/discreterandvar.h"
 #include "../src/powerlawdrv.h"
 #include "../src/intstats.h"
+#include "../src/inetworkpartitioner.h"
+#include "../src/clusterpart.h"
+#include "../src/componentpart.h"
+#include "../src/agglompart.h"
+#include "../src/newmancom.h"
+#include <iostream>
+#include <fstream>
 %}
 
 //Here are some standard C++ things we need
@@ -72,6 +79,13 @@
 %newobject Starsky::Network::getNeighbors(Node*);
 %include "../src/network.h"
 
+%extend Starsky::Network {
+  void printToFile(char* filename) {
+    std::ofstream output(filename);
+    self->printTo(output);
+  }
+}
+
 %include "../src/random.h"
 %include "../src/ran1random.h"
 
@@ -125,3 +139,12 @@ class IntStats {
 };
 
 }
+%include "std_vector.i"
+%template(vectornet) std::vector<Starsky::Network*>;
+
+//Here are the community/clustering algorithms:
+%include "../src/inetworkpartitioner.h"
+%include "../src/clusterpart.h"
+%include "../src/componentpart.h"
+%include "../src/agglompart.h"
+%include "../src/newmancom.h"
