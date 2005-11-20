@@ -214,7 +214,6 @@ class IntStats {
     ///Keeps the number of edges which go from valuex to valuey
     std::map< std::pair<int, int>, int> _edge_dist;
     //Here is a map of the functions:
-    std::map<std::string, NodeIntMember> _nmems;
     bool _keep_dist;
     bool _keep_max_net;
     bool _keep_min_net;

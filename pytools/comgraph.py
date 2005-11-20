@@ -14,4 +14,11 @@ for part in parts:
   part.printToFile("part%i" % p)
   p = p + 1
 
+#test...
+
+#take out one of the components:
+net0 = parts[0]
+parts[0] = None 
+net0.thisown = 1
+
 np.deletePartition(parts)

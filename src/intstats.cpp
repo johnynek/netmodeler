@@ -30,12 +30,6 @@ IntStats::IntStats(bool keep_dist,
 {
   _min_net = 0;
   _max_net = 0;
-
-  //Initialize the member table:
-  _nmems["getAssociatedNumber"] = &Network::getAssociatedNumber;
-  _nmems["getDegree"] = &Network::getDegree;
-  _nmems["getTriangles"] = &Network::getTriangles;
-  _nmems["getWedges"] = &Network::getWedges;
 }
 
 IntStats::~IntStats()
@@ -46,9 +40,8 @@ IntStats::~IntStats()
 
 double IntStats::collectN(const Network* net, std::string method, NodeIterator* ni)
 {
-  std::map<std::string, NodeIntMember>::const_iterator it = _nmems.find(method);
-  if( it != _nmems.end() ) {
-    NodeIntMember mem = it->second;
+  NodeIntMember mem = net->getNIMember(method);
+  if( mem != 0 ) {
     std::auto_ptr<NodeIterator> apni( net->getNodeIterator() );
     if( ni == 0 ) {
       ni = apni.get();
@@ -92,9 +85,8 @@ void IntStats::collectByEdge(const Network* net, NodeIntMember mem, EdgeIterator
 
 void IntStats::collectByEdge(const Network* net, std::string method, EdgeIterator* ei)
 {
-  std::map<std::string, NodeIntMember>::const_iterator it = _nmems.find(method);
-  if( it != _nmems.end() ) {
-    NodeIntMember mem = it->second;
+  NodeIntMember mem = net->getNIMember(method);
+  if( mem != 0 ) {
     std::auto_ptr<EdgeIterator> apei( net->getEdgeIterator() );
     if( ei == 0 ) {
       ei = apei.get();

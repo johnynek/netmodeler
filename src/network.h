@@ -307,6 +307,32 @@ class Network {
 	 */
 	int getEdgeSize() const;
 	/**
+	 * This returns the NodeIntMember for the function with
+	 * the given name.  For instance, "getWedges" or "getTriangles".
+	 * This is used by IntStats and DoubleStats to take statistics
+	 * of given functions.
+	 */
+	virtual EdgeIntMember getEIMember(const std::string& membername) const;
+	/**
+	 * Get an iterator holding the names of all the EdgeIntMember functions
+	 * for this network.
+	 * caller must delete Iterator when finished with it.
+	 */
+	virtual Iterator<std::string>* getEIMembers() const;
+	/**
+	 * This returns the NodeDoubMember for the function with
+	 * the given name.  For instance, "getEdgeCC".
+	 * This is used by IntStats and DoubleStats to take statistics
+	 * of given functions.
+	 */
+	virtual EdgeDoubMember getEDMember(const std::string& membername) const;
+	/**
+	 * Get an iterator holding the names of all the EdgeDoubMember functions
+	 * for this network.
+	 * caller must delete Iterator when finished with it.
+	 */
+	virtual Iterator<std::string>* getEDMembers() const;
+	/**
 	 * Get the expected transitivity if the current graph
 	 * were a random graph (same degree distribution).
 	 *
@@ -330,6 +356,32 @@ class Network {
 	 */
 	NodePSet getNeighborhood(Node* node, int distance) const;
 #endif
+	/**
+	 * This returns the NodeIntMember for the function with
+	 * the given name.  For instance, "getDegree" or "getTriangles".
+	 * This is used by IntStats and DoubleStats to take statistics
+	 * of given functions.
+	 */
+	virtual NodeIntMember getNIMember(const std::string& membername) const;
+	/**
+	 * Get an iterator holding the names of all the NodeIntMember functions
+	 * for this network.
+	 * caller must delete Iterator when finished with it.
+	 */
+	virtual Iterator<std::string>* getNIMembers() const;
+	/**
+	 * This returns the NodeDoubMember for the function with
+	 * the given name.  For instance, "getClusterCoefficient".
+	 * This is used by IntStats and DoubleStats to take statistics
+	 * of given functions.
+	 */
+	virtual NodeDoubMember getNDMember(const std::string& membername) const;
+	/**
+	 * Get an iterator holding the names of all the NodeDoubMember functions
+	 * for this network.
+	 * caller must delete Iterator when finished with it.
+	 */
+	virtual Iterator<std::string>* getNDMembers() const;
 	/**
 	 * Return a NodeIterator that can iterator through all the nodes
 	 */

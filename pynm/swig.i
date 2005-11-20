@@ -48,6 +48,7 @@
 
 %template(NodeIterator) Starsky::Iterator<Starsky::Node*>;
 %template(EdgeIterator) Starsky::Iterator<Starsky::Edge*>;
+%template(StringIterator) Starsky::Iterator<std::string>;
 
 //This is so we can do: for n in net.getNodeIterator: in Python
 %extend Starsky::Iterator<Starsky::Node*> {
@@ -67,6 +68,15 @@
   }
 }
 
+//This is so we can do: for n in net.getEdgeIterator: in Python
+%extend Starsky::Iterator<std::string> {
+  %pythoncode {
+    def __iter__(self):
+     while self.moveNext():
+       yield self.current();
+  }
+}
+
 %include "../src/inetworkmonitor.h"
 
 //We should not be using the below in general (currently)
@@ -77,6 +87,10 @@
 %newobject Starsky::Network::getNodeIterator();
 %newobject Starsky::Network::getNeighborIterator(Node*);
 %newobject Starsky::Network::getNeighbors(Node*);
+%newobject Starsky::Network::getNIMembers();
+%newobject Starsky::Network::getNDMembers();
+%newobject Starsky::Network::getEIMembers();
+%newobject Starsky::Network::getEDMembers();
 %include "../src/network.h"
 
 %extend Starsky::Network {

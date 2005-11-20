@@ -820,6 +820,36 @@ int Network::getEdgeSize() const {
   return _edge_count;
 }
 
+EdgeIntMember Network::getEIMember(const std::string& name) const {
+
+  if (name == "getTriangles") {
+      return &Network::getTriangles;
+  }
+  else if( name == "getWedges" ) {
+    return &Network::getWedges;
+  }
+  return 0;
+}
+Iterator<std::string>* Network::getEIMembers() const {
+  std::set<std::string>* mems = new std::set<std::string>();
+  mems->insert("getTriangles");
+  mems->insert("getWedges");
+  return new StlPIterator<std::set<std::string>, std::string>(mems);
+}
+
+EdgeDoubMember Network::getEDMember(const std::string& name) const {
+  if (name == "getEdgeCC") {
+    return &Network::getEdgeCC;
+  }
+  return 0;
+}
+
+Iterator<std::string>* Network::getEDMembers() const {
+  std::set<std::string>* mems = new std::set<std::string>();
+  mems->insert("getEdgeCC");
+  return new StlPIterator<std::set<std::string>, std::string>(mems);
+}
+
 double Network::getExpectedTransitivity() const {
   
   double exp_cc;
@@ -858,6 +888,42 @@ double Network::getExpectedTransitivity() const {
   return exp_cc;
 }
 
+NodeIntMember Network::getNIMember(const std::string& name) const {
+  if (name == "getAssociatedNumber") {
+      return &Network::getAssociatedNumber;
+  }
+  else if (name == "getDegree" ) {
+      return &Network::getDegree;
+  }
+  else if (name == "getTriangles" ) {
+      return &Network::getTriangles;
+  }
+  else if (name == "getWedges") {
+      return &Network::getWedges;
+  }
+  return 0;
+}
+
+Iterator<std::string>* Network::getNIMembers() const {
+  std::set<std::string>* mems = new std::set<std::string>();
+  mems->insert("getAssociatedNumber");
+  mems->insert("getDegree");
+  mems->insert("getTriangles");
+  mems->insert("getWedges");
+  return new StlPIterator<std::set<std::string>, std::string>(mems);
+}
+
+NodeDoubMember Network::getNDMember(const std::string& name) const {
+  if (name == "getClusterCoefficient" ) {
+      return &Network::getClusterCoefficient;
+  }
+  return 0;
+}
+Iterator<std::string>* Network::getNDMembers() const {
+  std::set<std::string>* mems = new std::set<std::string>();
+  mems->insert("getClusterCoefficient");
+  return new StlPIterator<std::set<std::string>, std::string>(mems);
+}
 
 #ifndef HIDE_STL
 
