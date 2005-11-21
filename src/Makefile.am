@@ -75,6 +75,7 @@ gnutellanode.cpp \
 gnutellanode.h \
 gnutellaquery.cpp  gnutellaquery.h \
 graphmatrix.cpp graphmatrix.h \
+iedgeselector.h \
 incrementable.h \
 inetworkpartitioner.h inetworkpartitioner.cpp \
 inetworkmapper.h \
@@ -154,6 +155,7 @@ trustgraphmatrix.cpp \
 uniformattachnet.h \
 uniformattachnet.cpp \
 uniformnodeselector.h uniformnodeselector.cpp \
+uniformedgeselector.h uniformedgeselector.cpp \
 uniformdrv.h uniformdrv.cpp \
 vazquezdirectednetwork.cpp \
 vazquezdirectednetwork.h \
