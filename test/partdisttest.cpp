@@ -32,8 +32,8 @@ int main(int argc, char* argv[]) {
   ComponentPart cp;
   NetworkFactory nf;
   Network* n = nf.create(std::cin);
-  set<Network*>* part0 = np.partition( *n );
-  set<Network*>* part1 = cp.partition( *n );
+  vector<Network*>* part0 = np.partition( *n );
+  vector<Network*>* part1 = cp.partition( *n );
   long n0, n1;
   long dist = cp.distance( part0, part1, n0, n1 );
   cout << "Norm0: " << n0 << endl << "Norm1: " << n1 << endl << "Dist: " << dist << endl;
