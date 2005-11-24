@@ -74,7 +74,7 @@ int RandAgPart::getCommunities(const Network& net, std::vector<double>& q,
 
 double RandAgPart::getNextJoin(const Network& net,
                                const std::map<Node*, int>& node_community,
-		               const vector< vector<double> >& e_ij,
+		               const std::map<int, std::map<int, double> >& e_ij,
 			       const vector< double >& a_i,
 			       int& join1, int& join2)
 {
@@ -99,7 +99,11 @@ double RandAgPart::getNextJoin(const Network& net,
       //Don't join a community with itself, and make sure this edge
       //touches the randomly selected community
       if( com1 != com2 && ( (com1 == join1) || (com2 == join1) ) ) {
-        tmp_delta = 2 * (e_ij[com1][com2] - a_i[com1] * a_i[com2] );
+	  std::map<int, std::map<int, double> >::const_iterator mit
+		  = e_ij.find(com1);
+	  std::map<int, double>::const_iterator mit2 = mit->second.find(com2);
+	  double eij = mit2->second;
+        tmp_delta = 2 * (eij - a_i[com1] * a_i[com2] );
      //   cout << "tmp_delta: " << tmp_delta << endl;
         if( (!got_first) || ( tmp_delta > delta_q ) ) {
           delta_q = tmp_delta;
@@ -116,7 +120,11 @@ double RandAgPart::getNextJoin(const Network& net,
       //Noisy join:
       join1 = getRandomCommunity();
       join2 = getRandomCommunity(join1);
-      delta_q = 2 * (e_ij[join1][join2] - a_i[join1] * a_i[join2] );
+      std::map<int, std::map<int, double> >::const_iterator mit
+		  = e_ij.find(join1);
+      std::map<int, double>::const_iterator mit2 = mit->second.find(join2);
+      double eij = mit2->second;
+      delta_q = 2 * (eij - a_i[join1] * a_i[join2] );
     }
     else {
       delta_q = NewmanCom::getNextJoin(net, node_community, e_ij, a_i, join1, join2);
@@ -153,7 +161,11 @@ double RandAgPart::getNextJoin(const Network& net,
 	pair<int, int> this_pair = pair<int,int>( std::min(com1,com2), std::max(com1,com2) );
 	if( delta_q_matrix.find( this_pair ) == delta_q_matrix.end() ) {
           //This is a new pair:
-          tmp_delta = 2 * (e_ij[com1][com2] - a_i[com1] * a_i[com2] );
+	  std::map<int, std::map<int, double> >::const_iterator mit
+		  = e_ij.find(com1);
+	  std::map<int, double>::const_iterator mit2 = mit->second.find(com2);
+	  double eij = mit2->second;
+          tmp_delta = 2 * (eij - a_i[com1] * a_i[com2] );
 	  delta_q_matrix[ this_pair ] = tmp_delta;
 	  if( (!got_first) || ( tmp_delta < min_q ) ) {
 	    min_q = tmp_delta;

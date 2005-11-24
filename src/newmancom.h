@@ -53,7 +53,7 @@ class NewmanCom : public AgglomPart {
      */
     virtual double getNextJoin(const Network& net,
                                const std::map<Node*, int>& community_map,
-		               const std::vector< std::vector<double> >& e_ij,
+		               const std::map<int, std::map<int, double> >& e_ij,
 			       const std::vector< double >& a_i,
 			       int& com1, int& com2);
 };

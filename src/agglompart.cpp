@@ -50,26 +50,10 @@ int AgglomPart::getCommunities(const Network& net, std::vector<double>& q_t,
     node_community[ ni->current() ] = community;
     community++;
   }
-  //initialize e_ij:
-  //This is the fraction of edges that go from
-  //community i to j (it is symmetric).
-  vector< vector<double> > e_ij;
-  vector< vector<double> >::iterator it;
-  e_ij.resize( net.getNodeSize() );
-  for( it = e_ij.begin();
-       it != e_ij.end();
-       it++) {
-    it->resize( net.getNodeSize() );
-  }
-  //Initialize e_ij
-  for(int i = 0; i < e_ij.size(); i++) {
-    for(int j = 0; j < e_ij[i].size(); j++) {
-      e_ij[i][j] = 0.0;
-    }
-  }
   int com1, com2;
   double e_total = 0.0;
   //This is the only difference in the wieghted version of the algorithm:
+  std::map<int, std::map<int, double> > e_ij;
   if( _weighted == false ) {
     auto_ptr<EdgeIterator> ei( net.getEdgeIterator() );
     while( ei->moveNext() ) {
@@ -94,29 +78,35 @@ int AgglomPart::getCommunities(const Network& net, std::vector<double>& q_t,
     }
   }
   //Normalize e_ij:
-  for(int i = 0; i < e_ij.size(); i++) {
-    for(int j = 0; j < e_ij[i].size(); j++) {
-      if( e_ij[i][j] > 0.0 ) {
-        e_ij[i][j] /= e_total;
-      }
-    }
-  }
+  std::map<int, std::map<int, double> >::iterator it1;
+  std::map<int, double>::iterator it2;
   //Make a_i;
   vector<double> a_i;
-  a_i.resize( e_ij.size() );
-  for(int i = 0; i < a_i.size(); i++) {
-    a_i[i] = 0.0;
-    for(int j = 0; j < e_ij[i].size(); j++) {
-      a_i[i] += e_ij[i][j];
+  a_i.resize( net.getNodeSize() );
+  
+  for(it1 = e_ij.begin(); it1 != e_ij.end(); it1++) {
+    for(it2 = it1->second.begin();
+        it2 != it1->second.end();
+	it2++) {
+	it2->second /= e_total;
+    }
+  }
+  for(it1 = e_ij.begin(); it1 != e_ij.end(); it1++) {
+    a_i[it1->first] = 0.0;
+    for(it2 = it1->second.begin();
+        it2 != it1->second.end();
+	it2++) {
+      a_i[it1->first] += it2->second;
     }
   }
   joins.clear();
-  joins.resize( e_ij.size() - 1 );
+  joins.resize( net.getNodeSize() - 1 );
   q_t.clear();
-  q_t.resize( e_ij.size() );
+  q_t.resize( net.getNodeSize() );
   //We don't neccesarily start at Q=0;
   double q = 0.0;
-  for(int i = 0; i < e_ij.size(); i++) {
+  for(it1 = e_ij.begin(); it1 != e_ij.end(); it1++) {
+    int i = it1->first;
     q += e_ij[i][i] - a_i[i] * a_i[i];
   }
   q_t[0] = q;
@@ -226,12 +216,14 @@ vector<Network*>* AgglomPart::getCommunity(const Network& net, int step,
 }
 
 void AgglomPart::update(std::map<Node*, int>& community_map,
-		        std::vector< std::vector<double> >& e_ij,
+		        std::map<int, std::map<int, double> >& e_ij,
 		        std::vector< double >& a_i, int join1, int join2)
 {
   if( join1 != join2 ) {
+    std::map<int, std::map<int, double> >::iterator mit;
     //update the number of edges between communities:
-    for(int j = 0; j < e_ij.size(); j++) {
+    for(mit = e_ij.begin(); mit != e_ij.end(); mit++) {
+      int j = mit->first;
       if( j != join2 ) {
         e_ij[join1][j] += e_ij[join2][j];
         e_ij[j][join1] += e_ij[j][join2];
@@ -240,9 +232,12 @@ void AgglomPart::update(std::map<Node*, int>& community_map,
     a_i[join1] += a_i[join2];
     //Delete all of join2:
     e_ij[join1][join1] += e_ij[join2][join2];
-    for(int j = 0; j < e_ij.size(); j++) {
-      e_ij[join2][j] = 0.0;
-      e_ij[j][join2] = 0.0;
+    mit = e_ij.find(join2);
+    e_ij.erase(mit);
+    std::map<int, double>::iterator mit2;
+    for(mit = e_ij.begin(); mit != e_ij.end(); mit++) {
+      mit2 = mit->second.find(join2);
+      mit->second.erase(mit2);
     }
     a_i[join2] = 0.0;
     //Put all the join2 nodes into join1

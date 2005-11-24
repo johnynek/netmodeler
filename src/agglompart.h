@@ -74,7 +74,7 @@ class AgglomPart : public INetworkPartitioner {
      */
     virtual double getNextJoin(const Network& net,
                                const std::map<Node*, int>& community_map,
-		               const std::vector< std::vector<double> >& e_ij,
+		               const std::map< int, std::map<int, double> >& e_ij,
 			       const std::vector< double >& a_i,
 			       int& com1, int& com2) = 0;
   protected:
@@ -82,7 +82,7 @@ class AgglomPart : public INetworkPartitioner {
      * Update the community map, e_ij, and a_i
      */
     void update(std::map<Node*, int>& community_map,
-		std::vector< std::vector<double> >& e_ij,
+		std::map< int, std::map<int, double> >& e_ij,
 		std::vector< double >& a_i, int com1, int com2);
 };
 	

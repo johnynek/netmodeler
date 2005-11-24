@@ -26,7 +26,7 @@ using namespace Starsky;
 
 double NewmanCom::getNextJoin(const Network& net,
                                const std::map<Node*, int>& node_community,
-		               const vector< vector<double> >& e_ij,
+		               const std::map<int, std::map<int, double> >& e_ij,
 			       const vector< double >& a_i,
 			       int& join1, int& join2)
 {
@@ -59,7 +59,10 @@ double NewmanCom::getNextJoin(const Network& net,
       com1 = com1_it->second;
       com2 = com2_it->second;
       if( com1 != com2 ) {
-        tmp_delta = 2 * (e_ij[com1][com2] - a_i[com1] * a_i[com2] );
+	std::map<int, std::map<int, double> >::const_iterator mit = e_ij.find(com1);
+	std::map<int, double>::const_iterator mit2 = mit->second.find(com2);
+	double eij = mit2->second;
+        tmp_delta = 2 * (eij - a_i[com1] * a_i[com2] );
         if( (!got_first) || ( tmp_delta > delta_q ) ) {
           //Make sure join1 <= join2:
           if( com1 < com2 ) { join1 = com1; join2 = com2; }

@@ -56,8 +56,8 @@ void printCommunities(INetworkPartitioner* ap,
     //Print out the communities:
    vector<Network*>* vcoms = ap->partition(net);
    double mod = ap->modularityOf(vcoms, net);
-   if( true ) 
-   //if( mod > 0.0 ) 
+   //if( true ) 
+   if( mod > 0.2 ) 
    //if( net.getNodeSize() > 1 ) 
    {
       out << "#" << prefix << "=" << mod << endl;
@@ -159,6 +159,7 @@ int main(int argc, char* argv[]) {
     ifstream input( op.getStringOpt("input","").c_str() );
     net = nf->create(input);
   }
+  delete nf;
   Network& my_net = *net;
   cout << "#loaded net" << endl; 
   ComponentPart cp;
@@ -197,7 +198,6 @@ int main(int argc, char* argv[]) {
   }
   //Delete the memory we allocated:
   cp.deletePartition(comms);
-  delete nf;
   delete net;
   delete comfinder;
   return 1;
