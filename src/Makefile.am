@@ -23,6 +23,7 @@ clusterpart.h \
 clusterpart.cpp \
 constdrv.h \
 containernode.h \
+containeredge.h \
 contentnetwork.cpp \
 contentnetwork.h \
 contentnode.h \
@@ -94,6 +95,7 @@ messagebuiltnetwork.h \
 message.h \
 mrucache.cpp \
 mrucache.h \
+namednode.h \
 network.cpp \
 network.h \
 networkfactory.h networkfactory.cpp \

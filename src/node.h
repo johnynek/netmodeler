@@ -37,15 +37,15 @@ namespace Starsky {
   class Node {
   public:
       Node();
+      /**
+       * The basic node totally ignores this string, but subclasses might not
+       */
       Node(const std::string& s);
       virtual ~Node();
       /**
        * @return a string suitable for printing
        */
       virtual std::string toString() const;
-  protected:
-      static int _node_count;
-      std::string* _name;
   };
 
 }

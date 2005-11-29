@@ -3,6 +3,7 @@
 #include "../src/iterator.h"
 #include "../src/node.h"
 #include "../src/edge.h"
+#include "../src/namednode.h"
 #include "../src/nodefactory.h"
 #include "../src/edgefactory.h"
 #include "../src/networkfactory.h"
@@ -106,8 +107,16 @@
 %include "../src/nodefactory.h"
 %include "../src/edgefactory.h"
 %newobject Starsky::NetworkFactory::create();
-%newobject Starsky::NetworkFactory::create(std::string&);
+%newobject Starsky::NetworkFactory::create(std::istream&);
+%newobject Starsky::NetworkFactory::create(char*);
 %include "../src/networkfactory.h"
+%extend Starsky::NetworkFactory {
+  Network* create(char* filename) {
+    std::ifstream input(filename);
+    return self->create(input);
+  }
+}
+
 
 %include "../src/discreterandvar.h"
 %include "../src/powerlawdrv.h"

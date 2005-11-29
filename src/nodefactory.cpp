@@ -44,3 +44,29 @@ Node* NodeFactory::getNode(const std::string& str_node)
     }
     return result;
 }
+
+
+NamedNode* NamedNodeFactory::create(const std::string& str_node)
+{
+    NamedNode* result = getNode(str_node);
+    if( result == 0 ) {
+      //This is a new node:
+      std::string* name = new std::string(str_node);
+      result = new NamedNode(name);
+      _str_to_node[ name ] = result;
+    }
+    return result;
+}
+
+NamedNode* NamedNodeFactory::getNode(const std::string& str_node)
+{
+    NamedNode* result = 0;
+    std::map<std::string*, NamedNode*, stringptr_lt>::const_iterator sit;
+    std::auto_ptr<std::string> name( new std::string(str_node) );
+    sit = _str_to_node.find( name.get() );
+    if( sit != _str_to_node.end() ) {
+      result = sit->second;
+    }
+    return result;
+}
+

@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define starsky__nodefactory_h
 
 #include <node.h>
+#include <namednode.h>
 #include <map>
 
 namespace Starsky {
@@ -69,6 +70,37 @@ class NodeFactory {
     std::map<std::string, Node*> _str_to_node;
 };
 
+/**
+ * If you want your nodes to remember their names, this is the factory
+ * to use.
+ */
+class NamedNodeFactory : public NodeFactory {
+    /**
+     * This method deserializes a node.
+     * By default it may also keep a table
+     * of string -> Node* mappings so that
+     * that repeated calls of create(string)
+     * will return the same pointer for
+     * the same string
+     */
+
+    virtual NamedNode* create(const std::string& node);
+    /**
+     * @param node String representation of the node.
+     * If we have not created this node yet, this function
+     * returns 0
+     */
+    virtual NamedNode* getNode(const std::string& node);
+    
+  private:
+    struct stringptr_lt : public std::binary_function<std::string*, std::string*, bool> {
+      bool operator()(std::string* x, std::string* y) const {
+        return *x < *y;
+      }
+    };
+    std::map<std::string*, NamedNode*, NamedNodeFactory::stringptr_lt> _str_to_node;
+};
+	
 }
 
 #endif

@@ -1,7 +1,6 @@
 /*
 This program is part of Netmodeler, a library for graph and network
 modeling and simulation.
-Copyright (C) 2005  University of California
 Copyright (C) 2005  P. Oscar Boykin <boykin@pobox.com>, University of Florida
 
 This program is free software; you can redistribute it and/or
@@ -19,29 +18,32 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include "node.h"
-#include <iostream>
-using namespace Starsky;
+#ifndef starsky__namednode_h
+#define starsky__namednode_h
 
-Node::Node()
-{
-  //std::cout << "Node Constructor: " << this << " " << toString() << std::endl;
+#include <containernode.h>
+#include <string>
+
+namespace Starsky {
+
+/**
+ * A node which remembers its name (uses more memory than a standard node).
+ */
+class NamedNode : public ContainerNode<std::string> {
+
+  public:
+    /**
+     * It is highly recommended to only keep one copy of this string
+     * in memory, and not have a second copy anywhere.
+     */
+    NamedNode(std::string* name) : ContainerNode<std::string>(name) { }
+    virtual std::string toString() const {
+      std::string* name = get();
+      return *name;
+    }
+  
+};
+
 }
 
-Node::~Node()
-{
-  //std::cout << "Node Destructor: " << this << std::endl;
-}
-
-Node::Node(const std::string& s)
-{
- //Ignore the name
-}
-
-std::string Node::toString() const {
-  std::stringstream s;
-  s << "n" << this;
-  return s.str();
-}
-
-
+#endif
