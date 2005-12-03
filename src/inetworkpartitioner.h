@@ -25,6 +25,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <set>
 #include <map>
 #include <network.h>
+#include <containernode.h>
+#include <containeredge.h>
 
 namespace Starsky {
 
@@ -66,7 +68,19 @@ class INetworkPartitioner {
     * This vector is sorted from largest to smallest ([0] is the biggest)
     */
    virtual std::vector<Network*>* partition(const Network& input) = 0;
-   
+  
+
+   /**
+    * This is gives a hierarchical picture of the network.  Each cluster
+    * becomes a node.  Two clusters have an edge between them if there
+    * is an edge between any pair of nodes in the clusters
+    *
+    * @param orig the original network
+    * @param part a partition of the network
+    * @return a Network where is node is a ContainerNode<Network> and
+    * each edge is a ContainerEdge<Network>.
+    */
+   Network* partitionAsNetwork(const Network& orig, std::vector<Network*>* part) const;
    /**
     * Uses the Frobenius norm to compute |A - B|, |A|, and |B| for
     * the communities given.  The partition matrix is an N x N matrix

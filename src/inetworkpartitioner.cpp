@@ -173,3 +173,50 @@ long INetworkPartitioner::distance(std::vector<Network*>* A,
   }
   return dist;
 }
+
+Network* INetworkPartitioner::partitionAsNetwork(const Network& orig,
+		std::vector<Network*>* part) const
+{
+  Network* result = new Network();
+  std::map<Node*, Network*> node_to_part;
+  std::map<Network*, ContainerNode<Network>* > part_to_node;
+  StlIterator<std::vector<Network*>, Network*> partit(*part);
+  //Add the nodes of the network:
+  while( partit.moveNext() ) {
+    Network* temp_net = partit.current();
+    std::auto_ptr<NodeIterator> ni( temp_net->getNodeIterator() );
+    while( ni->moveNext() ) {
+      node_to_part[ ni->current() ] = temp_net;
+    }
+    //Make a new network, but don't own this network
+    ContainerNode<Network>* n = new ContainerNode<Network>( temp_net, false );
+    part_to_node[ temp_net ] = n;
+    result->add(n);
+  }
+  //Now we add the edges, which includes all the edges that go between nodes:
+  std::auto_ptr<EdgeIterator> ei( orig.getEdgeIterator() );
+  while( ei->moveNext() ) {
+    Edge* this_edge = ei->current();
+    Node* a = this_edge->first;
+    Node* b = this_edge->second;
+    Network* neta = node_to_part[a];
+    Network* netb = node_to_part[b];
+    if( neta != netb ) {
+      //These two nodes are not in the same component
+      Node* nneta = part_to_node[neta];
+      Node* nnetb = part_to_node[netb];
+      Edge* temp_e = result->getEdge(nneta, nnetb);
+      if( temp_e == 0 ) {
+        //We are making a new edge:
+	Network* new_net = new Network();
+	temp_e = new ContainerEdge<Network>(nneta, nnetb, new_net);
+        result->add(temp_e);
+      }
+      //There is already an edge:
+      ContainerEdge<Network>* ce = dynamic_cast<ContainerEdge<Network>* >(temp_e);
+      Network* con_net = ce->get();
+      con_net->add( this_edge );
+    }
+  }
+  return result;
+}
