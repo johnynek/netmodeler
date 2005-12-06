@@ -26,6 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <edgefactory.h>
 #include <inodeselector.h>
 #include <random.h>
+#include <filterediterator.h>
 
 namespace Starsky {
 
@@ -61,6 +62,10 @@ class EdgeRewirer : public INetworkMapper {
      * Rewire the edges in this network
      */
     virtual void map(Network* net);
+    /**
+     * Rewire the edges given by the edge iterator
+     */
+    void map(Network* net, Iterator<Edge*>* it);
   protected:
     EdgeFactory& _ef;
     Random& _rand;

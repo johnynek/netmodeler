@@ -26,6 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <inetworkmapper.h>
 #include <network.h>
 #include <edgefactory.h>
+#include <filterediterator.h>
 
 namespace Starsky {
 
@@ -66,6 +67,10 @@ class EdgeSwapper : public INetworkMapper {
   };
   
     virtual void map(Network* net);
+    /**
+     * Swap the edges given by the iterator
+     */
+    void map(Network* net, Iterator<Edge*>* it);
 
   protected:
     Random& _rand;

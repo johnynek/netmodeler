@@ -44,22 +44,12 @@ double PercolationMapper::getExpectedThreshold(const Network* net)
 
 void PercolationMapper::map(Network* net)
 {
-  PercFilter pf(_rand);
   if( _site_p < 1.0 ) {
-    pf.setProb(_site_p);
-    FilteredIterator<PercFilter, Node*> nfi(net->getNodeIterator(), &pf,
-		                            &PercFilter::removeNode);
-    net->remove(&nfi);
+    RandomNodeFilterator rnf(net->getNodeIterator(), _rand, _site_p);
+    net->remove(&rnf);
   }
   if( _bond_p < 1.0 ) {
-    pf.setProb(_bond_p);
-    FilteredIterator<PercFilter, Edge*> efi(net->getEdgeIterator(), &pf,
-		                            &PercFilter::removeEdge);
-    net->remove(&efi);
+    RandomEdgeFilterator ref(net->getEdgeIterator(), _rand, _bond_p);
+    net->remove(&ref);
   }
 }
-
-PercolationMapper::PercFilter::PercFilter(Random& r) : _rand(r) { }
-void PercolationMapper::PercFilter::setProb(double p) { _prob = p; }
-bool PercolationMapper::PercFilter::removeEdge(Edge* e) { return !_rand.getBool(_prob); }
-bool PercolationMapper::PercFilter::removeNode(Node* n) { return !_rand.getBool(_prob); }

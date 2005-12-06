@@ -59,24 +59,27 @@ EdgeRewirer::~EdgeRewirer()
 
 void EdgeRewirer::map(Network* net)
 {
+  RandomEdgeFilterator rei( net->getEdgeIterator(), _rand, _prob);
+  map( net, &rei );
+}
+
+void EdgeRewirer::map(Network* net, Iterator<Edge*>* it)
+{
+  //Make a list of edges to rewire:
+  vector<Edge*> edges_to_rewire;
+  it->pushInto(edges_to_rewire);
+  
   if( _endsel != _startsel ) {
     _endsel->selectFrom( net );
   }
   _startsel->selectFrom( net );
 
-  set<Edge*> edges_to_rewire;
-  auto_ptr<EdgeIterator> ei( net->getEdgeIterator() );
-  while( ei->moveNext() ) {
-    if( _rand.getBool(_prob) ) {
-      //Rewire this edge:
-      edges_to_rewire.insert( ei->current() );
-    }
-  }
-  set<Edge*>::iterator reit;
+  vector<Edge*>::iterator reit;
   FOREACH(reit, edges_to_rewire)
   {
-    string attrs = (*reit)->getAttributes();
-    net->remove( *reit );
+    Edge* this_edge = *reit;
+    string attrs = this_edge->getAttributes();
+    net->remove( this_edge );
     Node* start = _startsel->select();
     Node* end = _endsel->select(start);
   //  cout << "(" << start << ", " << end << ")" << endl;

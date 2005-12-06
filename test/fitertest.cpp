@@ -27,7 +27,7 @@ int main(int argc, char* argv[])
   NetworkFactory nf;
   Network* net = nf.create(std::cin);
   NodeIterator* ni = net->getNodeIterator();
-  NINBIterator fi(ni, net, (NodeIntMember)&Network::getTriangles, 2, false, false);
+  NINBIterator fi(ni, net, (NodeIntMember)&Network::getTriangles, 2, false, true);
   while(fi.moveNext()) {
     Node* n = fi.current();
     std::cout << "Node: " << n->toString() << " has: " << net->getTriangles(n)
@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
   //Must clone because the filter will delete the iterator when we are done
   std::cout << "Round 2" << std::endl;
   Fittest fittest(net);
-  FilteredIterator<Fittest,Node*> fi2(ni2, &fittest, &Fittest::Test);
+  ClassFilterator<Fittest,Node*> fi2(ni2, &fittest, &Fittest::Test);
   while( fi2.moveNext() ) {
     Node* n = fi2.current();
     std::cout << "Node: " << n->toString() << " has: " << net->getTriangles(n)

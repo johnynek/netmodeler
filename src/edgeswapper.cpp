@@ -41,16 +41,16 @@ EdgeSwapper::EdgeSwapper(EdgeFactory& ef, Random& rand, double p, Method meth) :
 
 void EdgeSwapper::map(Network* net)
 {
+  RandomEdgeFilterator rei( net->getEdgeIterator(), _rand, _p);
+  map( net, &rei );
+}
+
+void EdgeSwapper::map(Network* net, Iterator<Edge*>* it)
+{
   DEBUG("About to look for edges to swap");
   vector<Edge*> edges;
-  auto_ptr<EdgeIterator> ei( net->getEdgeIterator() );
-  while( ei->moveNext() ) {
-    if ( _rand.getBool(_p) ) {
-      edges.push_back( ei->current() );
-    }
-  }
-  //This is in the STL algorithms
-  random_shuffle(edges.begin(), edges.end());
+  it->pushInto(edges);
+  _rand.shuffle(edges);
   //Now take pairs and delete them:
   DEBUG("About to swap");
   vector<Edge*>::iterator dit;

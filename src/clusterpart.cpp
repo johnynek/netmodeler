@@ -27,7 +27,7 @@ ClusterPart::ClusterPart(double m): _min_cc(m) { }
 std::vector<Network*>* ClusterPart::partition(const Network& input) {
   MinCCEdgeTester test(&input, _min_cc);
   std::auto_ptr<Network> net( input.clone() );
-  FilteredIterator<MinCCEdgeTester, Edge*> fi(input.getEdgeIterator(),
+  ClassFilterator<MinCCEdgeTester, Edge*> fi(input.getEdgeIterator(),
 		                             &test, &MinCCEdgeTester::shouldRemove);
   //Remove the edges that match.
   net->remove(&fi); 
