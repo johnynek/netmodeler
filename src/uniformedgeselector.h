@@ -37,8 +37,8 @@ namespace Starsky {
 class UniformEdgeSelector : public IEdgeSelector, public INetworkMonitor {
 
   public:
-    UniformEdgeSelector(Random& rand) : _rand(rand) { }
-    virtual void selectFrom(Network* net) { net->add(this); }
+    UniformEdgeSelector(Random& rand) : _rand(rand) { _my_net = 0; }
+    virtual void selectFrom(Network* net);
     virtual void postAdd(Network* net);
     virtual void postEdgeAdd(Edge* add);
     virtual void postEdgeRemove(Edge* rem);

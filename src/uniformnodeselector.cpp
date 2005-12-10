@@ -80,3 +80,16 @@ Node* UniformNodeSelector::select(Node* avoid)
   }
   return ret_val;
 }
+
+void UniformNodeSelector::selectFrom(Network* net)
+{
+  if( _my_net == net ) {
+    //Don't do anything.
+    return;
+  }
+  else if ( _my_net != 0 ) {
+    //Stop monitoring the old network:
+    _my_net->remove(this);
+  }
+  net->add(this);
+}

@@ -78,3 +78,16 @@ Edge* UniformEdgeSelector::select(Edge* avoid)
   }
   return ret_val;
 }
+
+void UniformEdgeSelector::selectFrom(Network* net)
+{
+  if( net == _my_net ) {
+    //Do nothing
+    return;
+  }
+  else if( _my_net != 0 ) {
+    //Stop monitoring _my_net
+    _my_net->remove(this);
+  }
+  net->add(this);
+}

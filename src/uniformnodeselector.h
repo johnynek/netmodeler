@@ -38,8 +38,8 @@ namespace Starsky {
 class UniformNodeSelector : public INodeSelector, public INetworkMonitor {
 
   public:
-    UniformNodeSelector(Random& rand) : _rand(rand) { }
-    virtual void selectFrom(Network* net) { net->add(this); }
+    UniformNodeSelector(Random& rand) : _rand(rand) { _my_net = 0; }
+    virtual void selectFrom(Network* net);
     virtual void postAdd(Network* net);
     virtual void postNodeAdd(Node* add);
     virtual void postNodeRemove(Node* rem);
