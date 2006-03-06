@@ -21,6 +21,7 @@ callawaynetwork.cpp \
 callawaynetwork.h \
 clusterpart.h \
 clusterpart.cpp \
+cnt_ptr.h \
 constdrv.h \
 containernode.h \
 containeredge.h \
