@@ -7,10 +7,10 @@ using namespace Starsky;
 
 int main(int argc, char* argv[])
 {
-  //NetworkFactory* nf = new WeightedNetworkFactory();
-  NetworkFactory* nf = new NetworkFactory();
+  cnt_ptr<NetworkFactory> nf( new WeightedNetworkFactory() );
+  //NetworkFactory* nf = new NetworkFactory();
   DEBUG("made nf")
-  Network* net = nf->create(std::cin);
+  cnt_ptr<Network> net( nf->create(std::cin) );
   DEBUG("made net")
   net->printTo(std::cout);
 }

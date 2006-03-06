@@ -12,8 +12,8 @@ int main(int argc, char* argv[])
   //PowerLawDRV pl(r, -2.0,2,(int)pow((double)size,0.5));
   //ConstDRV pl(4);
   UniformDRV pl(r, 2, 3);
-  std::auto_ptr<NetworkFactory> nf( new DegreeLawNetFac(size, pl, r, false) );
-  std::auto_ptr<Network> net( nf->create() );
+  cnt_ptr<NetworkFactory> nf( new DegreeLawNetFac(size, pl, r, false) );
+  cnt_ptr<Network> net( nf->create() );
 
 
   IntStats ns;
