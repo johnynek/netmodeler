@@ -21,7 +21,7 @@ class cnt_ptr {
     }
     
     //Here is the destructor
-    ~cnt_ptr<T>() {
+    ~cnt_ptr() {
       decrement();
     }
 
