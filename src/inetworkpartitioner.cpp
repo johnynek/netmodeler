@@ -180,7 +180,7 @@ Network* INetworkPartitioner::partitionAsNetwork(const Network& orig,
   Network* result = new Network();
   std::map<Node*, Network*> node_to_part;
   std::map<Network*, ContainerNode<Network>* > part_to_node;
-  StlIterator<std::vector<Network*>, Network*> partit(*part);
+  StlIterator<std::vector, Network*> partit(*part);
   //Add the nodes of the network:
   while( partit.moveNext() ) {
     Network* temp_net = partit.current();

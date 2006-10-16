@@ -80,7 +80,7 @@ int main(int argc, char* argv[]) {
   EdgeIterator* ei = net->getEdgeIterator();
   double thresh = op.getDoubleOpt("edgecc_thresh", 0.0);
   Remover r(net, thresh);
-  FilteredIterator<Remover, Edge*> fi(ei, &r, &Remover::check);
+  ClassFilterator<Remover, Edge*> fi(ei, &r, &Remover::check);
   net->remove(&fi);
   net->printTo(std::cout);
   delete net;

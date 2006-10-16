@@ -783,7 +783,7 @@ EdgeIterator* Network::getEdgeIterator(Node* n) const
     //No such edge:
     return 0;
   }
-  return new StlIterator<Network::EdgeSet, Edge*>(neit->second);
+  return new StlIterator<std::set, Edge*>(neit->second);
 }
 
 Edge* Network::getEdgePtr(const Edge& edge) const {
@@ -834,7 +834,7 @@ Iterator<std::string>* Network::getEIMembers() const {
   std::set<std::string>* mems = new std::set<std::string>();
   mems->insert("getTriangles");
   mems->insert("getWedges");
-  return new StlPIterator<std::set<std::string>, std::string>(mems);
+  return new StlPIterator<std::set, std::string>(mems);
 }
 
 EdgeDoubMember Network::getEDMember(const std::string& name) const {
@@ -847,7 +847,7 @@ EdgeDoubMember Network::getEDMember(const std::string& name) const {
 Iterator<std::string>* Network::getEDMembers() const {
   std::set<std::string>* mems = new std::set<std::string>();
   mems->insert("getEdgeCC");
-  return new StlPIterator<std::set<std::string>, std::string>(mems);
+  return new StlPIterator<std::set, std::string>(mems);
 }
 
 double Network::getExpectedTransitivity() const {
@@ -910,7 +910,7 @@ Iterator<std::string>* Network::getNIMembers() const {
   mems->insert("getDegree");
   mems->insert("getTriangles");
   mems->insert("getWedges");
-  return new StlPIterator<std::set<std::string>, std::string>(mems);
+  return new StlPIterator<std::set, std::string>(mems);
 }
 
 NodeDoubMember Network::getNDMember(const std::string& name) const {
@@ -922,7 +922,7 @@ NodeDoubMember Network::getNDMember(const std::string& name) const {
 Iterator<std::string>* Network::getNDMembers() const {
   std::set<std::string>* mems = new std::set<std::string>();
   mems->insert("getClusterCoefficient");
-  return new StlPIterator<std::set<std::string>, std::string>(mems);
+  return new StlPIterator<std::set, std::string>(mems);
 }
 
 #ifndef HIDE_STL

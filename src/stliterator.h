@@ -30,11 +30,11 @@ namespace Starsky {
  * be useful for making Starsky::Iterators out of iterators from any
  * single (non-map) container.
  */
-template<typename Cont, typename T>
+template<template <typename> class Cont, typename T>
 class StlIterator : public Iterator<T> {
 
   public:
-    StlIterator(const Cont& con) : _con(con) {
+    StlIterator(const Cont<T>& con) : _con(con) {
       reset();
     }
 
@@ -65,8 +65,8 @@ class StlIterator : public Iterator<T> {
     }
 
   protected:
-    typename Cont::const_iterator _it;
-    const Cont& _con;
+    typename Cont<T>::const_iterator _it;
+    const Cont<T>& _con;
     bool _moved_to_first;
 };
 
@@ -75,11 +75,11 @@ class StlIterator : public Iterator<T> {
  * This iterator totally "owns" the container, and deletes the
  * pointer when the last clone is deleted.
  */
-template<typename Cont, typename T>
+template<template <typename> class Cont, typename T>
 class StlPIterator : public Iterator<T> {
 
   public:
-    StlPIterator(Cont* con) : _con(con) {
+    StlPIterator(Cont<T>* con) : _con(con) {
       reset();
     }
 
@@ -120,13 +120,13 @@ class StlPIterator : public Iterator<T> {
     StlPIterator&  operator = (const StlPIterator& other) { /*..*/}
     //Don't allow copy constructors.
     StlPIterator(const StlPIterator& other) { /*..*/ }
-    StlPIterator(cnt_ptr<Cont>& con) : _con(con) {
+    StlPIterator(cnt_ptr< Cont<T> >& con) : _con(con) {
       reset();
     }
     StlPIterator() { }
   protected:
-    typename Cont::const_iterator _it;
-    cnt_ptr<Cont> _con;
+    typename Cont<T>::const_iterator _it;
+    cnt_ptr< Cont<T> > _con;
     bool _moved_to_first;
 };
 	
