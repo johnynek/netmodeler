@@ -29,19 +29,25 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 namespace Starsky {
 
 /**
- * Message that does a breadth first broadcast.  Each node rebroadcasts
- * the message to its neighbors unless it has seen it already or the TTL=0.
+ * Message that does a local breadth first broadcast.  Each node rebroadcasts
+ * the message to its neighbors unless it has seen it already or the TTL=0 
+ * or local boundary.
  * If the TTL is -1, the broadcast goes forever.
- *
  * This code is basically identical to the Starsky::PercolationMessage class
  * except that the percolation probability is 1.
  * 
  */
 	
-class BroadcastMessage : public Message {
+class LocalBroadcastMessage : public Message {
 
   public:
-    BroadcastMessage(int ttl=-1);
+    int hops;
+    /**
+     * @param nodes the number of nodes in the network
+     * @param hops the number of hops
+     * @cache message for caching if it's true, otherwise message for query 
+     */
+    LocalBroadcastMessage(int ttl=-1, int nodes, int hops, bool cache);
     /**
      * This will return all the nodes and edges in the
      * out component of a particular Node within a number of hops
@@ -52,8 +58,11 @@ class BroadcastMessage : public Message {
     virtual Network* visit(Node* anode, Network& aNet);	
   protected:
     int _ttl;
+    int _nodes;
+    bool _cache;
 };
 	
 }
 
 #endif
+

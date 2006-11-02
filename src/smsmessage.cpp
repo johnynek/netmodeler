@@ -24,12 +24,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 using namespace Starsky;
 using namespace std;
 
-BroadcastMessage::BroadcastMessage(int ttl) : _ttl(ttl)
+#define BMAX=65536
+LocalBroadcastMessage::LocalBroadcastMessage(int ttl, int nodesz, int hops, bool cache) : _ttl(ttl), _nodes(nodes), hops(0), _cache(cache)
 {
 }
 
-Network* BroadcastMessage::visit(Node* n, Network& net)
+Network* LocalBroadcastMessage::visit(Node* n, Network& net)
 {
+    /* 
+     * Determine cache or query size
+     */
+    int cqsize = int( sqrt( BMAX / net.size() ) );
+       
     map<int, Network::NodePSet > to_visit;
     map<int, Network::NodePSet >::iterator tv_it;
     Network::NodePSet::iterator a_it;
@@ -40,6 +46,8 @@ Network* BroadcastMessage::visit(Node* n, Network& net)
     int this_distance;
     //We loop through at each TTL:
     tv_it = to_visit.begin();
+    // local broadcasting range [addr_i*BMAX, addr_i*BMAX*cqsize+BAMX-1]
+    //                       or [(addr_i-2/cqsize)*BMAX, (addr_i+2/cqsize)*BMAX+BMAX-1 ]
     while( tv_it != to_visit.end() && ( (tv_it->first < _ttl) || (_ttl == -1) ) ) {
         this_distance = tv_it->first + 1;
         //Here are all the nodes at this distance:
