@@ -20,8 +20,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef starsky__SWNetwork_H
-#define starsky__SWNetwork_H
+#ifndef starsky__smsetwork_H
+#define starsky__smsetwork_H
 
 #include "network.h"
 #include "random.h"
@@ -59,8 +59,8 @@ class Smsnetwork : public Network {
 	 *@param address return Node by address
 	 */
 	//AddressedNode* getNodeFromAddress(const int address) const;
-	std::vector<AddressedNode*> node_vec;
-	//std::vector<AddressedNode*> node_map;
+	//std::vector<AddressedNode*> node_vec;
+	std::map<unsigned long int, AddressedNode*> node_map;
 	/**
 	 * print neighbors of each node into "output" file.
 	 */
@@ -72,15 +72,21 @@ class Smsnetwork : public Network {
 	 */
 	std::vector<int> getNeighborDistHist(int bin_count=10) const;
 	//bool compareNodes(const AddressedNode* a, const AddressedNode* b);
-	bool isIn(std::vector<AddressedNode*> n_vec, AddressedNode* nd);
+	//bool isIn(std::vector<AddressedNode*> n_vec, unsigned long int nd_addr);
 	unsigned long int findShortcutAddress(unsigned long int t_addr);
 	unsigned long int distanceTo(unsigned long int addr_a, unsigned long int addr_b);
 	
     protected:
 	/** 
 	 * @param n create new Smsnetwork whose size is n
+	 * @param c if c == 1, network for cache,
+	 *          if c == 0, network for query.
 	 */
 	void create(int n);
+	//void createQueryNet(std::vector<AddressedNode*> nd_vec);
+	void createQueryNet(std::map<unsigned long int, AddressedNode*> nd_map);
+	void cacheItem(std::string content, AddressedNode* cn);
+       // Network* queryForContent(AddressedNode* content, NodeIterator* ni);	
 	/** 
 	 * @param n create new Smsnetwork whose size is n
 	 * whose node addresses are transposed.
@@ -93,7 +99,7 @@ class Smsnetwork : public Network {
 	//double _p;
 	Ran1Random& _r_short;
 	//Random& _r_int;
-	std::map<unsigned long int, AddressedNode*> _node_map;
+	//std::map<unsigned long int, AddressedNode*> _node_map;
 	//std::vector<AddressedNode*> _node_vec;
 };
 	

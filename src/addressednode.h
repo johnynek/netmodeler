@@ -20,17 +20,18 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
      */
      
-#ifndef starsky__AddressedNode_h
-#define starsky__AddressedNode_h
+#ifndef starsky__addressednode_h
+#define starsky__addressednode_h
 
 #include "node.h"
+#include <set>
 
 namespace Starsky {
 
   /**
    * Addressed node class which every node in the network has address
    */
-
+  //template<typename T>
   class AddressedNode : public Node {
     protected:
       /**
@@ -41,14 +42,24 @@ namespace Starsky {
        * address for query 
        */
       unsigned long int _q_address;
+      std::set<std::string> _itemSet;
+      //bool _own;
       int _dist;
       int _small;
       int _big;
+       
     public:
       unsigned long int addr_i; // column address
       unsigned long int addr_j; // row address
+      bool cache;
       AddressedNode();
-      AddressedNode(const unsigned long int addr);
+      /**
+       * @param addr node's address 
+       * @param item object to hold
+       * @param own if true, delete the item when we are deleted
+       */
+      AddressedNode(const unsigned long int addr, std::set<std::string> itemSet) ;
+      ~AddressedNode() { _itemSet.clear(); }
       /**
        * Return a node's address in cache space
        */
@@ -63,6 +74,17 @@ namespace Starsky {
        * return distance to the target
        */
       int getDistanceTo(int nodes, AddressedNode* target);
+      /**
+       * return to the pointer to the object being contained.
+       */
+      std::set<std::string> getItem() const { return _itemSet; }
+      /**
+       * If you change your mind and don't want the item to be deleted
+       * when the node is deleted, call this function.
+       */
+      void insertItem(std::string item, AddressedNode* cn);
+      void deleteItem(std::string item, AddressedNode* cn);
+      //void release() { _own = false; }
     };
 }
 #endif

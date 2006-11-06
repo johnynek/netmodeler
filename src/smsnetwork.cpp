@@ -28,15 +28,16 @@ using namespace std;
 
 Smsnetwork::Smsnetwork(Ran1Random& r) : Network(), _r_short(r) {}
 Smsnetwork::Smsnetwork(int nodes, Ran1Random& r) : _r_short(r) {
-    node_vec.reserve(nodes);
-    create(nodes);
+    //node_vec.reserve(nodes);
+    //create(nodes);
 }
 /**
 bool compareNodes(const AddressedNode* a, const AddressedNode* b) {
     return a->getAddress() < b->getAddress();
 }
 */
-bool isIn(std::vector<AddressedNode*> n_vec, unsigned long int nd_addr) {
+/**
+bool Smsnetwork::isIn(std::vector<AddressedNode*> n_vec, unsigned long int nd_addr) {
     std::vector<AddressedNode*>::iterator it;
     for (it = n_vec.begin(); it != n_vec.end(); it++) {
         if (nd_addr == (*it)->getCacheAddress() ) {
@@ -45,17 +46,21 @@ bool isIn(std::vector<AddressedNode*> n_vec, unsigned long int nd_addr) {
     }
 }
 
+*/
 #define AMAX 65536
 void Smsnetwork::create(int n) {
+    //Let's make n different nodes!!
+    node_map.clear();
     for(int j=0; j < n; j++) {
-	unsigned long int r_int = (unsigned long int)_r_short.getDouble01() * AMAX;
-	r_addr = r_int << 16 + r_int;
-	//r_addr = r_int.getInt( (AMAX-1), 0 ) << 16 + r_int.getInt( (AMAX-1), 0 );
-	//while(_node_map.find(r_addr) !=_node_map.end() ){
-	while( !isIn(node_vec, r_addr));
-            AddressedNode* anode = new AddressedNode(r_addr);
-	    //node_map[r_addr] = anode;
-            node_vec.push_back(anode);
+	unsigned long int r_int_f = (unsigned long int)_r_short.getDouble01() * AMAX;
+	unsigned long int r_int_b = (unsigned long int)_r_short.getDouble01() * AMAX;
+	r_addr = r_int_f << 16 + r_int_b;
+	std::set<std::string> items;
+	items.clear();
+	if (node_map.find(r_addr) != node_map.end() ){
+            AddressedNode* anode = new AddressedNode(r_addr, items);
+	    node_map[r_addr] = anode;
+            //node_vec.push_back(anode);
 	    add(anode);
 	}
 	//while( !isIn(node_vec, anode));
@@ -63,18 +68,23 @@ void Smsnetwork::create(int n) {
 			
     //Sort Nodes in address increasing order.
     //sort(node_vec.begin(), node_vec.end(), Compare_nodes);
-    sort(node_vec.begin(), node_vec.end() );
+    //sort(node_vec.begin(), node_vec.end() );
     
-    AddressedNode* first = node_vec[0];
+    //Form ring.
+    //AddressedNode* first = itNode_map.begin()->second;
+    AddressedNode* first = node_map.begin()->second;
     //node_vec.push_back(first);
     AddressedNode *tmp, *last = first;
     //_node_map[0] = first;
     add(first);
-    //Form ring.
-    //std::vector<AddressedNode*>::iterator itNode_vec;
-    //for (itNode_vec = node_vec.begin(); itNode_vec != node_vec.end(); itNode_vec++) {
-    for(int k = 1; k < n; k++) 
-        tmp = node_vec[k];
+    std::map<unsigned long int, AddressedNode*>::iterator itNode_map;
+    for (itNode_map = node_map.begin(); itNode_map != node_map.end(); itNode_map++) {
+    //for(int k = 1; k < n; k++) 
+        if (itNode_map == node_map.begin() ) {
+		//do nothing. it is already added before for loop.
+	}
+        //tmp = node_vec[k];
+        tmp = itNode_map->second;
         //tmp = *(itNode_vec);
 	//add(tmp);
 	//_node_map[k] = tmp;
@@ -89,11 +99,11 @@ void Smsnetwork::create(int n) {
     while( ni->moveNext() ) {
       AddressedNode* nodei = dynamic_cast<AddressedNode*> (ni->current());
       double x = _r_short.getDouble01();
-      unsigned long int k = unsigned long int(pow(AMAX, x));
+      unsigned long int k = (unsigned long int) pow(AMAX, x);
       unsigned long int shortcut_target_addr = (nodei->getCacheAddress() + k) % AMAX;
       unsigned long int shortcut_address = findShortcutAddress(shortcut_target_addr);
-      AddressedNode* nodej = node_vec[shortcut_address];
-      if ((nodei->getAddress() != nodej->getAddress()) && !(getEdge(nodei, nodej)) && !(getEdge(nodej, nodei))){
+      AddressedNode* nodej = node_map[shortcut_address];
+      if ((nodei->getCacheAddress() != nodej->getCacheAddress()) && !(getEdge(nodei, nodej)) && !(getEdge(nodej, nodei))){
           //add(Edge(nodei,nodej));
           add( Edge(nodei,nodej) );
       }
@@ -101,6 +111,44 @@ void Smsnetwork::create(int n) {
     }
     
 }
+
+void Smsnetwork::createQueryNet(std::map<unsigned long int, AddressedNode*> nd_map)
+{
+    //sort(nd_vec.begin(), nd_vec.end() );
+
+    std::map<unsigned long int, AddressedNode*>::iterator itNd_map;
+    AddressedNode* first = nd_map.begin()->second;
+    add(first);
+    AddressedNode *tmp, *last = first;
+    for (itNd_map = nd_map.begin(); itNd_map != nd_map.end(); itNd_map++)
+    //for (int k = 1; k<nd_vec.size(); k++)
+    {
+        if (itNd_map == nd_map.begin() ) {
+		//do nothing. it is already added before for loop.
+	}
+	tmp = itNd_map->second;
+	add(tmp);
+	add(Edge(tmp, last));
+	last = tmp;
+    }
+    add(Edge(last, first) );
+    auto_ptr<NodeIterator> ni( getNodeIterator() );
+    while(ni->moveNext() ) {
+	AddressedNode* nodei = dynamic_cast<AddressedNode*> (ni->current() );
+	double x = _r_short.getDouble01();
+        unsigned long int k = (unsigned long int) pow(AMAX, x);
+        unsigned long int shortcut_target_addr = (nodei->getCacheAddress() + k) % AMAX;
+        unsigned long int shortcut_address = findShortcutAddress(shortcut_target_addr);
+        AddressedNode* nodej = nd_map[shortcut_address];
+        if ((nodei->getQueryAddress() != nodej->getQueryAddress()) && !(getEdge(nodei, nodej)) && !(getEdge(nodej, nodei))){
+            add( Edge(nodei,nodej) );
+      }
+
+    }
+    
+}
+	
+
 /**
 AddressedNode* Smsnetwork::getNodeFromAddress(const int addr) const {
 	map<int, AddressedNode*>::const_iterator i = _node_map.find(addr);
@@ -114,11 +162,14 @@ AddressedNode* Smsnetwork::getNodeFromAddress(const int addr) const {
 // Find the shortcut node's address
 // we have target address, let's find the nearest node 
 // to the target address
-unsigned long int findShortcutAddress(unsigned long int t_addr) {
+unsigned long int Smsnetwork::findShortcutAddress(unsigned long int t_addr) {
     unsigned long int this_distance, min_distance=AMAX, this_addr, scAddr;
-    for (ii=0, ii< node_vec.size(), ii++) {
-	this_addr = node_vec.at(ii)->_c_address;
-        this_distance = distnceTo( this_addr, t_addr);	    
+    std::map<unsigned long int, AddressedNode*>::iterator itNM;
+    //for (int ii=0; ii< node_map.size(); ii++) {
+    for (itNM=node_map.begin(); itNM!=node_map.end(); itNM++) {
+	//this_addr = node_map.at(ii)->_c_address;
+	this_addr = itNM->first;
+        this_distance = distanceTo( this_addr, t_addr);	    
 	if ( this_distance < min_distance) {
 	    min_distance = this_distance;
 	    scAddr = this_addr;
@@ -126,7 +177,7 @@ unsigned long int findShortcutAddress(unsigned long int t_addr) {
     } return scAddr;
 }	
     
-unsigned long int distanceTo(unsigned long int addr_a, unsigned long int addr_b) {
+unsigned long int Smsnetwork::distanceTo(unsigned long int addr_a, unsigned long int addr_b) {
     unsigned long int sm, bg, dt;
     sm = std::min(addr_a, addr_b);
     bg = std::max(addr_a, addr_b);
@@ -141,11 +192,11 @@ void Smsnetwork::printNetInfo() {
       //cout<< "current node's address is: " << ni->current()->getAddress() << endl;
       if (this->getDegree(this_node) != 0) {
          auto_ptr<NodeIterator> nni (this->getNeighborIterator(this_node) );
-	 cout << "neighbors of " << this_node->getAddress() << "are: " << endl;
+	 cout << "neighbors of " << this_node->getCacheAddress() << "are: " << endl;
 	 cout << "(";
 	 while ( nni->moveNext() ) { 
 	    AddressedNode* nei_node = dynamic_cast<AddressedNode*> (nni->current() );
-	    cout << nei_node->getAddress() << ",";
+	    cout << nei_node->getCacheAddress() << ",";
          }
 	 cout << ")" << endl;
       }
@@ -178,3 +229,29 @@ vector<int> Smsnetwork::getNeighborDistHist(int bins) const {
    }
    return ret_val;
 }
+
+void Smsnetwork::cacheItem(std::string content, AddressedNode* cn) 
+{
+    //Determine cache size
+    int csize = (int) (sqrt( AMAX / this->getNodeSize() ) );
+    unsigned long int start_addr;
+    if ( cn->addr_i == 0) {cn->addr_i = 1;}
+    start_addr = (unsigned long int)(cn->addr_i-2/csize)*AMAX;
+    unsigned long int end_addr = (unsigned long int)( ( (start_addr % AMAX)+csize)*AMAX+AMAX-1);
+    std::map<unsigned long int, AddressedNode*> cache_nm;
+    std::map<unsigned long int, AddressedNode*>::iterator itNodeMap;
+    for (itNodeMap=node_map.begin(); itNodeMap!=node_map.end(); itNodeMap++) 
+    {
+	std::set<std::string> cacheItemSet = itNodeMap->second->getItem();
+	if ( (itNodeMap->first >= start_addr && itNodeMap->first <= end_addr) && cacheItemSet.find(content)== cacheItemSet.end() )
+	{
+	    itNodeMap->second->insertItem(content, cn);
+	}
+    }
+}
+/**
+Smsnetwork* Smsnetwork::queryForContent(AddressedNode* content, NodeIterator* ni)
+{
+
+}
+*/

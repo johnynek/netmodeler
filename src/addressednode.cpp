@@ -24,20 +24,29 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 using namespace Starsky;
 
 #define AMAX 65536
+
 AddressedNode::AddressedNode()
 {
   _c_address=0;
   _q_address=0;
 }
 
-AddressedNode::AddressedNode(const unsigned long int addr)
+
+AddressedNode::AddressedNode(const unsigned long int addr, std::set<std::string> itemSet)
 {
   _c_address = addr;
   addr_j = addr % AMAX;
   addr_i = (addr - addr_j) / AMAX;
   _q_address = addr_j*AMAX + addr_i;
+  _itemSet = itemSet;
 }
-
+/**
+unsigned long int AddressedNode::getAddress(bool cache)
+{
+    if (cache == true) { return _c_address; }
+    else { return _q_address; }
+}
+*/
 unsigned long int AddressedNode::getCacheAddress()
 {
   return _c_address;
@@ -46,6 +55,7 @@ unsigned long int AddressedNode::getQueryAddress()
 {
   return _q_address;
 }
+
 int AddressedNode::getDistanceTo(int nodes, AddressedNode* target)
 {
   _small = std::min (_c_address, target->_c_address);
@@ -54,4 +64,12 @@ int AddressedNode::getDistanceTo(int nodes, AddressedNode* target)
   return _dist;
 }
 
+void AddressedNode::insertItem(std::string item, AddressedNode* cn)
+{
+    _itemSet.insert(item);
+}
 
+void AddressedNode::deleteItem(std::string item, AddressedNode* cn)
+{
+    _itemSet.erase(item);
+}

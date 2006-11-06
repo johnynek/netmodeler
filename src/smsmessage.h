@@ -41,13 +41,13 @@ namespace Starsky {
 class LocalBroadcastMessage : public Message {
 
   public:
-    int hops;
+    //int hops;
     /**
      * @param nodes the number of nodes in the network
      * @param hops the number of hops
      * @cache message for caching if it's true, otherwise message for query 
      */
-    LocalBroadcastMessage(int ttl=-1, int nodes, int hops, bool cache);
+    LocalBroadcastMessage(std::string query, unsigned long int r0, unsigned long int r1);
     /**
      * This will return all the nodes and edges in the
      * out component of a particular Node within a number of hops
@@ -55,11 +55,10 @@ class LocalBroadcastMessage : public Message {
      * @param aNet the network that the message will travel on
      * @return a network consisting of all the nodes and edges crossed in a broadcast.
      */
-    virtual Network* visit(Node* anode, Network& aNet);	
+    virtual Smsnetwork* visit(AddressedNode* anode, Smsnetwork& aNet);	
   protected:
-    int _ttl;
-    int _nodes;
-    bool _cache;
+    std::string _query;
+    unsigned long int _r0, _r1;
 };
 	
 }
