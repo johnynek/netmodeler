@@ -42,18 +42,18 @@ namespace Starsky {
      * Nodes are arranged in a ring, 
      * and with probability p(~1/d) each node is also connected to a shortcut.
      */
-class DeetoNetwork : public Network {
+class DeetooNetwork : public Network {
 
     public:
 	unsigned long int r_addr;
-	DeetoNetwork(Ran1Random& r);
-        DeetoNetwork(int nodes, Ran1Random& r);
+	DeetooNetwork(Ran1Random& r);
+        DeetooNetwork(int nodes, Ran1Random& r);
 	/**
 	 *make new empty network
 	 */
-	virtual DeetoNetwork* newNetwork() const { 
+	virtual DeetooNetwork* newNetwork() const { 
 	//virtual Network* newNetwork() const { 
-		return new DeetoNetwork(_r_short);}
+		return new DeetooNetwork(_r_short);}
 		//return new Network();}
 	/**
 	 *@param address return Node by address
@@ -76,9 +76,8 @@ class DeetoNetwork : public Network {
 	unsigned long int findShortcutAddress(unsigned long int t_addr);
 	unsigned long int distanceTo(unsigned long int addr_a, unsigned long int addr_b);
 	
-    protected:
 	/** 
-	 * @param n create new DeetoNetwork whose size is n
+	 * @param n create new DeetooNetwork whose size is n
 	 * @param c if c == 1, network for cache,
 	 *          if c == 0, network for query.
 	 */
@@ -87,8 +86,9 @@ class DeetoNetwork : public Network {
 	void createQueryNet(std::map<unsigned long int, AddressedNode*> nd_map);
 	void cacheItem(std::string content, AddressedNode* cn);
        // Network* queryForContent(AddressedNode* content, NodeIterator* ni);	
+    protected:
 	/** 
-	 * @param n create new DeetoNetwork whose size is n
+	 * @param n create new DeetooNetwork whose size is n
 	 * whose node addresses are transposed.
 	 */
 	//void createTrans(int n);

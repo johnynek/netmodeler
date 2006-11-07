@@ -24,7 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <message.h>
 #include <addressednode.h>
-#include <smsnetwork.h>
+#include <deetoonetwork.h>
 
 namespace Starsky {
 
@@ -38,7 +38,7 @@ namespace Starsky {
  * 
  */
 	
-class LocalBroadcastMessage : public Message {
+class DeetooMessage : public Message {
 
   public:
     //int hops;
@@ -47,7 +47,7 @@ class LocalBroadcastMessage : public Message {
      * @param hops the number of hops
      * @cache message for caching if it's true, otherwise message for query 
      */
-    LocalBroadcastMessage(std::string query, unsigned long int r0, unsigned long int r1);
+     DeetooMessage(std::string query, unsigned long int r0, unsigned long int r1);
     /**
      * This will return all the nodes and edges in the
      * out component of a particular Node within a number of hops
@@ -55,7 +55,7 @@ class LocalBroadcastMessage : public Message {
      * @param aNet the network that the message will travel on
      * @return a network consisting of all the nodes and edges crossed in a broadcast.
      */
-    virtual Smsnetwork* visit(AddressedNode* anode, Smsnetwork& aNet);	
+    virtual DeetooNetwork* visit(AddressedNode* anode, DeetooNetwork& aNet);	
   protected:
     std::string _query;
     unsigned long int _r0, _r1;

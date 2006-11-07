@@ -19,18 +19,18 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include <smsmessage.h>
+#include <deetoomessage.h>
 
 using namespace Starsky;
 using namespace std;
 
 #define BMAX 65536
-//LocalBroadcastMessage::LocalBroadcastMessage(int ttl, int nodesz, int hops) : _ttl(ttl), _nodes(nodesz), hops(0)
-LocalBroadcastMessage::LocalBroadcastMessage(std::string query, unsigned long int r0, unsigned long int r1) : _query(query), _r0(r0), _r1(r1)
+//DeetooMessage::DeetooMessage(int ttl, int nodesz, int hops) : _ttl(ttl), _nodes(nodesz), hops(0)
+DeetooMessage::DeetooMessage(std::string query, unsigned long int r0, unsigned long int r1) : _query(query), _r0(r0), _r1(r1)
 {
 }
 
-Smsnetwork* LocalBroadcastMessage::visit(AddressedNode* n, Smsnetwork& net)
+DeetooNetwork* DeetooMessage::visit(AddressedNode* n, DeetooNetwork& net)
 {
     /* 
      * Determine cache or query size
@@ -56,7 +56,7 @@ Smsnetwork* LocalBroadcastMessage::visit(AddressedNode* n, Smsnetwork& net)
     Network::NodePSet::iterator a_it;
 
     to_visit[0].insert(n);
-    Smsnetwork* new_net = net.newNetwork();
+    DeetooNetwork* new_net = net.newNetwork();
     new_net->add( n );
     int this_distance;
     //We loop through at each TTL:

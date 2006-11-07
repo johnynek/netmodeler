@@ -20,14 +20,14 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include "smsnetwork.h"
+#include "deetoonetwork.h"
 #include <cmath>
 
 using namespace Starsky;
 using namespace std;
 
-Smsnetwork::Smsnetwork(Ran1Random& r) : Network(), _r_short(r) {}
-Smsnetwork::Smsnetwork(int nodes, Ran1Random& r) : _r_short(r) {
+DeetooNetwork::DeetooNetwork(Ran1Random& r) : Network(), _r_short(r) {}
+DeetooNetwork::DeetooNetwork(int nodes, Ran1Random& r) : _r_short(r) {
     //node_vec.reserve(nodes);
     //create(nodes);
 }
@@ -37,7 +37,7 @@ bool compareNodes(const AddressedNode* a, const AddressedNode* b) {
 }
 */
 /**
-bool Smsnetwork::isIn(std::vector<AddressedNode*> n_vec, unsigned long int nd_addr) {
+bool DeetooNetwork::isIn(std::vector<AddressedNode*> n_vec, unsigned long int nd_addr) {
     std::vector<AddressedNode*>::iterator it;
     for (it = n_vec.begin(); it != n_vec.end(); it++) {
         if (nd_addr == (*it)->getCacheAddress() ) {
@@ -48,7 +48,7 @@ bool Smsnetwork::isIn(std::vector<AddressedNode*> n_vec, unsigned long int nd_ad
 
 */
 #define AMAX 65536
-void Smsnetwork::create(int n) {
+void DeetooNetwork::create(int n) {
     //Let's make n different nodes!!
     node_map.clear();
     for(int j=0; j < n; j++) {
@@ -112,7 +112,7 @@ void Smsnetwork::create(int n) {
     
 }
 
-void Smsnetwork::createQueryNet(std::map<unsigned long int, AddressedNode*> nd_map)
+void DeetooNetwork::createQueryNet(std::map<unsigned long int, AddressedNode*> nd_map)
 {
     //sort(nd_vec.begin(), nd_vec.end() );
 
@@ -150,7 +150,7 @@ void Smsnetwork::createQueryNet(std::map<unsigned long int, AddressedNode*> nd_m
 	
 
 /**
-AddressedNode* Smsnetwork::getNodeFromAddress(const int addr) const {
+AddressedNode* DeetooNetwork::getNodeFromAddress(const int addr) const {
 	map<int, AddressedNode*>::const_iterator i = _node_map.find(addr);
 	if (i != _node_map.end()) {
 		return i->second;
@@ -162,7 +162,7 @@ AddressedNode* Smsnetwork::getNodeFromAddress(const int addr) const {
 // Find the shortcut node's address
 // we have target address, let's find the nearest node 
 // to the target address
-unsigned long int Smsnetwork::findShortcutAddress(unsigned long int t_addr) {
+unsigned long int DeetooNetwork::findShortcutAddress(unsigned long int t_addr) {
     unsigned long int this_distance, min_distance=AMAX, this_addr, scAddr;
     std::map<unsigned long int, AddressedNode*>::iterator itNM;
     //for (int ii=0; ii< node_map.size(); ii++) {
@@ -177,14 +177,14 @@ unsigned long int Smsnetwork::findShortcutAddress(unsigned long int t_addr) {
     } return scAddr;
 }	
     
-unsigned long int Smsnetwork::distanceTo(unsigned long int addr_a, unsigned long int addr_b) {
+unsigned long int DeetooNetwork::distanceTo(unsigned long int addr_a, unsigned long int addr_b) {
     unsigned long int sm, bg, dt;
     sm = std::min(addr_a, addr_b);
     bg = std::max(addr_a, addr_b);
     return dt = std::min( (bg-sm),(AMAX-bg+sm) );
 }
 
-void Smsnetwork::printNetInfo() {
+void DeetooNetwork::printNetInfo() {
    auto_ptr<NodeIterator> ni (this->getNodeIterator() );
    while ( ni->moveNext() ) {
       AddressedNode* this_node = dynamic_cast<AddressedNode*> ( ni-> current() );
@@ -206,7 +206,7 @@ void Smsnetwork::printNetInfo() {
    }
 }
 		   	
-vector<int> Smsnetwork::getNeighborDistHist(int bins) const {
+vector<int> DeetooNetwork::getNeighborDistHist(int bins) const {
 
    vector<int> ret_val;
    int this_nd;
@@ -230,7 +230,7 @@ vector<int> Smsnetwork::getNeighborDistHist(int bins) const {
    return ret_val;
 }
 
-void Smsnetwork::cacheItem(std::string content, AddressedNode* cn) 
+void DeetooNetwork::cacheItem(std::string content, AddressedNode* cn) 
 {
     //Determine cache size
     int csize = (int) (sqrt( AMAX / this->getNodeSize() ) );
@@ -250,7 +250,7 @@ void Smsnetwork::cacheItem(std::string content, AddressedNode* cn)
     }
 }
 /**
-Smsnetwork* Smsnetwork::queryForContent(AddressedNode* content, NodeIterator* ni)
+DeetooNetwork* DeetooNetwork::queryForContent(AddressedNode* content, NodeIterator* ni)
 {
 
 }
