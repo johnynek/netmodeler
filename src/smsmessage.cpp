@@ -39,7 +39,7 @@ Smsnetwork* LocalBroadcastMessage::visit(AddressedNode* n, Smsnetwork& net)
     // local broadcasting range [addr_i*BMAX, addr_i*BMAX*cqsize+BAMX-1]
     //                       or [(addr_i-2/cqsize)*BMAX, (addr_i+2/cqsize)*BMAX+BMAX-1 ]
     unsigned long int start_addr = (unsigned long int)(n->addr_i-2/cqsize)*BMAX;
-    unsigned long int end_addr = (unsigned long int)start_addr + BMAX -1;
+    unsigned long int end_addr = (unsigned long int)( ( (start_addr/BMAX)+cqsize)*BMAX + BMAX -1);
     std::map<unsigned long int, AddressedNode*> new_nm;
     std::map<unsigned long int, AddressedNode*>::iterator itNodeMap ;
     for (itNodeMap=net.node_map.begin(); itNodeMap!=net.node_map.end(); itNodeMap++) {

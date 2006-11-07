@@ -237,7 +237,7 @@ void Smsnetwork::cacheItem(std::string content, AddressedNode* cn)
     unsigned long int start_addr;
     if ( cn->addr_i == 0) {cn->addr_i = 1;}
     start_addr = (unsigned long int)(cn->addr_i-2/csize)*AMAX;
-    unsigned long int end_addr = (unsigned long int)( ( (start_addr % AMAX)+csize)*AMAX+AMAX-1);
+    unsigned long int end_addr = (unsigned long int)( ( (start_addr / AMAX)+csize)*AMAX+AMAX-1);
     std::map<unsigned long int, AddressedNode*> cache_nm;
     std::map<unsigned long int, AddressedNode*>::iterator itNodeMap;
     for (itNodeMap=node_map.begin(); itNodeMap!=node_map.end(); itNodeMap++) 
