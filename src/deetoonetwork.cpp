@@ -48,23 +48,29 @@ bool DeetooNetwork::isIn(std::vector<AddressedNode*> n_vec, unsigned long int nd
 
 */
 #define AMAX 65536
+#define WMAX 4294967295
 void DeetooNetwork::create(int n) {
     //Let's make n different nodes!!
     node_map.clear();
-    for(int j=0; j < n; j++) {
-	unsigned long int r_int_f = (unsigned long int)_r_short.getDouble01() * AMAX;
-	unsigned long int r_int_b = (unsigned long int)_r_short.getDouble01() * AMAX;
+    while(node_map.size() < n) 
+    //for(int j=0; j < n; j++) 
+    {
+	unsigned long int r_int_f = (unsigned long int)(_r_short.getDouble01() * AMAX);
+	unsigned long int r_int_b = (unsigned long int)(_r_short.getDouble01() * AMAX);
+	//cout << " r_int_f, r_int_b: " << r_int_f << ", " << r_int_b << endl;
 	r_addr = r_int_f << 16 + r_int_b;
+	//cout << "r_addr: " << r_addr << endl;
 	std::set<std::string> items;
 	items.clear();
-	if (node_map.find(r_addr) != node_map.end() ){
+	if (node_map.find(r_addr) == node_map.end() && r_addr != 0){
+	    //cout << "addr: " << r_addr << endl;
             AddressedNode* anode = new AddressedNode(r_addr, items);
 	    node_map[r_addr] = anode;
-            //node_vec.push_back(anode);
+	    //cout << "nodemap.size() " << node_map.size() << endl;
 	    add(anode);
 	}
-	//while( !isIn(node_vec, anode));
     }
+    //cout << "how many node?: " << node_map.size() << endl;
 			
     //Sort Nodes in address increasing order.
     //sort(node_vec.begin(), node_vec.end(), Compare_nodes);
@@ -83,13 +89,13 @@ void DeetooNetwork::create(int n) {
         if (itNode_map == node_map.begin() ) {
 		//do nothing. it is already added before for loop.
 	}
-        //tmp = node_vec[k];
-        tmp = itNode_map->second;
-        //tmp = *(itNode_vec);
-	//add(tmp);
-	//_node_map[k] = tmp;
-	add(Edge(tmp, last));
-	last = tmp;
+	else
+	{
+          tmp = itNode_map->second;
+	  if(!this->has(Edge(tmp,last) ) ) {
+	  add(Edge(tmp, last));}
+	  last = tmp;
+	}
     }
     //Close the circle
     add(Edge(last, first));
@@ -98,16 +104,27 @@ void DeetooNetwork::create(int n) {
     auto_ptr<NodeIterator> ni( getNodeIterator() );
     while( ni->moveNext() ) {
       AddressedNode* nodei = dynamic_cast<AddressedNode*> (ni->current());
-      double x = _r_short.getDouble01();
-      unsigned long int k = (unsigned long int) pow(AMAX, x);
-      unsigned long int shortcut_target_addr = (nodei->getCacheAddress() + k) % AMAX;
-      unsigned long int shortcut_address = findShortcutAddress(shortcut_target_addr);
-      AddressedNode* nodej = node_map[shortcut_address];
-      if ((nodei->getCacheAddress() != nodej->getCacheAddress()) && !(getEdge(nodei, nodej)) && !(getEdge(nodej, nodei))){
+      unsigned long int shortcut_address = nodei->getAddress(true);
+      //cout << "current_addr: " << nodei->getAddress(true) << endl;
+      while ( shortcut_address == nodei->getAddress(true) )
+      {
+        double x = _r_short.getDouble01();
+        unsigned long int k = (unsigned long int) (pow(WMAX, x) );
+        //cout << "k: " << k << endl;
+	//cout << "node_i+k: " << (nodei->getAddress(true)+k) << endl;
+        unsigned long int shortcut_target_addr = (nodei->getAddress(true) + k) % WMAX;
+	//cout << "+_+_+_+_+_+_+_+_++_+_+_+_+_+_+_+_+_+_+_+_+_+___+_+_+_++_+" << endl;
+        //cout << "shortcut target addr: " << shortcut_target_addr << endl;
+        shortcut_address = findShortcutAddress(shortcut_target_addr);
+        AddressedNode* nodej = node_map[shortcut_address];
+        //cout << "shortcut_addr from shortcut node: " << nodej->getAddress(true) << endl;
+        //cout << " edge exist? " << getEdge(nodei, nodej) << endl;
+        if ((nodei->getAddress(true) != nodej->getAddress(true)) && !(getEdge(nodei, nodej)) && !(getEdge(nodej, nodei))){
           //add(Edge(nodei,nodej));
+	  //cout << "make short cut here====+++++++++++++++++++++++======" << endl;
           add( Edge(nodei,nodej) );
+	}
       }
-
     }
     
 }
@@ -135,20 +152,22 @@ void DeetooNetwork::createQueryNet(std::map<unsigned long int, AddressedNode*> n
     auto_ptr<NodeIterator> ni( getNodeIterator() );
     while(ni->moveNext() ) {
 	AddressedNode* nodei = dynamic_cast<AddressedNode*> (ni->current() );
-	double x = _r_short.getDouble01();
-        unsigned long int k = (unsigned long int) pow(AMAX, x);
-        unsigned long int shortcut_target_addr = (nodei->getCacheAddress() + k) % AMAX;
-        unsigned long int shortcut_address = findShortcutAddress(shortcut_target_addr);
-        AddressedNode* nodej = nd_map[shortcut_address];
-        if ((nodei->getQueryAddress() != nodej->getQueryAddress()) && !(getEdge(nodei, nodej)) && !(getEdge(nodej, nodei))){
+	unsigned long int shortcut_address = nodei->getAddress(false);
+	while ( shortcut_address == nodei->getAddress(false) )
+	{
+	  double x = _r_short.getDouble01();
+          unsigned long int k = (unsigned long int) pow(WMAX, x);
+          unsigned long int shortcut_target_addr = (nodei->getAddress(false) + k) % WMAX;
+          shortcut_address = findShortcutAddress(shortcut_target_addr);
+          AddressedNode* nodej = nd_map[shortcut_address];
+          if ((nodei->getAddress(false) != nodej->getAddress(false)) && !(getEdge(nodei, nodej)) && !(getEdge(nodej, nodei))){
             add( Edge(nodei,nodej) );
+	  }
       }
 
     }
     
 }
-	
-
 /**
 AddressedNode* DeetooNetwork::getNodeFromAddress(const int addr) const {
 	map<int, AddressedNode*>::const_iterator i = _node_map.find(addr);
@@ -157,24 +176,24 @@ AddressedNode* DeetooNetwork::getNodeFromAddress(const int addr) const {
 	}
 	return 0;
 }*/
-
-
 // Find the shortcut node's address
 // we have target address, let's find the nearest node 
 // to the target address
 unsigned long int DeetooNetwork::findShortcutAddress(unsigned long int t_addr) {
-    unsigned long int this_distance, min_distance=AMAX, this_addr, scAddr;
+    unsigned long int this_distance, min_distance=WMAX, this_addr, scAddr;
     std::map<unsigned long int, AddressedNode*>::iterator itNM;
     //for (int ii=0; ii< node_map.size(); ii++) {
     for (itNM=node_map.begin(); itNM!=node_map.end(); itNM++) {
 	//this_addr = node_map.at(ii)->_c_address;
 	this_addr = itNM->first;
         this_distance = distanceTo( this_addr, t_addr);	    
-	if ( this_distance < min_distance) {
+	if ( this_distance < min_distance ) {
 	    min_distance = this_distance;
 	    scAddr = this_addr;
 	}
-    } return scAddr;
+    } 
+    //cout << scAddr << endl;
+    return scAddr;
 }	
     
 unsigned long int DeetooNetwork::distanceTo(unsigned long int addr_a, unsigned long int addr_b) {
@@ -192,11 +211,11 @@ void DeetooNetwork::printNetInfo() {
       //cout<< "current node's address is: " << ni->current()->getAddress() << endl;
       if (this->getDegree(this_node) != 0) {
          auto_ptr<NodeIterator> nni (this->getNeighborIterator(this_node) );
-	 cout << "neighbors of " << this_node->getCacheAddress() << "are: " << endl;
+	 cout << "neighbors of " << this_node->getAddress(true) << "are: " << endl;
 	 cout << "(";
 	 while ( nni->moveNext() ) { 
 	    AddressedNode* nei_node = dynamic_cast<AddressedNode*> (nni->current() );
-	    cout << nei_node->getCacheAddress() << ",";
+	    cout << nei_node->getAddress(true) << ",";
          }
 	 cout << ")" << endl;
       }
@@ -229,7 +248,7 @@ vector<int> DeetooNetwork::getNeighborDistHist(int bins) const {
    }
    return ret_val;
 }
-
+/**
 void DeetooNetwork::cacheItem(std::string content, AddressedNode* cn) 
 {
     //Determine cache size
@@ -249,6 +268,7 @@ void DeetooNetwork::cacheItem(std::string content, AddressedNode* cn)
 	}
     }
 }
+*/
 /**
 DeetooNetwork* DeetooNetwork::queryForContent(AddressedNode* content, NodeIterator* ni)
 {

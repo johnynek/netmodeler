@@ -19,8 +19,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef starsky__broadcastmessage
-#define starsky__broadcastmessage
+#ifndef starsky__deetoomessage_H
+#define starsky__deetoomessage_H
 
 #include <message.h>
 #include <addressednode.h>
@@ -42,12 +42,14 @@ class DeetooMessage : public Message {
 
   public:
     //int hops;
+    bool hit;
     /**
-     * @param nodes the number of nodes in the network
-     * @param hops the number of hops
-     * @cache message for caching if it's true, otherwise message for query 
+     * @param item the item we cache or send query for that item
+     * @param r0 lower limit of multicasting range
+     * @param r1 upper limit of multicasting range
+     * @param c_q cache message for caching if it's true, otherwise message for query 
      */
-     DeetooMessage(std::string query, unsigned long int r0, unsigned long int r1);
+     DeetooMessage(std::string item, unsigned long int r0, unsigned long int r1, bool cache=true);
     /**
      * This will return all the nodes and edges in the
      * out component of a particular Node within a number of hops
@@ -55,9 +57,11 @@ class DeetooMessage : public Message {
      * @param aNet the network that the message will travel on
      * @return a network consisting of all the nodes and edges crossed in a broadcast.
      */
-    virtual DeetooNetwork* visit(AddressedNode* anode, DeetooNetwork& aNet);	
+    virtual DeetooNetwork* visit(Node* anode, Network& aNet);	
+    bool inRange( AddressedNode* node);
   protected:
-    std::string _query;
+    std::string _item;
+    bool _cache;
     unsigned long int _r0, _r1;
 };
 	

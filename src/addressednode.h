@@ -61,19 +61,23 @@ namespace Starsky {
       AddressedNode(const unsigned long int addr, std::set<std::string> itemSet) ;
       ~AddressedNode() { _itemSet.clear(); }
       /**
-       * Return a node's address in cache space
+       * @param cache true if cache, else query
        */
-      unsigned long int getCacheAddress();
+      unsigned long int getAddress(bool cache);
       /**
        * Return a node's address in cache space
        */
-      unsigned long int getQueryAddress();
+      //unsigned long int getCacheAddress();
+      /**
+       * Return a node's address in cache space
+       */
+      //unsigned long int getQueryAddress();
       /**
        *@param nodes total nodes size
        *@param target calculate ring distance to the target
        * return distance to the target
        */
-      int getDistanceTo(int nodes, AddressedNode* target);
+      unsigned long int getDistanceTo(unsigned long int t_addr, bool cache);
       /**
        * return to the pointer to the object being contained.
        */
@@ -82,8 +86,8 @@ namespace Starsky {
        * If you change your mind and don't want the item to be deleted
        * when the node is deleted, call this function.
        */
-      void insertItem(std::string item, AddressedNode* cn);
-      void deleteItem(std::string item, AddressedNode* cn);
+      void insertItem(std::string item);
+      void deleteItem(std::string item);
       //void release() { _own = false; }
     };
 }

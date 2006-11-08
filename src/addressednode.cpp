@@ -40,13 +40,13 @@ AddressedNode::AddressedNode(const unsigned long int addr, std::set<std::string>
   _q_address = addr_j*AMAX + addr_i;
   _itemSet = itemSet;
 }
-/**
+
 unsigned long int AddressedNode::getAddress(bool cache)
 {
-    if (cache == true) { return _c_address; }
+    if (cache) { return _c_address; }
     else { return _q_address; }
 }
-*/
+/**
 unsigned long int AddressedNode::getCacheAddress()
 {
   return _c_address;
@@ -55,21 +55,24 @@ unsigned long int AddressedNode::getQueryAddress()
 {
   return _q_address;
 }
-
-int AddressedNode::getDistanceTo(int nodes, AddressedNode* target)
+*/
+unsigned long int AddressedNode::getDistanceTo(unsigned long int t_addr, bool cache)
 {
-  _small = std::min (_c_address, target->_c_address);
-  _big = std::max (_c_address, target->_c_address);
-  _dist = std::min ((_big-_small), (nodes - _big + _small));
+  unsigned long int this_addr;
+  if (cache) { this_addr = _c_address; }
+  else { this_addr = _q_address;}
+  _small = std::min (this_addr, t_addr);
+  _big = std::max (this_addr, t_addr);
+  _dist = std::min ((_big-_small), (AMAX - _big + _small));
   return _dist;
 }
 
-void AddressedNode::insertItem(std::string item, AddressedNode* cn)
+void AddressedNode::insertItem(std::string item)
 {
     _itemSet.insert(item);
 }
 
-void AddressedNode::deleteItem(std::string item, AddressedNode* cn)
+void AddressedNode::deleteItem(std::string item)
 {
     _itemSet.erase(item);
 }

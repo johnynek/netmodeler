@@ -84,7 +84,7 @@ class DeetooNetwork : public Network {
 	void create(int n);
 	//void createQueryNet(std::vector<AddressedNode*> nd_vec);
 	void createQueryNet(std::map<unsigned long int, AddressedNode*> nd_map);
-	void cacheItem(std::string content, AddressedNode* cn);
+	//void cacheItem(std::string content, AddressedNode* cn);
        // Network* queryForContent(AddressedNode* content, NodeIterator* ni);	
     protected:
 	/** 

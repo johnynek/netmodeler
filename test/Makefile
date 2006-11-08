@@ -1,4 +1,4 @@
-PROGS = rewiretest partdisttest makenet stattest weightedtest fitertest undist
+PROGS = rewiretest partdisttest makenet stattest weightedtest fitertest undist deetoo_test
 NMDIR = ../src
 LIBNM = $(NMDIR)/.libs/libnetmod.a
 
