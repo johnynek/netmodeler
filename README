@@ -14,25 +14,45 @@ ignorance).
 
 After that, you are on your own!
 
-The above should make the netmodlib.a library and the netmodeler executable from
+The above should make the libnetmod.a library and the netmodeler executable from
 the main.cpp in the main library.  This main.cpp probably is not exactly what
 you want.  Check the examples directory for simpler examples.
 
 To write your own code you just use any parts you would like, then using the
-compiler, link to the netmodlib.a.  For g++ (the GNU C++ compiler), you could
+compiler, link to the libnetmod.a.  For g++ (the GNU C++ compiler), you could
 do the following:
 
 First compile your my.cpp:
 g++ -c my.cpp -I /path/to/headers/
 Then link it:
-g++ -o test my.o /path/to/library/netmodlib.a
+g++ -o test my.o /path/to/library/libnetmod.a
+
+The default path is src/.libs/libnetmod.a
 
 now, the executible "test" should be your code.
 
 You may need to give a complete path to the headers (which is represented in
 the above example as /path/to/headers/) and you may need to give the complete
-path to the netmodlib.a file (which is represented above as
+path to the libnetmod.a file (which is represented above as
 /path/to/library/).
+
+You may want to make new classes in /src/ directory.
+After making new files (Let's name them yourfile.cpp and yourfile.h), You need to add your files to the input to Makefile.
+Add yourfile.cpp and yourfile.h to 'libnetmod_la_SOURCES' in /src/Makefile.in
+Add yourfile.lo to 'am_libnetmod_la_OBJECTS' in /src/Makefile.in
+run 'make' in the upper directory.
+Now, you can use your own classes.
+
+======SWIG/Python Support=====
+
+Netmodeler now has some support for SWIG, which allows us to use netmodeler
+from languages other than C/C++.  To enable this, use:
+
+./configure --enable-swig
+
+This requires swig to be installed as well as the headers for python (and
+in the future maybe other languages).  Go to the pytools directory to see
+some examples of using python with netmodeler.
 
 ======CODE DOCUMENTATION======
 
