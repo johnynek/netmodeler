@@ -59,7 +59,13 @@ namespace Starsky {
        * @param own if true, delete the item when we are deleted
        */
       AddressedNode(const unsigned long int addr, std::set<std::string> itemSet) ;
-      ~AddressedNode() { _itemSet.clear(); }
+      ~AddressedNode() { 
+	      _c_address = NULL;
+	      _q_address = NULL;
+	      addr_i=NULL;
+	      addr_j = NULL;
+	      _itemSet.clear(); }
+      
       /**
        * @param cache true if cache, else query
        */

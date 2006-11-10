@@ -7,7 +7,7 @@ using namespace std;
 #define ADDR_MAX 65536
 
 void printInfo(map<int, pair<double, double> > result) {
-	ofstream myfile("output.dat");
+	ofstream myfile("/home/2006/netmodeler/test/output.dat");
 	myfile << "#nodes: " << "\t" << "hit rate" << "\t" << "ave msgs" << "\t" << "hops/hit_rate" << endl;
 	map<int,pair<double, double> >::iterator it;
 	for (it=result.begin(); it!=result.end(); it++) {
@@ -48,7 +48,7 @@ int main(void)
     unsigned long int rg_start, rg_end; 
     map<int, pair<double, double> > result;
     for (int nodes = 100; nodes <= max_node; nodes = nodes*10) {
-	cout << "nodes:\t" << nodes << endl;
+	//cout << "nodes:\t" << nodes << endl;
 	//cqsize determines how many rows or columns to multicast.
 	//cqsize = sqrt(B) / sqrt(N), where B is total space m*m
 	int cqsize = (int) (ADDR_MAX / (int)sqrt( nodes ) * alpha);
@@ -116,12 +116,13 @@ int main(void)
 	    //seg fault in visit
 	    //DeetooNetwork* cached_net = cache_m->cacheItems(item_source, *cacheNet);
 	    cache_m->cacheItems(item_source, cacheNet);
+	    delete cache_m;
 	}
 	//We finished caching all items into the network.
         //Now make another DeetooNetwork for query.
-        DeetooNetwork* queryNet = new DeetooNetwork(ran_no);
+        //DeetooNetwork* queryNet = new DeetooNetwork(ran_no);
 	//cout << "++++++++++++++++++++++++++++++++++" << endl;
-	queryNet->createQueryNet(cacheNet->node_map);
+	//queryNet->createQueryNet(cacheNet->node_map);
 	//cout << "++++++++++++++++++++++++++++++++++" << endl;
         //Query each item 100 times
 	//Record # of times each message is copied
@@ -139,8 +140,10 @@ int main(void)
 	    int reached;
 	    int sum_no_msg = 0;
             for ( int it_no = 0; it_no < max_it; it_no++) {
+		DeetooNetwork* queryNet = new DeetooNetwork(ran_no);
+		queryNet->createQueryNet(cacheNet->node_map);
 	        //set starting point
-		cout << "number of iteration: \t " << it_no << endl;
+		//cout << "number of iteration: \t " << it_no << endl;
 	        UniformNodeSelector uns_start(ran_no);
 	        uns_start.selectFrom(queryNet);
 	        AddressedNode* query_start = dynamic_cast<AddressedNode*> (uns_start.select() );
@@ -181,10 +184,11 @@ int main(void)
 	        if (query_msg->hit) 
 		{ 
 		    reached = reached + 1; 
-		    cout << "hit\t hit\t hit\t" << endl;
+		    //cout << "hit\t hit\t hit\t" << endl;
 		}
 	        no_msg = visited_net->getNodeSize();
 	        sum_no_msg = sum_no_msg + no_msg;
+		delete queryNet;
                 delete visited_net;
                 delete query_msg;
                 //delete visited_net;
@@ -203,7 +207,6 @@ int main(void)
         double ave_msgs = (double)total_msgs / (double)(100 * item_size);
         result[nodes] = make_pair(hit_rate, ave_msgs);	
         delete cacheNet;
-        delete queryNet;	
 	//result_map[nodes]=
     }
     cout << "---------------End of Process-----------------------" << endl;

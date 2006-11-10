@@ -116,7 +116,8 @@ void DeetooNetwork::create(int n) {
       while ( shortcut_address == nodei->getAddress(true) )
       {
         double x = _r_short.getDouble01();
-        unsigned long int k = (unsigned long int) (pow((WMAX+1), x) );
+        //unsigned long int k = (unsigned long int) (pow((WMAX+1), x) );
+        unsigned long int k = (unsigned long int) (pow((WMAX), x) );
         //cout << "k: " << k << endl;
 	//cout << "node_i+k: " << (nodei->getAddress(true)+k) << endl;
         unsigned long int shortcut_target_addr = (nodei->getAddress(true) + k) % (WMAX );
@@ -188,7 +189,8 @@ void DeetooNetwork::createQueryNet(std::map<unsigned long int, AddressedNode*> n
 	while ( shortcut_address == nodei->getAddress(false) )
 	{
 	  double x = _r_short.getDouble01();
-          unsigned long int k = (unsigned long int) pow( (WMAX+1), x);
+          //unsigned long int k = (unsigned long int) pow( (WMAX+1), x);
+          unsigned long int k = (unsigned long int) pow( (WMAX), x);
           unsigned long int shortcut_target_addr = (nodei->getAddress(false) + k) % (WMAX );
           shortcut_address = findSCAQuery(shortcut_target_addr);
 	  //cout << "shortcut Addr : " << shortcut_address << endl;
