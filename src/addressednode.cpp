@@ -24,6 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 using namespace Starsky;
 
 #define AMAX 65536
+#define WMAX 4294967295
 
 AddressedNode::AddressedNode()
 {
@@ -63,7 +64,7 @@ unsigned long int AddressedNode::getDistanceTo(unsigned long int t_addr, bool ca
   else { this_addr = _q_address;}
   _small = std::min (this_addr, t_addr);
   _big = std::max (this_addr, t_addr);
-  _dist = std::min ((_big-_small), (AMAX - _big + _small));
+  _dist = std::min ((_big-_small), ( WMAX - _big + _small +1));
   return _dist;
 }
 

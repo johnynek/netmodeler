@@ -58,6 +58,7 @@ class DeetooMessage : public Message {
      * @return a network consisting of all the nodes and edges crossed in a broadcast.
      */
     virtual DeetooNetwork* visit(Node* anode, Network& aNet);	
+    void cacheItems(AddressedNode* cache_node, DeetooNetwork* o_net);	
     bool inRange( AddressedNode* node);
   protected:
     std::string _item;

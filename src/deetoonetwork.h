@@ -45,7 +45,6 @@ namespace Starsky {
 class DeetooNetwork : public Network {
 
     public:
-	unsigned long int r_addr;
 	DeetooNetwork(Ran1Random& r);
         DeetooNetwork(int nodes, Ran1Random& r);
 	/**
@@ -61,6 +60,7 @@ class DeetooNetwork : public Network {
 	//AddressedNode* getNodeFromAddress(const int address) const;
 	//std::vector<AddressedNode*> node_vec;
 	std::map<unsigned long int, AddressedNode*> node_map;
+	std::map<unsigned long int, AddressedNode*> query_nm;
 	/**
 	 * print neighbors of each node into "output" file.
 	 */
@@ -74,6 +74,7 @@ class DeetooNetwork : public Network {
 	//bool compareNodes(const AddressedNode* a, const AddressedNode* b);
 	//bool isIn(std::vector<AddressedNode*> n_vec, unsigned long int nd_addr);
 	unsigned long int findShortcutAddress(unsigned long int t_addr);
+	unsigned long int findSCAQuery(unsigned long int t_addr);
 	unsigned long int distanceTo(unsigned long int addr_a, unsigned long int addr_b);
 	
 	/** 

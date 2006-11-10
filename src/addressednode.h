@@ -44,9 +44,9 @@ namespace Starsky {
       unsigned long int _q_address;
       std::set<std::string> _itemSet;
       //bool _own;
-      int _dist;
-      int _small;
-      int _big;
+      unsigned long int _dist;
+      unsigned long int _small;
+      unsigned long int _big;
        
     public:
       unsigned long int addr_i; // column address
