@@ -46,6 +46,7 @@ DeetooNetwork* DeetooMessage::visit(Node* n, Network& net)
 {
   //_cache = false;
   DeetooNetwork* visited_net = dynamic_cast<DeetooNetwork*> (net.newNetwork() );
+  //auto_ptr<DeetooNetwork> visited_net ( dynamic_cast<DeetooNetwork*> (net.newNetwork() ) );
   AddressedNode* start = dynamic_cast<AddressedNode*> (n);
   AddressedNode* next_node=NULL;
   std::map<unsigned long int, AddressedNode*> lower_neighbors;
@@ -198,7 +199,7 @@ DeetooNetwork* DeetooMessage::visit(Node* n, Network& net)
     lower_neighbors.clear();
     upper_neighbors.clear();
   }
-  //cout << "complete query... Wow!!!!!!!!!!!!" << endl;
+  cout << "complete query... Wow!!!!!!!!!!!!" << endl;
   return visited_net;
 }
 

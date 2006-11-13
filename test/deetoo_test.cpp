@@ -7,7 +7,7 @@ using namespace std;
 #define ADDR_MAX 65536
 
 void printInfo(map<int, pair<double, double> > result) {
-	ofstream myfile("/home/2006/netmodeler/test/output.dat");
+	ofstream myfile("output1");
 	myfile << "#nodes: " << "\t" << "hit rate" << "\t" << "ave msgs" << "\t" << "hops/hit_rate" << endl;
 	map<int,pair<double, double> >::iterator it;
 	for (it=result.begin(); it!=result.end(); it++) {
@@ -55,9 +55,11 @@ int main(void)
         //cout << "-------------------------------------------" << endl;
 	//cout << "cqsize" << cqsize << endl;	
 	//Make DeetooNetwork for cache.
-	DeetooNetwork* cacheNet = new DeetooNetwork(nodes, ran_no);
+	//DeetooNetwork* cacheNet = new DeetooNetwork(nodes, ran_no);
+	auto_ptr<DeetooNetwork> cacheNet_ptr( new DeetooNetwork(nodes, ran_no) );
 	//cout << "++++++++++++++++++++++++++++++++++" << endl;
-	cacheNet->create(nodes);
+	cacheNet_ptr->create(nodes);
+	DeetooNetwork* cacheNet = cacheNet_ptr.get();
         //Insert k items from k randomly selceted nodes into the network.
 	int k = 100;
 	//generate k items.
@@ -112,11 +114,12 @@ int main(void)
 	    //cout << "range start: " << rg_start << "range end: " << rg_end << endl;
 	    //local broadcasting for cache
 	    //cout << "start range and end range:\t" << rg_start << "\t" << rg_end << endl;
-	    DeetooMessage* cache_m = new DeetooMessage(*item_it, rg_start, rg_end, true);
+	    //DeetooMessage* cache_m = new DeetooMessage(*item_it, rg_start, rg_end, true);
+	    auto_ptr<DeetooMessage> cache_m ( new DeetooMessage(*item_it, rg_start, rg_end, true) );
 	    //seg fault in visit
 	    //DeetooNetwork* cached_net = cache_m->cacheItems(item_source, *cacheNet);
 	    cache_m->cacheItems(item_source, cacheNet);
-	    delete cache_m;
+	    //delete cache_m;
 	}
 	//We finished caching all items into the network.
         //Now make another DeetooNetwork for query.
@@ -133,17 +136,19 @@ int main(void)
 	//int f_ 
 	int total_hits = 0;
 	int total_msgs = 0;
+	int max_it = 100;
 	for (item_it = items.begin(); item_it != items.end(); item_it++)
 	{
-	    int max_it = 100;
 	    int no_msg = 0;
-	    int reached;
+	    int reached=0;
 	    int sum_no_msg = 0;
             for ( int it_no = 0; it_no < max_it; it_no++) {
-		DeetooNetwork* queryNet = new DeetooNetwork(ran_no);
-		queryNet->createQueryNet(cacheNet->node_map);
+		//DeetooNetwork* queryNet = new DeetooNetwork(ran_no);
+		auto_ptr<DeetooNetwork> queryNet_ptr ( new DeetooNetwork(ran_no) );
+		queryNet_ptr->createQueryNet(cacheNet->node_map);
 	        //set starting point
 		//cout << "number of iteration: \t " << it_no << endl;
+		DeetooNetwork* queryNet = queryNet_ptr.get();
 	        UniformNodeSelector uns_start(ran_no);
 	        uns_start.selectFrom(queryNet);
 	        AddressedNode* query_start = dynamic_cast<AddressedNode*> (uns_start.select() );
@@ -177,9 +182,11 @@ int main(void)
 	        //DeetooNetwork* visited_net = queryNet->newNetwork();
 		//cout << " rg_start,  rg_end " << rg_start << ",\t" << rg_end << endl;
 		//cout << " current node's address:\t " << query_start->getAddress(false) << endl;
-	        DeetooMessage* query_msg = new DeetooMessage(query, rg_start, rg_end, false);
+	        //DeetooMessage* query_msg = new DeetooMessage(query, rg_start, rg_end, false);
+	        auto_ptr<DeetooMessage> query_msg ( new DeetooMessage(query, rg_start, rg_end, false) );
 		//cout << "*********************************************" << endl;
-		DeetooNetwork* visited_net = query_msg->visit(query_start, *queryNet);
+		//DeetooNetwork* visited_net = query_msg->visit(query_start, *queryNet);
+		auto_ptr<DeetooNetwork> visited_net( query_msg->visit(query_start, *queryNet) );
 		//cout << "-----------------***********************************" << endl;
 	        if (query_msg->hit) 
 		{ 
@@ -188,9 +195,9 @@ int main(void)
 		}
 	        no_msg = visited_net->getNodeSize();
 	        sum_no_msg = sum_no_msg + no_msg;
-		delete queryNet;
-                delete visited_net;
-                delete query_msg;
+		//delete queryNet;
+                //delete visited_net;
+                //delete query_msg;
                 //delete visited_net;
 	    }
 	    total_hits = total_hits + reached;
@@ -201,14 +208,19 @@ int main(void)
 	 
         }
         int item_size = items.size();
-	//double hit_rate = (double)total_hits / (double)(max_it * item_size);
-        //double ave_msgs = (double)total_msgs / (double)(max_it * item_size);
-	double hit_rate = (double)total_hits / (double)(100 * item_size);
-        double ave_msgs = (double)total_msgs / (double)(100 * item_size);
+	cout << "total hits: \t" << total_hits << endl;
+	double hit_rate = (double)total_hits / (double)(max_it * item_size);
+        double ave_msgs = (double)total_msgs / (double)(max_it * item_size);
+	cout << "hit rate:\t" << hit_rate << endl;
+	cout << "ave_msgs:\t" << ave_msgs << endl;
+	//double hit_rate = (double)total_hits / (double)(100 * item_size);
+        //double ave_msgs = (double)total_msgs / (double)(100 * item_size);
         result[nodes] = make_pair(hit_rate, ave_msgs);	
-        delete cacheNet;
+        //delete cacheNet;
 	//result_map[nodes]=
+	items.clear();
     }
+    printInfo(result);
     cout << "---------------End of Process-----------------------" << endl;
 }    
 
