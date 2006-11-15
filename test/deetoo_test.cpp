@@ -23,10 +23,8 @@ std::set<std::string> rstringGenerator ( int howmany, int length, Ran1Random& r 
     for (int no=0; no < k; no++)
     {
 	std::string item;
-	
 	for (int i = 0; i < length; i++)
 	{
-            //int rand_no = r.getInt(122,0);
             int rand_no = (int) (r.getDouble01() * 122);
 	    if ( rand_no < 65 ) { rand_no = 65 + rand_no % 56;}
 	    if ( (rand_no > 90) && (rand_no < 97) ) { rand_no += 6; }
@@ -41,47 +39,42 @@ int main(void)
 {
     int max_node = 100000;
     double alpha = 1;
-    //int max_node = 101;
     Ran1Random ran_no;
     //Random r;
     //set the multicasting range (randge0, range1)
     unsigned long int rg_start, rg_end; 
     map<int, pair<double, double> > result;
     for (int nodes = 100; nodes <= max_node; nodes = nodes*10) {
-	//cout << "nodes:\t" << nodes << endl;
+	cout << "nodes:\t" << nodes << endl;
 	//cqsize determines how many rows or columns to multicast.
 	//cqsize = sqrt(B) / sqrt(N), where B is total space m*m
 	int cqsize = (int) (ADDR_MAX / (int)sqrt( nodes ) * alpha);
-        //cout << "-------------------------------------------" << endl;
 	//cout << "cqsize" << cqsize << endl;	
 	//Make DeetooNetwork for cache.
 	//DeetooNetwork* cacheNet = new DeetooNetwork(nodes, ran_no);
 	auto_ptr<DeetooNetwork> cacheNet_ptr( new DeetooNetwork(nodes, ran_no) );
-	//cout << "++++++++++++++++++++++++++++++++++" << endl;
 	cacheNet_ptr->create(nodes);
-	DeetooNetwork* cacheNet = cacheNet_ptr.get();
+	//DeetooNetwork* cacheNet = cacheNet_ptr.get();
         //Insert k items from k randomly selceted nodes into the network.
 	int k = 100;
 	//generate k items.
-	//cout << "++++++++++++++++++++++++++++++++++" << endl;
 	std::set<std::string> items = rstringGenerator(k, 10, ran_no );
         std::set<std::string>::iterator item_it; 
 	for (item_it = items.begin(); item_it != items.end(); item_it++)
 	{
 	    //pick a random node to insert an item.
-	    //cout << "Let's insert items" << endl;
 	    UniformNodeSelector item_src(ran_no);
-	    item_src.selectFrom(cacheNet);
+	    //item_src.selectFrom(cacheNet);
+	    item_src.selectFrom(cacheNet_ptr.get() );
 	    AddressedNode* item_source = dynamic_cast<AddressedNode*> (item_src.select() );
             //cout << "item_source's addr: " << item_source->getAddress(true) << endl;	
             //insert the item to item_source node
 	    item_source->insertItem(*item_it );
 	    //decide cache range
 	    //calculate starting column
-	    //cout << " **start range setup start " << endl;
 	    int start_col = ( (int)(item_source->addr_i) - (int)(cqsize/2) );
 	    //cout << "start column:\t" << start_col << endl;
-	    if ( start_col < 0 ) {  //if starting node is in the first column
+	    if ( start_col < 0 ) {  //if starting column is negative
 		start_col = 0;
                 rg_start = 0;       // start in the first column
 	    }
@@ -90,67 +83,56 @@ int main(void)
 		  //otherwise start in the cqsize/2 left column from the column with initiating node.
 	          rg_start = (unsigned long int)( start_col)*ADDR_MAX;
             }
-	    //rg_start = (unsigned long int)(query_start->addr_j - 2/cqsize)*ADDR_MAX;
-	    //cout << " ----end range setup start " << endl;
-	    //cout << "rg_start:\t" << rg_start << endl;
-	    //int end_col = ( (int)(rg_start / ADDR_MAX) + cqsize);
 	    int end_col =  (int)(start_col + cqsize -1 );
-	    //cout << "end column \t" << end_col << endl;
 	    if ( end_col >= (ADDR_MAX-1) )
 	    {
 		// If the upper range is greater than column size
 		// set the upper range to the last column
-		//cout << " @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ " << endl;
 	        rg_end = 4294967295;
-		//cout << " @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ " << endl;
 	        rg_start = (unsigned long int)(  (ADDR_MAX-cqsize) * ADDR_MAX );
 	    }
 	    else
 	    {
-		//cout << " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=" << endl;    
-	        //rg_end = (unsigned long int)( ( ( start_col + cqsize - 1) * ADDR_MAX) + ADDR_MAX -1);
 	        rg_end = (unsigned long int)( ( end_col * ADDR_MAX) + ADDR_MAX -1);
 	    }
 	    //cout << "range start: " << rg_start << "range end: " << rg_end << endl;
 	    //local broadcasting for cache
-	    //cout << "start range and end range:\t" << rg_start << "\t" << rg_end << endl;
 	    //DeetooMessage* cache_m = new DeetooMessage(*item_it, rg_start, rg_end, true);
 	    auto_ptr<DeetooMessage> cache_m ( new DeetooMessage(*item_it, rg_start, rg_end, true) );
-	    //seg fault in visit
 	    //DeetooNetwork* cached_net = cache_m->cacheItems(item_source, *cacheNet);
-	    cache_m->cacheItems(item_source, cacheNet);
+	    //cache_m->cacheItems(item_source, (cacheNet) );
+	    cache_m->cacheItems(item_source, cacheNet_ptr.get() );
 	    //delete cache_m;
 	}
 	//We finished caching all items into the network.
-        //Now make another DeetooNetwork for query.
-        //DeetooNetwork* queryNet = new DeetooNetwork(ran_no);
-	//cout << "++++++++++++++++++++++++++++++++++" << endl;
-	//queryNet->createQueryNet(cacheNet->node_map);
-	//cout << "++++++++++++++++++++++++++++++++++" << endl;
+        //Now make another DeetooNetwork for queries.
         //Query each item 100 times
 	//Record # of times each message is copied
 	//Check hit_rate (count hit)
 	//local broadcasting for query.
 	
 	//int f_reached = 0;
-	//int f_ 
 	int total_hits = 0;
 	int total_msgs = 0;
 	int max_it = 100;
+	int i = 0;
 	for (item_it = items.begin(); item_it != items.end(); item_it++)
 	{
 	    int no_msg = 0;
 	    int reached=0;
 	    int sum_no_msg = 0;
+	    cout << i << "th item" << endl;
             for ( int it_no = 0; it_no < max_it; it_no++) {
 		//DeetooNetwork* queryNet = new DeetooNetwork(ran_no);
 		auto_ptr<DeetooNetwork> queryNet_ptr ( new DeetooNetwork(ran_no) );
-		queryNet_ptr->createQueryNet(cacheNet->node_map);
-	        //set starting point
+		//queryNet_ptr->createQueryNet( cacheNet->node_map);
+		queryNet_ptr->createQueryNet( (cacheNet_ptr.get() )->node_map);
 		//cout << "number of iteration: \t " << it_no << endl;
 		DeetooNetwork* queryNet = queryNet_ptr.get();
+	        //set starting point
 	        UniformNodeSelector uns_start(ran_no);
-	        uns_start.selectFrom(queryNet);
+	        //uns_start.selectFrom(queryNet);
+	        uns_start.selectFrom(queryNet_ptr.get() );
 	        AddressedNode* query_start = dynamic_cast<AddressedNode*> (uns_start.select() );
 		//
 	        int start_row = ( (int)(query_start->addr_j) - (int)(cqsize/2) );
