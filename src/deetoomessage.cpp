@@ -3,6 +3,7 @@ This program is part of Netmodeler, a library for graph and network
 modeling and simulation.
 Copyright (C) 2005  University of California
 Copyright (C) 2005  P. Oscar Boykin <boykin@pobox.com>, University of Florida
+Copyright (C) 2006  Tae Woong Choi  <twchoi@ufl.edu>, University of Florida
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -25,7 +26,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 using namespace Starsky;
 using namespace std;
 
-//DeetooMessage::DeetooMessage(int ttl, int nodesz, int hops) : _ttl(ttl), _nodes(nodesz), hops(0)
 DeetooMessage::DeetooMessage(std::string item, unsigned long int r0, unsigned long int r1, bool cache) : _item(item), _r0(r0), _r1(r1), _cache(cache)
 {
     hit = false;
@@ -44,7 +44,6 @@ bool DeetooMessage::inRange(AddressedNode* inode)
 
 DeetooNetwork* DeetooMessage::visit(Node* n, Network& net)
 {
-  //_cache = false;
   DeetooNetwork* visited_net = dynamic_cast<DeetooNetwork*> (net.newNetwork() );
   //auto_ptr<DeetooNetwork> temp_net ( dynamic_cast<DeetooNetwork*> (net.newNetwork() ) );
   AddressedNode* start = dynamic_cast<AddressedNode*> (n);
@@ -60,24 +59,18 @@ DeetooNetwork* DeetooMessage::visit(Node* n, Network& net)
       unsigned long int dist_to_lower = 0;
       bool first_iteration =true;
       auto_ptr<NodeIterator> ni(net.getNeighborIterator(start) );
-      //cout << "auto_ptr" << endl;
       while (ni->moveNext() )
       {
           AddressedNode* c_node = dynamic_cast<AddressedNode*> (ni->current() );
 	  unsigned long int dist = c_node->getDistanceTo(_r0, _cache) ;
-          //if ( ( c_node->getDistanceTo(_r0, _cache) < dist_to_lower) || (dist_to_lower <= 0) )
           if ( first_iteration || dist < dist_to_lower )
 	  {
               next_node = c_node;
-	      //dist_to_lower = next_node->getDistanceTo(_r0, _cache);
 	      dist_to_lower = dist;
 	      first_iteration = false;
-	      //cout << "next_node   " << c_node->getAddress(_cache) << endl;
-	      //cout << "dist to lower " << dist_to_lower << endl;
 	  }
       }	
       //We have the closest neighbor to lower, start over there
-      //visited_net->add(visit(next_node, net) );
       auto_ptr<DeetooNetwork> tmp_net (visit(next_node, net) );
       visited_net->add( tmp_net.get() );
   }
@@ -87,7 +80,6 @@ DeetooNetwork* DeetooMessage::visit(Node* n, Network& net)
       //divide range to upper and lower.
       //get upper neighbors and lower neighbors.
       //std::map will sort them according to their addree, lowest first.
-      //cout << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^" << endl;	
       auto_ptr<NodeIterator> ni(net.getNeighborIterator(start) );
       while(ni->moveNext() )
       {
@@ -110,7 +102,6 @@ DeetooNetwork* DeetooMessage::visit(Node* n, Network& net)
   AddressedNode* last_node=NULL;
   std::vector<pair<unsigned long int, AddressedNode*> > range_low;
   range_low.clear();
-  //cout << "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-" << endl;
   std::map<unsigned long int, AddressedNode*>::iterator it_low;
   for (it_low=lower_neighbors.begin(); it_low!=lower_neighbors.end(); it_low++)
   {
