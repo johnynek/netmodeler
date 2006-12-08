@@ -26,7 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "network.h"
 #include "random.h"
 #include "ran1random.h"
-#include "RandAddrNode.h"
+#include "randaddrnode.h"
 #include "swedge.h"
 #include <set>
 #include <map>

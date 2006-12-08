@@ -20,7 +20,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include "SWNetwork.h"
+#include "swnetwork.h"
 
 using namespace Starsky;
 using namespace std;
@@ -56,6 +56,7 @@ void SWNetwork::create(int n, int local_size) {
     add(SWEdge(last, first, "DN"));
     //add(*c_edge);
     cout << "(" << last->getAddress() << "," << first->getAddress() << ")" << endl;
+    cout << "How manay edges? " << getEdgeSize() << endl;
     
     //This next part is making a shortcut connection:
     auto_ptr<NodeIterator> ni( getNodeIterator() );

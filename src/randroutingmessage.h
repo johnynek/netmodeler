@@ -24,8 +24,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define starsky__RandRoutingmessage
 
 #include "message.h"
-#include "RandAddrNode.h"
-#include "SWNetwork.h"
+#include "randaddrnode.h"
+#include "swnetwork.h"
 #include "random.h"
 #include "ran1random.h"
 #include "uniformnodeselector.h"

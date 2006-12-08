@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define starsky__swedge_h
 
 #include "edge.h"
-#include "RandAddrNode.h"
+#include "randaddrnode.h"
 
 namespace Starsky {
   /**

@@ -28,8 +28,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <network.h>
 #include <node.h>
 #include <vector>
-#include <SWNetwork.h>
-#include <RandAddrNode.h>
+#include <swnetwork.h>
+#include <randaddrnode.h>
 
 namespace Starsky {
 
