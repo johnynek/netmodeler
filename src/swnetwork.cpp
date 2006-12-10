@@ -48,14 +48,22 @@ void SWNetwork::create(int n, int local_size) {
 	//c_edge = new SWEdge(tmp, last, "DN");
 	//add(*c_edge);
 	add(SWEdge(tmp, last, "DN"));   //add 'direct neighbor' SWEdge to net
-	cout << "(" << tmp->getAddress() << "," << last->getAddress() << ")" << endl;
+	cout << "(" << tmp->getAddress() << "," << last->getAddress() << ")" ;
 	last = tmp;
     }
     //Close the circle
     //c_edge = new SWEdge(last, first, "DN");
     add(SWEdge(last, first, "DN"));
-    //add(*c_edge);
     cout << "(" << last->getAddress() << "," << first->getAddress() << ")" << endl;
+    //add(*c_edge);
+    auto_ptr<EdgeIterator> ei1 (getEdgeIterator() );
+    while (ei1->moveNext() ) {
+      //cout << (ei1->current() )->toString().c_str()<< endl;
+      SWEdge* cedge (dynamic_cast<SWEdge*> ( ei1->current() ) );
+      RandAddrNode* noi (dynamic_cast<RandAddrNode*> (ei1->current()->first) );
+      RandAddrNode* noj (dynamic_cast<RandAddrNode*> (ei1->current()->second) );
+      cout << "(" << noi->getAddress() << "," << noj->getAddress() << "," << cedge->printAttributes() << ")" ;
+    }
     cout << "How manay edges? " << getEdgeSize() << endl;
     
     //This next part is making a shortcut connection:
@@ -65,21 +73,29 @@ void SWNetwork::create(int n, int local_size) {
       double x = _r_short.getDouble01();
       int k = int(pow(n, x));
       int shortcut_address = (nodei->getAddress() + k) % n;
+      cout << "c_addr and shortcut_addr: " << nodei->getAddress() << "," << shortcut_address << endl;
       RandAddrNode* nodej = node_vec[shortcut_address];
-      if ((nodei->getAddress() != nodej->getAddress()) && !(getEdge(nodei, nodej)) && !(getEdge(nodej, nodei))){
+      Network* nei_net = getNeighbors(nodei);
+      cout << "getEdge():\t" << (getEdge(nodei,nodej)==0)<<  endl;
+      cout << "nodei!= nodej?\t" << (nodei!=nodej) << endl;
+      /*if ((nodei->getAddress() != nodej->getAddress()) && !(getEdge(nodei, nodej)) && !(getEdge(nodej, nodei))){*/
+      
+      //if ((nodei != nodej) && (nei_net->getEdge(nodei, nodej)!=0)){
+      if ((nodei!=nodej) && (getEdge(nodei, nodej)==0)){
           //add(Edge(nodei,nodej));
 	  //c_edge = new SWEdge(nodei,nodej, "SC");
+	  cout << getEdge(nodei,nodej) << endl;
           add(SWEdge(nodei,nodej, "SC"));
 	  //add(*c_edge);
+	  cout << "-----------------------------------------" << endl;
 	  cout << "(" << nodei->getAddress() << "," << nodej->getAddress() << ")" << endl;
       }
-
     }
     cout << "How manay edges? " << getEdgeSize() << endl;
     //this is for testing EdgeIterator
     auto_ptr<EdgeIterator> ei (getEdgeIterator() );
     while (ei->moveNext() ) {
-      cout << (ei->current() )->toString().c_str()<< endl;
+      //cout << (ei->current() )->toString().c_str()<< endl;
       SWEdge* cedge (dynamic_cast<SWEdge*> ( ei->current() ) );
       if (cedge==0) {
 	      cout << "make swedge properly!!!!" << endl;
@@ -90,7 +106,7 @@ void SWNetwork::create(int n, int local_size) {
         cout << "make addressed  node properly!!!!!" << endl;
       }
       else {
-        cout << "(" << noi->getAddress() << "," << noj->getAddress() << "," << cedge->printAttributes() << ")" << endl;
+        cout << "(" << noi->getAddress() << "," << noj->getAddress() << "," << cedge->printAttributes() << ")" ;
         //cout << "(" << noi->getAddress() << "," << noj->getAddress() <<  ")" << endl;
       }
     }// delete c_edge;

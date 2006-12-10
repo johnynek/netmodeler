@@ -42,10 +42,12 @@ namespace Starsky {
        * copy a swedge and return it
        */
       SWEdge* clone() const { 
-	//RandAddrNode* afirst = dynamic_cast<RandAddrNode*> (first);
-	//RandAddrNode* asecond = dynamic_cast<RandAddrNode*> (second);
-        return new SWEdge((RandAddrNode*)first, (RandAddrNode*)second, _attr); }
-        //return new SWEdge(afirst, asecond, _attr); }
+	RandAddrNode* afirst = dynamic_cast<RandAddrNode*> (first);
+	RandAddrNode* asecond = dynamic_cast<RandAddrNode*> (second);
+	std::cout << "--------clone------------" << std::endl;
+	std::cout << "(" << afirst->getAddress() << "," << asecond->getAddress() << ")" << std::endl;
+        //return new SWEdge((RandAddrNode*)first, (RandAddrNode*)second, _attr); }
+        return new SWEdge(afirst, asecond, _attr); }
       /** 
        * retrurns edge's attribute
        */
