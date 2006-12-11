@@ -92,86 +92,69 @@ SWNetwork* SWEdgeRewirer::map(SWNetwork* net, int m)
     _endsel-> selectFrom( net);
   }
   _startsel->selectFrom( net );
-  set<Edge*> edges_to_rewire;
+  set<SWEdge*> edges_to_rewire;
   auto_ptr<EdgeIterator> ei( net->getEdgeIterator() );
   while( ei->moveNext() ) {
     if( _rand.getBool(_prob) ) {
 	//Rewire this edge:
-        //SWEdge* this_edge = dynamic_cast<SWEdge*>(ei->current() );	
-	//edges_to_rewire.insert( dynamic_cast<SWEdge*>(ei -> current() ) );
-	edges_to_rewire.insert( ei -> current()  );
-	//edges_to_rewire.insert( this_edge );
+	edges_to_rewire.insert( dynamic_cast<SWEdge*>(ei -> current() ) );
+	//edges_to_rewire.insert( ei -> current()  );
     }
   }
-  //auto_ptr<EdgeIterator> ei(toRewireNet->getEdgeIterator() );
-  set<Edge*>::iterator reit;
-  //SWEdge* new_edge;
+  set<SWEdge*>::iterator reit;
   FOREACH(reit, edges_to_rewire)
-  //while( ei->moveNext() )
   {
-    //do {
       RandAddrNode *start, *end; 
-      //std::string attr;
-      //Method m = _method;
-      if (m == 1) {  //rewire both ends to random
-        //_startsel->selectFrom( net );
-        start = dynamic_cast<RandAddrNode*> (_startsel->select());
-        end = dynamic_cast<RandAddrNode*>(_endsel->select(start));
-        //Edge* new_edge = _ef.create(start, end);
-        //net->add(new_edge); 
-      }  
-      else if ( m == 2) {  //rewire one end to random
-        if (_rand.getBool(0.5)) {
-          start = dynamic_cast<RandAddrNode*> ( (*reit) -> first);
+      std::string attr;
+      do {
+        //Method m = _method;
+        if (m == 1) {  //rewire both ends to random
+          //_startsel->selectFrom( net );
+          start = dynamic_cast<RandAddrNode*> (_startsel->select());
+          end = dynamic_cast<RandAddrNode*>(_endsel->select(start));
+	  attr=(*reit)->getAttributes();
+        }  
+        else if ( m == 2) {  //rewire one end to random
+          if (_rand.getBool(0.5)) {
+            start = dynamic_cast<RandAddrNode*> ( (*reit) -> first);
+          }
+          else {
+            start = dynamic_cast<RandAddrNode*> ( (*reit) -> second);
+          }	
+          end = dynamic_cast<RandAddrNode*> (_endsel->select(start));
         }
-        else {
-          start = dynamic_cast<RandAddrNode*> ( (*reit) -> second);
-        }	
-        end = dynamic_cast<RandAddrNode*> (_endsel->select(start));
-        //cout << "(" <<start->getAddress() << "," << end->getAddress() << ")" << endl;
-        //Edge* new_edge = _ef.create(start, end);
-        //net->add(new_edge); 
-      }
-      else if ( m == 3) {  //rewire one end to shortcut
-        if (_rand.getBool(0.5)) {
-          start = dynamic_cast<RandAddrNode*> ( (*reit) -> first);
+        else if ( m == 3) {  //rewire one end to shortcut
+          if (_rand.getBool(0.5)) {
+            start = dynamic_cast<RandAddrNode*> ( (*reit) -> first);
+          }
+          else {
+            start = dynamic_cast<RandAddrNode*> ( (*reit) -> second);
+          }	
+          double x = _rand.getDouble01();
+          int net_size = net->getNodeSize();
+          int k = int(pow(net_size, x));
+          int shortcut_addr = (start->getAddress() + k) % net_size;
+          end = net->node_vec[shortcut_addr];
         }
-        else {
-          start = dynamic_cast<RandAddrNode*> ( (*reit) -> second);
-        }	
-        //RandAddrNode* start = dynamic_cast<RandAddrNode*> ( (*reit) -> first);
-        /**
-        SWNodeSelector swns(_rand);
-        cout << "rerererererererererererererererer" << endl;
-        //swns.selectFrom(net);
-        cout << "rerererererererererererererererer" << endl;
-        RandAddrNode* end = swns.select(start);
-        cout << "end node's address; " << end->getAddress() << endl;
-        */ 
-        double x = _rand.getDouble01();
-        int net_size = net->getNodeSize();
-        int k = int(pow(net_size, x));
-        int shortcut_addr = (start->getAddress() + k) % net_size;
-        end = net->node_vec[shortcut_addr];
-      
-        //Edge* new_edge = _ef.create(start, end);
-        //net->add(new_edge); 
-      }
-      auto_ptr<Edge> new_edge ( _ef.create(start, end ) );
+      } while(net->getEdge(start,end)!=0);
+      //auto_ptr<Edge> new_edge ( _ef.create(start, end ) );
+      //auto_ptr<SWEdge> new_edge ( _ef.create(start, end ) );
       //auto_ptr<SWEdge> new_edge( new SWEdge(start, end, (*reit)->getAttributes() ) );
       //new_edge = new SWEdge(start, end, (*reit)->getAttributes() );
       //cout << "edge attr: " << (*reit)->printAttributes() << endl;
     //}
     RandAddrNode* orig_first=dynamic_cast<RandAddrNode*>( (*reit)->first);
     RandAddrNode* orig_second=dynamic_cast<RandAddrNode*>( (*reit)->second);
-    RandAddrNode* rew_first=dynamic_cast<RandAddrNode*>(new_edge->first);
-    RandAddrNode* rew_second=dynamic_cast<RandAddrNode*>(new_edge->second);
-    cout << "original: (" << orig_first->getAddress() <<"," << orig_second->getAddress() <<"), rewiered: ("<< rew_first->getAddress() <<","<<rew_second->getAddress()<<")" << endl;
+    //RandAddrNode* new_first=dynamic_cast<RandAddrNode*>(new_edge->first);
+    //RandAddrNode* new_second=dynamic_cast<RandAddrNode*>(new_edge->second);
+    //cout << "original: (" << orig_first->getAddress() <<"," << orig_second->getAddress() <<"), rewiered: ("<< rew_first->getAddress() <<","<<rew_second->getAddress()<<")" << endl;
+    cout << "original: (" << orig_first->getAddress() <<"," << orig_second->getAddress() << "," << (*reit)->printAttributes() << "), rewiered: ("<< start->getAddress() <<","<<end->getAddress()<<")" << endl;
     //SWEdge* orig_edge = dynamic_cast<SWEdge*>(*reit);
     //cout << orig_edge->printAttributes() << endl;
     //while( !net->add( *(new_edge ) ) );
     //net->add( *(new_edge ) );
-    net->add( *(new_edge.get() ) );
+    //net->add( *(new_edge.get() ) );
+    net->add( SWEdge(start,end,attr ) );
     //cout << "new edge's attr: " << new_edge->printAttributes() << endl;
       //The above adds a *copy* of the node IF there is no such node already in the network.
     net->remove(*reit );
