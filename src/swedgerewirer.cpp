@@ -148,7 +148,7 @@ SWNetwork* SWEdgeRewirer::map(SWNetwork* net, int m)
     //RandAddrNode* new_first=dynamic_cast<RandAddrNode*>(new_edge->first);
     //RandAddrNode* new_second=dynamic_cast<RandAddrNode*>(new_edge->second);
     //cout << "original: (" << orig_first->getAddress() <<"," << orig_second->getAddress() <<"), rewiered: ("<< rew_first->getAddress() <<","<<rew_second->getAddress()<<")" << endl;
-    cout << "original: (" << orig_first->getAddress() <<"," << orig_second->getAddress() << "," << (*reit)->printAttributes() << "), rewiered: ("<< start->getAddress() <<","<<end->getAddress()<<")" << endl;
+    //cout << "original: (" << orig_first->getAddress() <<"," << orig_second->getAddress() << "," << (*reit)->printAttributes() << "), rewiered: ("<< start->getAddress() <<","<<end->getAddress()<<")" << endl;
     //SWEdge* orig_edge = dynamic_cast<SWEdge*>(*reit);
     //cout << orig_edge->printAttributes() << endl;
     //while( !net->add( *(new_edge ) ) );
