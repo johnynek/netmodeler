@@ -36,35 +36,28 @@ void SWNetwork::create(int n, int local_size) {
     RandAddrNode* first = new RandAddrNode(0);
     node_vec.push_back(first);
     RandAddrNode *tmp, *last = first;
-    //SWEdge* c_edge;
-    //_node_map[0] = first;
     add(first);
     //We made the first node, now lets make the rest.
     for(int k = 1; k < n; k++) {
         tmp = new RandAddrNode(k);
 	node_vec.push_back(tmp);
 	add(tmp);
-	//_node_map[k] = tmp;
-	//c_edge = new SWEdge(tmp, last, "DN");
-	//add(*c_edge);
 	add(SWEdge(tmp, last, "DN"));   //add 'direct neighbor' SWEdge to net
-	cout << "(" << tmp->getAddress() << "," << last->getAddress() << ")" ;
+	//cout << "(" << tmp->getAddress() << "," << last->getAddress() << ")" ;
 	last = tmp;
     }
     //Close the circle
-    //c_edge = new SWEdge(last, first, "DN");
     add(SWEdge(last, first, "DN"));
+
+    /* test printing for edges
     cout << "(" << last->getAddress() << "," << first->getAddress() << ")" << endl;
-    //add(*c_edge);
     auto_ptr<EdgeIterator> ei1 (getEdgeIterator() );
     while (ei1->moveNext() ) {
-      //cout << (ei1->current() )->toString().c_str()<< endl;
       SWEdge* cedge (dynamic_cast<SWEdge*> ( ei1->current() ) );
       RandAddrNode* noi (dynamic_cast<RandAddrNode*> (ei1->current()->first) );
       RandAddrNode* noj (dynamic_cast<RandAddrNode*> (ei1->current()->second) );
       cout << "(" << noi->getAddress() << "," << noj->getAddress() << "," << cedge->printAttributes() << ")" ;
-    }
-    cout << "How manay edges? " << getEdgeSize() << endl;
+    }*/
     
     //This next part is making a shortcut connection:
     auto_ptr<NodeIterator> ni( getNodeIterator() );
@@ -73,25 +66,18 @@ void SWNetwork::create(int n, int local_size) {
       double x = _r_short.getDouble01();
       int k = int(pow(n, x));
       int shortcut_address = (nodei->getAddress() + k) % n;
-      cout << "c_addr and shortcut_addr: " << nodei->getAddress() << "," << shortcut_address << endl;
+      //cout << "c_addr and shortcut_addr: " << nodei->getAddress() << "," << shortcut_address << endl;
       RandAddrNode* nodej = node_vec[shortcut_address];
-      Network* nei_net = getNeighbors(nodei);
-      cout << "getEdge():\t" << (getEdge(nodei,nodej)==0)<<  endl;
-      cout << "nodei!= nodej?\t" << (nodei!=nodej) << endl;
-      /*if ((nodei->getAddress() != nodej->getAddress()) && !(getEdge(nodei, nodej)) && !(getEdge(nodej, nodei))){*/
-      
-      //if ((nodei != nodej) && (nei_net->getEdge(nodei, nodej)!=0)){
+      //cout << "getEdge():\t" << (getEdge(nodei,nodej)==0)<<  endl;
+      //cout << "nodei!= nodej?\t" << (nodei!=nodej) << endl;
       if ((nodei!=nodej) && (getEdge(nodei, nodej)==0)){
-          //add(Edge(nodei,nodej));
-	  //c_edge = new SWEdge(nodei,nodej, "SC");
-	  cout << getEdge(nodei,nodej) << endl;
+	  //cout << getEdge(nodei,nodej) << endl;
           add(SWEdge(nodei,nodej, "SC"));
-	  //add(*c_edge);
-	  cout << "-----------------------------------------" << endl;
-	  cout << "(" << nodei->getAddress() << "," << nodej->getAddress() << ")" << endl;
+	  //cout << "-----------------------------------------" << endl;
+	  //cout << "(" << nodei->getAddress() << "," << nodej->getAddress() << ")" << endl;
       }
     }
-    cout << "How manay edges? " << getEdgeSize() << endl;
+/*
     //this is for testing EdgeIterator
     auto_ptr<EdgeIterator> ei (getEdgeIterator() );
     while (ei->moveNext() ) {
@@ -107,9 +93,77 @@ void SWNetwork::create(int n, int local_size) {
       }
       else {
         cout << "(" << noi->getAddress() << "," << noj->getAddress() << "," << cedge->printAttributes() << ")" ;
-        //cout << "(" << noi->getAddress() << "," << noj->getAddress() <<  ")" << endl;
       }
     }// delete c_edge;
+*/
+    //Now we make "local connections" which are a distance log N or less
+    int log_dist = (int)(log10(n)/log10(2) );
+    auto_ptr<NodeIterator> nl(getNodeIterator() ) ;
+    while (nl->moveNext() ) {
+      RandAddrNode* c_node = dynamic_cast<RandAddrNode*>(nl->current() );
+      std::vector<RandAddrNode*> local_neis;
+      auto_ptr<NodeIterator> nei(getNodeIterator() );
+      bool everylocal=false;
+      while(nei->moveNext() ) {
+	RandAddrNode* nnode = dynamic_cast<RandAddrNode*>(nei->current() );
+	int cur_dist = c_node->getDistanceTo(n,nnode);
+	//cout << "\t cur_dist and log_dist:\t" << cur_dist << "\t" << log_dist << endl;
+	if (cur_dist <= log_dist && c_node!=nnode)
+	{
+	  if (getEdge(c_node, nnode)==0)
+	  {
+	    //cout << "c_node and selected node addr:\t" << c_node->getAddress() << "\t" << nnode->getAddress() << endl;
+	    c_node->local_neighbors.push_back(nnode);
+	    local_neis.push_back(nnode);
+	    if (local_size == log_dist*2)  //if local nei's size ==logN, add every node in the range.
+	    {
+	      everylocal = true;
+	      //cout << "---------add SWEdge here!!!!!!!!!!!!!!!----------------" << endl;
+              add(SWEdge(c_node, nnode, "LC") );
+	    }
+	  }
+	}
+      }
+      //cout << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" << endl;
+      //cout << "current Addr:\t " << c_node->getAddress() << endl;
+      if (!everylocal) {
+        int local_addr;
+        RandAddrNode* ln_node;
+	std::set<RandAddrNode*> ln_nodes;
+	//std::set<int> ran_nums;
+	//cout << "local_neis.size: " << local_neis.size() << endl; 
+        do {
+	  local_addr = _r_short.getInt(local_neis.size()-1);
+	  ln_node = local_neis.at(local_addr);
+	  //cout <<" selected local neighbor node:\t" << ln_node->getAddress() << endl;
+	  if (ln_nodes.find(ln_node) == ln_nodes.end() ) {
+	    ln_nodes.insert(ln_node);
+	  //if (ran_nums.find(local_addr) == ran_nums.end() ) {
+	  //  ran_nums.insert(local_addr);
+	  }
+        }
+        //while ( ran_nums.size()<(local_size) );
+        while ( ln_nodes.size()<(local_size) );
+	//cout << "\t\tprint how many random numbers:\t " << ln_nodes.size() << endl;
+	std::set<RandAddrNode*>::iterator nodeit;
+	for (nodeit = ln_nodes.begin(); nodeit!=ln_nodes.end(); nodeit++) {
+	  add(SWEdge(c_node, *nodeit, "LC") );
+	}
+      }
+    }
+/*
+    int lc_cnt = 0;
+    auto_ptr<EdgeIterator> ei2 (getEdgeIterator() );
+    while (ei2->moveNext() ) {
+      //cout << (ei1->current() )->toString().c_str()<< endl;
+      SWEdge* cedge (dynamic_cast<SWEdge*> ( ei2->current() ) );
+      RandAddrNode* noi (dynamic_cast<RandAddrNode*> (ei2->current()->first) );
+      RandAddrNode* noj (dynamic_cast<RandAddrNode*> (ei2->current()->second) );
+      cout << "(" << noi->getAddress() << "," << noj->getAddress() << "," << cedge->printAttributes() << ")" ;
+      if (cedge->getAttributes()=="LC") { lc_cnt=lc_cnt+1; }
+    }
+    cout << "total number of LC is: \t" << lc_cnt << endl;
+    */
 }
 
 SWNetwork* SWNetwork::getLocalNeighbors(RandAddrNode* node) const {
@@ -195,9 +249,7 @@ void SWNetwork::printNeighborEdgeInfo() {
 	   SWEdge* c_edge (dynamic_cast<SWEdge*> (ei->current() ) );
 	   RandAddrNode* fnode ( dynamic_cast<RandAddrNode*> (c_edge->first) );
 	   RandAddrNode* snode ( dynamic_cast<RandAddrNode*> (c_edge->second) );
-	   //cout << "[" << fnode->getAddress() << "," << snode->getAddress() << "," << c_edge->getAttributes() << "," << endl;
-	   cout << "[" << fnode->getAddress() << "," << snode->getAddress() << "]" << endl;
-	   delete c_edge;
+	   cout << "[" << fnode->getAddress() << "," << snode->getAddress() << "," << c_edge->printAttributes() << "]" ;
          }
 	 cout << ")" << endl;
       }

@@ -37,15 +37,16 @@ namespace Starsky {
        * @param attr attributes of edges
        * (e.g., DN:direct neighbor, SC:shortcut neighbor)
        */
-      SWEdge (RandAddrNode* start, RandAddrNode* end, const std::string& attr );
+      //SWEdge (RandAddrNode* start, RandAddrNode* end, const std::string& attr );
+      SWEdge (RandAddrNode* start, RandAddrNode* end, std::string attr );
       /** 
        * copy a swedge and return it
        */
       SWEdge* clone() const { 
 	RandAddrNode* afirst = dynamic_cast<RandAddrNode*> (first);
 	RandAddrNode* asecond = dynamic_cast<RandAddrNode*> (second);
-	std::cout << "--------clone------------" << std::endl;
-	std::cout << "(" << afirst->getAddress() << "," << asecond->getAddress() << ")" << std::endl;
+	//std::cout << "--------clone------------" << std::endl;
+	//std::cout << "(" << afirst->getAddress() << "," << asecond->getAddress() << ")" << std::endl;
         //return new SWEdge((RandAddrNode*)first, (RandAddrNode*)second, _attr); }
         return new SWEdge(afirst, asecond, _attr); }
       /** 
@@ -57,7 +58,8 @@ namespace Starsky {
       int getDistanceBetween(int node_size);
       void printEdgeInfo ();
     protected:
-      const std::string& _attr;
+      //const std::string& _attr;
+      std::string _attr;
   };
 }
 #endif

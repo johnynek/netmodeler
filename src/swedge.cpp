@@ -26,7 +26,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 using namespace Starsky;
 using namespace std;
 
-SWEdge::SWEdge (RandAddrNode* start, RandAddrNode* end, const std::string& attr="") : _attr(attr), Edge(start, end)
+//SWEdge::SWEdge (RandAddrNode* start, RandAddrNode* end, const std::string& attr="") : _attr(attr), Edge(start, end)
+SWEdge::SWEdge (RandAddrNode* start, RandAddrNode* end, std::string attr="") : _attr(attr), Edge(start, end)
 {
 }
 
