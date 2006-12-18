@@ -128,6 +128,7 @@ void SWNetwork::create(int n, int local_size) {
       //cout << "current Addr:\t " << c_node->getAddress() << endl;
       if (!everylocal) {
         int local_addr;
+	int le_cnt=0;
         RandAddrNode* ln_node;
 	std::set<RandAddrNode*> ln_nodes;
 	//std::set<int> ran_nums;
@@ -147,8 +148,10 @@ void SWNetwork::create(int n, int local_size) {
 	//cout << "\t\tprint how many random numbers:\t " << ln_nodes.size() << endl;
 	std::set<RandAddrNode*>::iterator nodeit;
 	for (nodeit = ln_nodes.begin(); nodeit!=ln_nodes.end(); nodeit++) {
+	  le_cnt=le_cnt+1;
 	  add(SWEdge(c_node, *nodeit, "LC") );
 	}
+        //cout << "how many local edges for " << c_node->getAddress() << " node? " << le_cnt << endl;
       }
     }
 /*

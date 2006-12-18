@@ -106,6 +106,7 @@ SWNetwork* SWEdgeRewirer::map(SWNetwork* net, int m)
   {
       RandAddrNode *start, *end; 
       std::string attr;
+      //cout << "original attr " << (*reit)->printAttributes() << endl; 
       do {
         //Method m = _method;
         if (m == 1) {  //rewire both ends to random
@@ -154,6 +155,7 @@ SWNetwork* SWEdgeRewirer::map(SWNetwork* net, int m)
     //while( !net->add( *(new_edge ) ) );
     //net->add( *(new_edge ) );
     //net->add( *(new_edge.get() ) );
+    //cout << "rewired attr " << attr.c_str() << endl; 
     net->add( SWEdge(start,end,attr ) );
     //cout << "new edge's attr: " << new_edge->printAttributes() << endl;
       //The above adds a *copy* of the node IF there is no such node already in the network.

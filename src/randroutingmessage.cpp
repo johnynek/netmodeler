@@ -42,24 +42,24 @@ SWNetwork* RandRoutingMessage::visit(Node* bstart, Network& net)
    SWNetwork* new_net = dynamic_cast<SWNetwork*> (net.newNetwork() );
    //auto_ptr<SWNetwork> new_net ( dynamic_cast<SWNetwork*> (net.newNetwork() ) );
    RandAddrNode* start = dynamic_cast<RandAddrNode*> (bstart);
-   cout << "first new_net's size: " << new_net->getNodeSize() << endl;
+   //cout << "first new_net's size: " << new_net->getNodeSize() << endl;
    new_net->add(start);
-   cout << "after adding first node, new_net's size: " << new_net->getNodeSize() << endl;
+   //cout << "after adding first node, new_net's size: " << new_net->getNodeSize() << endl;
    _start_addr = start->getAddress();
    _target_addr = _target->getAddress();
    r_send = _r1ran.getDouble01();
-   cout << "+++++++++++++++++++++++++++++++++++++++++++++" << endl;
+   //cout << "+++++++++++++++++++++++++++++++++++++++++++++" << endl;
    //auto_ptr<Network> neighbor_net( net.getNeighbors(start) );
    //cout << "neighbor net's size: " << neighbor_net->getNodeSize() << endl;
    int init_distance = start->getDistanceTo(this->_nodes, _target);
    hops++;
-   cout << "-------------------------hops---------------------" << hops << endl;
+   //cout << "-------------------------hops---------------------" << hops << endl;
    if ((_start_addr!=_target_addr) && (hops < _nodes) && (net.getDegree(start) !=0)) 
    { 
       //select a node closest to a target with p_greedy
       if (_p_greedy > r_send)
       {
-	 cout << "greedy mode" << endl;
+	 //cout << "greedy mode" << endl;
          auto_ptr<NodeIterator> ni(net.getNeighborIterator(start));
          int min_distance = _nodes -1;
          while (ni->moveNext()) 
@@ -78,10 +78,10 @@ SWNetwork* RandRoutingMessage::visit(Node* bstart, Network& net)
 	    //the distance to a target should be at least the same 
 	    // as that of the previous node
 	    new_net->add(this->_greedy_next);
-            cout << "after adding greedy next node, new_net's size: " << new_net->getNodeSize() << endl;
+            //cout << "after adding greedy next node, new_net's size: " << new_net->getNodeSize() << endl;
 	    //Edge new_edge = Edge(start, this->_greedy_next);
 	    //new_net->add(new_edge);
-	    cout << "current node and next node\t" << start->getAddress() << "\t" <<_greedy_next->getAddress() << endl;
+	    //cout << "current node and next node\t" << start->getAddress() << "\t" <<_greedy_next->getAddress() << endl;
 	    new_net->add(Edge(start, _greedy_next) );
 	    //RandRoutingMessage* m_greedy = new RandRoutingMessage(_r1ran, _p_greedy, _nodes, hops);
 	    //auto_ptr<SWNetwork> visited_net (m_greedy->visit(_greedy_next, net) );
@@ -93,37 +93,37 @@ SWNetwork* RandRoutingMessage::visit(Node* bstart, Network& net)
       //With (1-p_greedy), select random node only among 'local neighbors' as next 
       else 
       {
-	 cout << "random mode" << endl;
+	 //cout << "random mode" << endl;
 	 std::vector<SWEdge*> local_edges;
 	 local_edges.clear();
 	 auto_ptr<EdgeIterator> nei ( net.getEdgeIterator(start) );
 	 while(nei->moveNext() ) {
 	   SWEdge* c_edge (dynamic_cast<SWEdge*>(nei->current() ) );
+	   //cout << "edge's attribute: " << c_edge->printAttributes() << endl;
 	   if (c_edge->getAttributes() == "LC" ) {
 	     local_edges.push_back(c_edge);
 	   }
 	 }
-	 cout << "local_edges.size():\t" << local_edges.size() << endl;
+	 //cout << "local_edges.size():\t" << local_edges.size() << endl;
+	 if (local_edges.size() > 0) {
 
-         int ran_num=_r1ran.getInt(local_edges.size()-1); 	 
-	 RandAddrNode* _rand_next = dynamic_cast<RandAddrNode*>(local_edges.at(ran_num)->getOtherNode(start) );
-	 cout << "in random mode:\tcurrent node and next node:\t" << start->getAddress() << "\t" << _rand_next->getAddress() << endl;
-	 new_net->add(_rand_next);
-	 cout << "node added, new_net's size? \t" << new_net->getNodeSize() << endl;
-	 new_net->add(Edge(start, _rand_next) );
-	 //RandRoutingMessage* m_random = new RandRoutingMessage(_r1ran, _p_greedy, _nodes, hops);
-	 //auto_ptr<SWNetwork> v_net (m_random->visit(_rand_next, net) );
-	 auto_ptr<SWNetwork> v_net (visit(_rand_next, net) );
-	 new_net->add(v_net.get() );
-	 //visit(_rand_next, net);
-	 //delete m_random;
+           int ran_num=_r1ran.getInt(local_edges.size()-1); 	 
+	   RandAddrNode* _rand_next = dynamic_cast<RandAddrNode*>(local_edges.at(ran_num)->getOtherNode(start) );
+	   //cout << "in random mode:\tcurrent node and next node:\t" << start->getAddress() << "\t" << _rand_next->getAddress() << endl;
+	   new_net->add(_rand_next);
+	   //cout << "node added, new_net's size? \t" << new_net->getNodeSize() << endl;
+	   new_net->add(Edge(start, _rand_next) );
+	   //RandRoutingMessage* m_random = new RandRoutingMessage(_r1ran, _p_greedy, _nodes, hops);
+	   //auto_ptr<SWNetwork> v_net (m_random->visit(_rand_next, net) );
+	   auto_ptr<SWNetwork> v_net (visit(_rand_next, net) );
+	   new_net->add(v_net.get() );
+	   //visit(_rand_next, net);
+	   //delete m_random;
+	 }
       }
    }
-   //SWNetwork* ret_val = new_net;
-   //new_net = 0;
-   cout << "ret_val's size: " << new_net->getNodeSize() << endl;
-   cout << "ret_val have source?: " << new_net->has(start) << endl;
-   //return ret_val;
+   //cout << "ret_val's size: " << new_net->getNodeSize() << endl;
+   //cout << "ret_val have source?: " << new_net->has(start) << endl;
    //return new_net.get();
    return new_net;
 }
