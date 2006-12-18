@@ -52,6 +52,10 @@ class RandRoutingMessage : public Message {
 	 */
         RandRoutingMessage(Ran1Random& r, double p_greedy, int nodes, int hops);
 	/**
+	 * delete new_net when message is destructed.
+	 */
+	//~RandRoutingMessage() { delete new_net; };
+	/**
 	 * @param target created SWNetwrok type network 
 	 * returns randomly selected target node in my_net
 	 */
