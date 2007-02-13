@@ -156,14 +156,17 @@ SWNetwork* SWEdgeRewirer::map(SWNetwork* net, int m)
     //net->add( *(new_edge ) );
     //net->add( *(new_edge.get() ) );
     //cout << "rewired attr " << attr.c_str() << endl; 
+    //cout << "start and end " << start->getAddress() << ", " << end->getAddress() << endl;
     net->add( SWEdge(start,end,attr ) );
+    //cout << " new edge added" << endl;
     //cout << "new edge's attr: " << new_edge->printAttributes() << endl;
       //The above adds a *copy* of the node IF there is no such node already in the network.
     net->remove(*reit );
+    //cout << " old edge removed" << endl;
     //delete new_edge;
     //string attrs = (*reit) -> getAttribues();   
     //net->remove( *reit );
-  //  cout << "(" << start << ", " << end << ")" << endl;
+    //cout << "(" << start << ", " << end << ")" << endl;
     //Edge* new_edge = _ef.create(start, end, attrs);
     //Edge* new_edge = _ef.create(start, end);
     //net->add(new_edge); 

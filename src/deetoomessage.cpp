@@ -79,7 +79,7 @@ DeetooNetwork* DeetooMessage::visit(Node* n, Network& net)
       //We are in the range, get the neighbors.
       //divide range to upper and lower.
       //get upper neighbors and lower neighbors.
-      //std::map will sort them according to their addree, lowest first.
+      //std::map will sort them according to their address, lowest first.
       auto_ptr<NodeIterator> ni(net.getNeighborIterator(start) );
       while(ni->moveNext() )
       {

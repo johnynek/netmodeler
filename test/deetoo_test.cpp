@@ -35,17 +35,21 @@ std::set<std::string> rstringGenerator ( int howmany, int length, Ran1Random& r 
     return items;
 }
 
-int main(void)
+int main(int argc, char *argv[]) 
 {
-    int max_node = 100000;
+    //int max_node = 100000;
+    if (argc < 2) {
+	    cerr << "Usage: " << argv[0] << ", number of nodes:" << endl;
+    }
+    int nodes = atoi(argv[1]);
     double alpha = 1;
     Ran1Random ran_no;
     //Random r;
     //set the multicasting range (randge0, range1)
     unsigned long int rg_start, rg_end; 
     map<int, pair<double, double> > result;
-    for (int nodes = 100; nodes <= max_node; nodes = nodes*10) {
-	cout << "nodes:\t" << nodes << endl;
+    //for (int nodes = 100; nodes <= max_node; nodes = nodes*10) {
+	//cout << "nodes:\t" << nodes << endl;
 	//cqsize determines how many rows or columns to multicast.
 	//cqsize = sqrt(B) / sqrt(N), where B is total space m*m
 	int cqsize = (int) (ADDR_MAX / (int)sqrt( nodes ) * alpha);
@@ -88,7 +92,7 @@ int main(void)
 	    {
 		// If the upper range is greater than column size
 		// set the upper range to the last column
-	        rg_end = 4294967295;
+	            rg_end = 4294967295;
 	        rg_start = (unsigned long int)(  (ADDR_MAX-cqsize) * ADDR_MAX );
 	    }
 	    else
@@ -121,7 +125,7 @@ int main(void)
 	    int no_msg = 0;
 	    int reached=0;
 	    int sum_no_msg = 0;
-	    cout << i << "th item" << endl;
+	    //cout << i << "th item" << endl;
             for ( int it_no = 0; it_no < max_it; it_no++) {
 		//DeetooNetwork* queryNet = new DeetooNetwork(ran_no);
 		auto_ptr<DeetooNetwork> queryNet_ptr ( new DeetooNetwork(ran_no) );
@@ -190,20 +194,23 @@ int main(void)
 	 
         }
         int item_size = items.size();
-	cout << "total hits: \t" << total_hits << endl;
+	//cout << "total hits: \t" << total_hits << endl;
 	double hit_rate = (double)total_hits / (double)(max_it * item_size);
         double ave_msgs = (double)total_msgs / (double)(max_it * item_size);
-	cout << "hit rate:\t" << hit_rate << endl;
-	cout << "ave_msgs:\t" << ave_msgs << endl;
+        double hops_hit = ave_msgs / hit_rate;
+	//cout << "hit rate:\t" << hit_rate << endl;
+	//cout << "ave_msgs:\t" << ave_msgs << endl;
 	//double hit_rate = (double)total_hits / (double)(100 * item_size);
         //double ave_msgs = (double)total_msgs / (double)(100 * item_size);
         result[nodes] = make_pair(hit_rate, ave_msgs);	
         //delete cacheNet;
 	//result_map[nodes]=
 	items.clear();
-    }
-    printInfo(result);
-    cout << "---------------End of Process-----------------------" << endl;
+        cout << "#nodes:\t" << "hit rate:\t" << "ave msgs:\t" << "hops/hit_rate" << endl
+		<< nodes << "\t" << hit_rate << "\t" << ave_msgs << "\t" << hops_hit << endl;
+    //}
+    //printInfo(result);
+    //cout << "---------------End of Process-----------------------" << endl;
 }    
 
 

@@ -99,8 +99,11 @@ SWNetwork* RandRoutingMessage::visit(Node* bstart, Network& net)
 	 auto_ptr<EdgeIterator> nei ( net.getEdgeIterator(start) );
 	 while(nei->moveNext() ) {
 	   SWEdge* c_edge (dynamic_cast<SWEdge*>(nei->current() ) );
+	   RandAddrNode* fNode (dynamic_cast<RandAddrNode*>(c_edge->first) );
+	   RandAddrNode* sNode (dynamic_cast<RandAddrNode*>(c_edge->second) );
 	   //cout << "edge's attribute: " << c_edge->printAttributes() << endl;
-	   if (c_edge->getAttributes() == "LC" ) {
+	   //if (c_edge->getAttributes() == "LC" ) {
+	   if ( fNode->getDistanceTo(net.getNodeSize(), sNode) <= (log10(net.getNodeSize() ) / log10(2) ) ) {
 	     local_edges.push_back(c_edge);
 	   }
 	 }
