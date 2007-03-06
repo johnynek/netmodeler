@@ -47,16 +47,7 @@ unsigned long int AddressedNode::getAddress(bool cache)
     if (cache) { return _c_address; }
     else { return _q_address; }
 }
-/**
-unsigned long int AddressedNode::getCacheAddress()
-{
-  return _c_address;
-}
-unsigned long int AddressedNode::getQueryAddress()
-{
-  return _q_address;
-}
-*/
+
 unsigned long int AddressedNode::getDistanceTo(unsigned long int t_addr, bool cache)
 {
   unsigned long int this_addr;

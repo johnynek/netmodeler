@@ -66,14 +66,6 @@ namespace Starsky {
        */
       unsigned long int getAddress(bool cache);
       /**
-       * Return a node's address in cache space
-       */
-      //unsigned long int getCacheAddress();
-      /**
-       * Return a node's address in cache space
-       */
-      //unsigned long int getQueryAddress();
-      /**
        *@param nodes total nodes size
        *@param target calculate ring distance to the target
        * return distance to the target
@@ -87,13 +79,8 @@ namespace Starsky {
        * return true if this node has qItem.
        */
       bool searchItem( std::string qItem);
-      /**
-       * If you change your mind and don't want the item to be deleted
-       * when the node is deleted, call this function.
-       */
       void insertItem(std::string item);
       void deleteItem(std::string item);
-      //void release() { _own = false; }
     };
 }
 #endif
