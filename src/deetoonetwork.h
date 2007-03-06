@@ -64,7 +64,7 @@ class DeetooNetwork : public Network {
 	/**
 	 * print neighbors of each node into "output" file.
 	 */
-	void printNetInfo();
+	void printNetInfo(bool cache);
 	/**
 	 * @param bin_count the number of evenly spaced bins
 	 * return a histogram evenly spaced over shourcut 
@@ -73,35 +73,39 @@ class DeetooNetwork : public Network {
 	std::vector<int> getNeighborDistHist(int bin_count=10) const;
 	//bool compareNodes(const AddressedNode* a, const AddressedNode* b);
 	//bool isIn(std::vector<AddressedNode*> n_vec, unsigned long int nd_addr);
-	unsigned long int findShortcutAddress(unsigned long int t_addr);
-	unsigned long int findSCAQuery(unsigned long int t_addr);
+	/**
+	 *Make ring connection between nodes @param nodeMap
+	 */
+	void formRing(std::map<unsigned long int, AddressedNode*> nodeMap);
+	/**
+	 *@param cache if cache net, true, else if query net, false
+	 *make shortcut connection 
+	 */
+	void makeShortcutConnection(std::map<unsigned long int, AddressedNode*> nd_map, bool cache);
+	/**
+	 * @param n_map node map
+	 * @param t_addr calculated target address for shortcut
+	 * return the closest neighbor node to the t_addr
+	 */
+	AddressedNode* findShortcutNode(std::map<unsigned long int, AddressedNode*> n_map, unsigned long int t_addr);
+	//unsigned long int findSCAQuery(unsigned long int t_addr);
+	/**
+	 * calculate the distance between addr_a and addr_b,
+	 * and return the distance
+	 */
 	unsigned long int distanceTo(unsigned long int addr_a, unsigned long int addr_b);
 	
 	/** 
 	 * @param n create new DeetooNetwork whose size is n
-	 * @param c if c == 1, network for cache,
-	 *          if c == 0, network for query.
 	 */
 	void create(int n);
-	//void createQueryNet(std::vector<AddressedNode*> nd_vec);
 	void createQueryNet(std::map<unsigned long int, AddressedNode*> nd_map);
 	//void cacheItem(std::string content, AddressedNode* cn);
        // Network* queryForContent(AddressedNode* content, NodeIterator* ni);	
     protected:
-	/** 
-	 * @param n create new DeetooNetwork whose size is n
-	 * whose node addresses are transposed.
-	 */
-	//void createTrans(int n);
-	/** 
-	 * @param *bn address of bn is transposed.
-	 */
-	//AddressedNode* addTrans(AddressedNode* bn);
 	//double _p;
 	Ran1Random& _r_short;
 	//Random& _r_int;
-	//std::map<unsigned long int, AddressedNode*> _node_map;
-	//std::vector<AddressedNode*> _node_vec;
 };
 	
 }

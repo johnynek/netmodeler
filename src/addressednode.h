@@ -84,6 +84,10 @@ namespace Starsky {
        */
       std::set<std::string> getItem() const { return _itemSet; }
       /**
+       * return true if this node has qItem.
+       */
+      bool searchItem( std::string qItem);
+      /**
        * If you change your mind and don't want the item to be deleted
        * when the node is deleted, call this function.
        */

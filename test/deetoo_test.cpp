@@ -60,10 +60,15 @@ int main(int argc, char *argv[])
 	cacheNet_ptr->create(nodes);
 	//DeetooNetwork* cacheNet = cacheNet_ptr.get();
         //Insert k items from k randomly selceted nodes into the network.
+	
 	int k = 100;
 	//generate k items.
 	std::set<std::string> items = rstringGenerator(k, 10, ran_no );
         std::set<std::string>::iterator item_it; 
+
+/*
+
+	
 	for (item_it = items.begin(); item_it != items.end(); item_it++)
 	{
 	    //pick a random node to insert an item.
@@ -71,7 +76,7 @@ int main(int argc, char *argv[])
 	    //item_src.selectFrom(cacheNet);
 	    item_src.selectFrom(cacheNet_ptr.get() );
 	    AddressedNode* item_source = dynamic_cast<AddressedNode*> (item_src.select() );
-            //cout << "item_source's addr: " << item_source->getAddress(true) << endl;	
+            cout << "item_source's addr: " << item_source->getAddress(true) << endl;	
             //insert the item to item_source node
 	    item_source->insertItem(*item_it );
 	    //decide cache range
@@ -99,7 +104,7 @@ int main(int argc, char *argv[])
 	    {
 	        rg_end = (unsigned long int)( ( end_col * ADDR_MAX) + ADDR_MAX -1);
 	    }
-	    //cout << "range start: " << rg_start << "range end: " << rg_end << endl;
+	    cout << "range start: " << rg_start << "\trange end: " << rg_end << endl;
 	    //local broadcasting for cache
 	    //DeetooMessage* cache_m = new DeetooMessage(*item_it, rg_start, rg_end, true);
 	    auto_ptr<DeetooMessage> cache_m ( new DeetooMessage(*item_it, rg_start, rg_end, true) );
@@ -115,30 +120,39 @@ int main(int argc, char *argv[])
 	//Check hit_rate (count hit)
 	//local broadcasting for query.
 	
+*/
+	
 	//int f_reached = 0;
 	int total_hits = 0;
 	int total_msgs = 0;
 	int max_it = 100;
 	int i = 0;
+        auto_ptr<DeetooNetwork> queryNet_ptr ( new DeetooNetwork(ran_no) );
+	//queryNet_ptr->createQueryNet( cacheNet->node_map);
+	queryNet_ptr->createQueryNet( (cacheNet_ptr.get() )->node_map);
+	//cout << "number of iteration: \t " << it_no << endl;
+	DeetooNetwork* queryNet = queryNet_ptr.get();
 	for (item_it = items.begin(); item_it != items.end(); item_it++)
 	{
 	    int no_msg = 0;
 	    int reached=0;
 	    int sum_no_msg = 0;
-	    //cout << i << "th item" << endl;
+	    cout << i << "th item" << endl;
             for ( int it_no = 0; it_no < max_it; it_no++) {
+		cout << "number of iteration: \t " << it_no << endl;
+		/** move  to out of "for" loops    
 		//DeetooNetwork* queryNet = new DeetooNetwork(ran_no);
 		auto_ptr<DeetooNetwork> queryNet_ptr ( new DeetooNetwork(ran_no) );
 		//queryNet_ptr->createQueryNet( cacheNet->node_map);
 		queryNet_ptr->createQueryNet( (cacheNet_ptr.get() )->node_map);
 		//cout << "number of iteration: \t " << it_no << endl;
 		DeetooNetwork* queryNet = queryNet_ptr.get();
+		**/
 	        //set starting point
 	        UniformNodeSelector uns_start(ran_no);
 	        //uns_start.selectFrom(queryNet);
 	        uns_start.selectFrom(queryNet_ptr.get() );
 	        AddressedNode* query_start = dynamic_cast<AddressedNode*> (uns_start.select() );
-		//
 	        int start_row = ( (int)(query_start->addr_j) - (int)(cqsize/2) );
 	        if ( start_row < 0 ) {
 		  start_row = 0;
@@ -166,20 +180,21 @@ int main(int argc, char *argv[])
 		std::string query = *item_it;
 
 	        //DeetooNetwork* visited_net = queryNet->newNetwork();
-		//cout << " rg_start,  rg_end " << rg_start << ",\t" << rg_end << endl;
+		cout << " rg_start,  rg_end      " << rg_start << ",\t" << rg_end << endl;
 		//cout << " current node's address:\t " << query_start->getAddress(false) << endl;
 	        //DeetooMessage* query_msg = new DeetooMessage(query, rg_start, rg_end, false);
 	        auto_ptr<DeetooMessage> query_msg ( new DeetooMessage(query, rg_start, rg_end, false) );
 		//cout << "*********************************************" << endl;
 		//DeetooNetwork* visited_net = query_msg->visit(query_start, *queryNet);
 		auto_ptr<DeetooNetwork> visited_net( query_msg->visit(query_start, *queryNet) );
-		//cout << "-----------------***********************************" << endl;
+		cout << "End of query--------------------------------------------***********************************" << endl;
 	        if (query_msg->hit) 
 		{ 
 		    reached = reached + 1; 
-		    //cout << "hit\t hit\t hit\t" << endl;
+		    cout << "hit\t hit\t hit\t" << endl;
 		}
 	        no_msg = visited_net->getNodeSize();
+		cout << "No. Msgs: \t" << no_msg << endl;
 	        sum_no_msg = sum_no_msg + no_msg;
 		//delete queryNet;
                 //delete visited_net;
@@ -208,6 +223,7 @@ int main(int argc, char *argv[])
 	items.clear();
         cout << "#nodes:\t" << "hit rate:\t" << "ave msgs:\t" << "hops/hit_rate" << endl
 		<< nodes << "\t" << hit_rate << "\t" << ave_msgs << "\t" << hops_hit << endl;
+	//delete queryNet;
     //}
     //printInfo(result);
     //cout << "---------------End of Process-----------------------" << endl;

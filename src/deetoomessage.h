@@ -41,15 +41,12 @@ namespace Starsky {
 class DeetooMessage : public Message {
 
   public:
-    //int hops;
-    bool hit;
     /**
-     * @param item the item we cache or send query for that item
      * @param r0 lower limit of multicasting range
      * @param r1 upper limit of multicasting range
      * @param c_q cache message for caching if it's true, otherwise message for query 
      */
-     DeetooMessage(std::string item, unsigned long int r0, unsigned long int r1, bool cache=true);
+     DeetooMessage(unsigned long int r0, unsigned long int r1, bool cache=true);
     /**
      * This will return all the nodes and edges in the
      * out component of a particular Node within a number of hops
@@ -61,7 +58,6 @@ class DeetooMessage : public Message {
     void cacheItems(AddressedNode* cache_node, DeetooNetwork* o_net);	
     bool inRange( AddressedNode* node);
   protected:
-    std::string _item;
     bool _cache;
     unsigned long int _r0, _r1;
 };

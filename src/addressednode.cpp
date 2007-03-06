@@ -68,6 +68,15 @@ unsigned long int AddressedNode::getDistanceTo(unsigned long int t_addr, bool ca
   return _dist;
 }
 
+bool AddressedNode::searchItem(std::string qItem)
+{
+  if (_itemSet.find(qItem) != _itemSet.end() ) {
+	  return true;
+  }
+  else {
+	  return false;
+  }
+}
 void AddressedNode::insertItem(std::string item)
 {
     _itemSet.insert(item);
