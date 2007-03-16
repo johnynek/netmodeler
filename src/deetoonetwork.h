@@ -102,6 +102,11 @@ class DeetooNetwork : public Network {
 	void createQueryNet(std::map<unsigned long int, AddressedNode*> nd_map);
 	//void cacheItem(std::string content, AddressedNode* cn);
        // Network* queryForContent(AddressedNode* content, NodeIterator* ni);	
+       /**
+	* @param cq_size column or row size for cache or query
+	* returns lower and upper bound addresses within cacheing or qurying range
+	*/
+	std::pair<unsigned long int, unsigned long int> getRange(double cq_size);
     protected:
 	//double _p;
 	Ran1Random& _r_short;

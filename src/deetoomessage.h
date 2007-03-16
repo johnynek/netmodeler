@@ -59,6 +59,7 @@ class DeetooMessage : public Message {
     bool inRange( AddressedNode* node);
   protected:
     bool _cache;
+    //unsigned long int _dist_to_lower;
     unsigned long int _r0, _r1;
 };
 	
