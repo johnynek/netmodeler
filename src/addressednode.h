@@ -79,7 +79,13 @@ namespace Starsky {
        * return true if this node has qItem.
        */
       bool searchItem( std::string qItem);
+      /**
+       * @param item, insert item to a node
+       */
       void insertItem(std::string item);
+      /**
+       * @param item delete this item from a node
+       */
       void deleteItem(std::string item);
     };
 }

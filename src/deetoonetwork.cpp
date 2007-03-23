@@ -27,20 +27,8 @@ using namespace Starsky;
 using namespace std;
 
 DeetooNetwork::DeetooNetwork(Ran1Random& r) : Network(), _r_short(r) {}
-DeetooNetwork::DeetooNetwork(int nodes, Ran1Random& r) : _r_short(r) {
-    //node_vec.reserve(nodes);
-    //create(nodes);
-}
-/**
-bool DeetooNetwork::isIn(std::vector<AddressedNode*> n_vec, unsigned long int nd_addr) {
-    std::vector<AddressedNode*>::iterator it;
-    for (it = n_vec.begin(); it != n_vec.end(); it++) {
-        if (nd_addr == (*it)->getCacheAddress() ) {
-		return nd_addr;
-	}
-    }
-}
-*/
+DeetooNetwork::DeetooNetwork(int nodes, Ran1Random& r) : _r_short(r) {}
+
 #define AMAX 65536
 #define WMAX 4294967295
 void DeetooNetwork::formRing(std::map<unsigned long int, AddressedNode*> nodeMap) {
@@ -72,10 +60,8 @@ void DeetooNetwork::makeShortcutConnection(std::map<unsigned long int, Addressed
         double x = _r_short.getDouble01();
         unsigned long int k = (unsigned long int) (pow(10,(log10(WMAX)-(1-x)*log10(getNodeSize() ) ) ) );
         unsigned long int shortcut_target_addr = (nodei->getAddress(cache) + k) % (WMAX );
-	//cout << "target shortcut addr: " << shortcut_target_addr << endl;
 	AddressedNode* nodej = findShortcutNode(nd_map, shortcut_target_addr);
 	shortcut_address = nodej->getAddress(cache);
-	//cout << "selected shortcut neighbor's addr: "<< nodej->getAddress(cache) << endl;
         if ((nodei->getAddress(cache) != nodej->getAddress(cache)) && !(getEdge(nodei, nodej)) && !(getEdge(nodej, nodei))){
           add( Edge(nodei,nodej) );
 	}
@@ -123,11 +109,9 @@ void DeetooNetwork::createQueryNet(std::map<unsigned long int, AddressedNode*> n
 	add(q_node);
 	query_nm[query_addr] = q_node;
     }
-    //cout << "query_nm's size: " << query_nm.size() << endl;
     
     //form ring.
     formRing(query_nm);
-
     //make shortcut connection.
     makeShortcutConnection(query_nm,false);
     //printNetInfo(false);
@@ -171,12 +155,9 @@ AddressedNode* DeetooNetwork::findShortcutNode(std::map<unsigned long int, Addre
 
 unsigned long int DeetooNetwork::distanceTo(unsigned long int addr_a, unsigned long int addr_b) {
     unsigned long int sm, bg, dt;
-    //cout <<  "a and b: " << addr_a<< "\t"<< addr_b << endl;
     sm = std::min(addr_a, addr_b);
     bg = std::max(addr_a, addr_b);
-    //cout << "small and big: " << sm << "\t" << bg << endl;
     dt = std::min( (bg-sm),( (WMAX+1) - bg + sm) );
-    //cout << "distance:\t" << dt << endl;
     return dt;
 }
 
@@ -227,8 +208,8 @@ vector<int> DeetooNetwork::getNeighborDistHist(int bins) const {
 
 std::pair<unsigned long int, unsigned long int> DeetooNetwork::getRange(double cq_size) {
   unsigned long int range0, range1;
-  cout << "set ranges==================" << endl;
-  int start_cr = (int)(_r_short.getDouble01()*(AMAX-1) );
+  //cout << "set ranges==================" << endl;
+  int start_cr = (int)(_r_short.getDouble01()*(double)(AMAX - cq_size - 1 ) );
   double end_cr = (double)start_cr + cq_size-1;
  if (end_cr > (AMAX-1) ) {
      range1 = WMAX;
@@ -238,33 +219,6 @@ std::pair<unsigned long int, unsigned long int> DeetooNetwork::getRange(double c
      range0 = start_cr * AMAX;
      range1 = (unsigned long int) ( (end_cr * AMAX) + AMAX -1 );
  }
- cout << "range0: " << range0 << ", range1: " << range1 << endl; 
+ //cout << "range0: " << range0 << ", range1: " << range1 << endl; 
   return make_pair(range0, range1);
 }
-/**
-void DeetooNetwork::cacheItem(std::string content, AddressedNode* cn) 
-{
-    //Determine cache size
-    int csize = (int) (sqrt( AMAX / this->getNodeSize() ) );
-    unsigned long int start_addr;
-    if ( cn->addr_i == 0) {cn->addr_i = 1;}
-    start_addr = (unsigned long int)(cn->addr_i-2/csize)*AMAX;
-    unsigned long int end_addr = (unsigned long int)( ( (start_addr / AMAX)+csize)*AMAX+AMAX-1);
-    std::map<unsigned long int, AddressedNode*> cache_nm;
-    std::map<unsigned long int, AddressedNode*>::iterator itNodeMap;
-    for (itNodeMap=node_map.begin(); itNodeMap!=node_map.end(); itNodeMap++) 
-    {
-	std::set<std::string> cacheItemSet = itNodeMap->second->getItem();
-	if ( (itNodeMap->first >= start_addr && itNodeMap->first <= end_addr) && cacheItemSet.find(content)== cacheItemSet.end() )
-	{
-	    itNodeMap->second->insertItem(content, cn);
-	}
-    }
-}
-*/
-/**
-DeetooNetwork* DeetooNetwork::queryForContent(AddressedNode* content, NodeIterator* ni)
-{
-
-}
-*/

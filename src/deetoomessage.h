@@ -3,6 +3,7 @@ This program is part of Netmodeler, a library for graph and network
 modeling and simulation.
 Copyright (C) 2005  University of California
 Copyright (C) 2005  P. Oscar Boykin <boykin@pobox.com>, University of Florida
+Copyright (C) 2007  Tae Woong Choi <twchoi@ufl.edu>, University of Florida
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -45,7 +46,7 @@ class DeetooMessage : public Message {
      * @param r0 lower limit of multicasting range
      * @param r1 upper limit of multicasting range
      * @param c_q cache message for caching if it's true, otherwise message for query 
-     */
+     **/
      DeetooMessage(unsigned long int r0, unsigned long int r1, bool cache=true);
     /**
      * This will return all the nodes and edges in the
@@ -53,15 +54,26 @@ class DeetooMessage : public Message {
      * @param anode the node to start the message at
      * @param aNet the network that the message will travel on
      * @return a network consisting of all the nodes and edges crossed in a broadcast.
-     */
+     **/
     virtual DeetooNetwork* visit(Node* anode, Network& aNet);	
     void cacheItems(AddressedNode* cache_node, DeetooNetwork* o_net);	
+    /**
+     * This will check if node is in the range (_r0, _r1)
+     **/
     bool inRange( AddressedNode* node);
+    /**
+     * count how many edges are visited before getting in the range
+     */
+    int out_edge_count;
+    /**
+     * In given message, the first node to be visited in the range
+     */
+    AddressedNode* init_node;
   protected:
-    bool _cache;
-    //unsigned long int _dist_to_lower;
+    bool _cache;   //cache or query, cache=true, query=false
+    unsigned long int _mid_range;  //(_r0,_r1)/2
     unsigned long int _r0, _r1;
-};
+  };
 	
 }
 

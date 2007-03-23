@@ -51,18 +51,15 @@ class DeetooNetwork : public Network {
 	 *make new empty network
 	 */
 	virtual DeetooNetwork* newNetwork() const { 
-	//virtual Network* newNetwork() const { 
 		return new DeetooNetwork(_r_short);}
-		//return new Network();}
 	/**
 	 *@param address return Node by address
 	 */
 	//AddressedNode* getNodeFromAddress(const int address) const;
-	//std::vector<AddressedNode*> node_vec;
-	std::map<unsigned long int, AddressedNode*> node_map;
-	std::map<unsigned long int, AddressedNode*> query_nm;
+	std::map<unsigned long int, AddressedNode*> node_map;  //<address, Node>
+	std::map<unsigned long int, AddressedNode*> query_nm;  // node map for query
 	/**
-	 * print neighbors of each node into "output" file.
+	 * print neighbors of each node.
 	 */
 	void printNetInfo(bool cache);
 	/**
@@ -71,8 +68,6 @@ class DeetooNetwork : public Network {
 	 * neighbor distribution.
 	 */
 	std::vector<int> getNeighborDistHist(int bin_count=10) const;
-	//bool compareNodes(const AddressedNode* a, const AddressedNode* b);
-	//bool isIn(std::vector<AddressedNode*> n_vec, unsigned long int nd_addr);
 	/**
 	 *Make ring connection between nodes @param nodeMap
 	 */
@@ -88,7 +83,6 @@ class DeetooNetwork : public Network {
 	 * return the closest neighbor node to the t_addr
 	 */
 	AddressedNode* findShortcutNode(std::map<unsigned long int, AddressedNode*> n_map, unsigned long int t_addr);
-	//unsigned long int findSCAQuery(unsigned long int t_addr);
 	/**
 	 * calculate the distance between addr_a and addr_b,
 	 * and return the distance
@@ -99,18 +93,17 @@ class DeetooNetwork : public Network {
 	 * @param n create new DeetooNetwork whose size is n
 	 */
 	void create(int n);
+	/**
+	 * @param nd_map, create another network for query with query address in nd_map
+	 */
 	void createQueryNet(std::map<unsigned long int, AddressedNode*> nd_map);
-	//void cacheItem(std::string content, AddressedNode* cn);
-       // Network* queryForContent(AddressedNode* content, NodeIterator* ni);	
        /**
 	* @param cq_size column or row size for cache or query
 	* returns lower and upper bound addresses within cacheing or qurying range
 	*/
 	std::pair<unsigned long int, unsigned long int> getRange(double cq_size);
     protected:
-	//double _p;
 	Ran1Random& _r_short;
-	//Random& _r_int;
 };
 	
 }
