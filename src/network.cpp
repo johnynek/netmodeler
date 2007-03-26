@@ -441,8 +441,7 @@ int Network::getDistancesFrom(Node* start,
     //Just stop if the distance is more than we should go
     if( is_max_depth && (distance > max_depth) ) { break; }
     neighbor_max_dist = 0;
-    Network* neighbors = getNeighbors(tmp_node);
-    auto_ptr<NodeIterator> neighit( neighbors->getNodeIterator() );
+    auto_ptr<NodeIterator> neighit( getNeighborIterator(tmp_node) );
     while( neighit->moveNext() ) {
       Node* n = neighit->current();
       dit = distances.find( n );
@@ -462,7 +461,6 @@ int Network::getDistancesFrom(Node* start,
         neighbor_max_dist = distances[n];
       }
     }
-    delete neighbors;
     /**
      * We check all the nodes at distance d before d+1 (breadth first)
      * so, once a distance is assigned it is never decreased
