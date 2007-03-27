@@ -108,6 +108,8 @@ class Network {
         //typedef std::multiset<Edge> EdgeSet;
 	//The below makes sure that each edge appears only once
 	typedef std::set<Edge*> EdgeSet;
+        //This is the main storage for the network
+        typedef std::map<Node*, EdgeSet> GraphMap;
 	
 	/**
 	 * @param edge an edge to add.  This just allocates memory for a
@@ -563,9 +565,9 @@ class Network {
 	        virtual void reset();
 		friend class Network;
               protected:
-                std::map< Node*, std::set<Edge*> >::const_iterator _nit;
-                std::map< Node*, std::set<Edge*> >::const_iterator _begin;
-                std::map< Node*, std::set<Edge*> >::const_iterator _end;
+                GraphMap::const_iterator _nit;
+                GraphMap::const_iterator _begin;
+                GraphMap::const_iterator _end;
                 bool _called_movenext;
 	    };
             
@@ -580,10 +582,10 @@ class Network {
 	        virtual void reset();
 		friend class Network;
               protected:
-                std::map< Node*, std::set<Edge*> >::const_iterator _nit;
-                std::map< Node*, std::set<Edge*> >::const_iterator _begin;
-                std::map< Node*, std::set<Edge*> >::const_iterator _end;
-                std::set<Edge*>::const_iterator _eit;
+                GraphMap::const_iterator _nit;
+                GraphMap::const_iterator _begin;
+                GraphMap::const_iterator _end;
+                EdgeSet::const_iterator _eit;
                 bool _called_movenext;
 	    };
 	    
@@ -612,7 +614,7 @@ class Network {
 	     *
 	     * Holds the edges each node is involved with:
 	     */
-	    std::map<Node*, EdgeSet> _node_to_edges;
+	    GraphMap _node_to_edges;
 	    //This is the total number of edges:
 	    int _edge_count;
   };

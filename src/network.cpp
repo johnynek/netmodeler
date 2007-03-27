@@ -194,7 +194,7 @@ void Network::addJoiningEdgesFrom(const Network* net)
 }
 
 void Network::clearEdges() {
-    map<Node*, EdgeSet>::iterator neit = _node_to_edges.begin();
+    GraphMap::iterator neit = _node_to_edges.begin();
     for(neit = _node_to_edges.begin();
         neit != _node_to_edges.end();
         neit++) {
@@ -329,7 +329,7 @@ double Network::getCCStdErr() const {
 }
 
 NodeIterator* Network::getNeighborIterator(Node* n) const {
-  map<Node*, EdgeSet>::const_iterator neit = _node_to_edges.find(n);
+  GraphMap::const_iterator neit = _node_to_edges.find(n);
   if( neit == _node_to_edges.end() ) {
     //No such edge:
     return 0;
@@ -344,7 +344,7 @@ NodeIterator* Network::getNeighborIterator(Node* n) const {
 }
 
 Network* Network::getNeighbors(Node* node) const {
-  map<Node*, EdgeSet>::const_iterator it;
+  GraphMap::const_iterator it;
   it = _node_to_edges.find(node);
   Network* net = newNetwork();
   if( it != _node_to_edges.end() ) {
@@ -400,7 +400,7 @@ double Network::getClusterCoefficient() const {
 }
 
 int Network::getDegree(Node* node) const {
-    map<Node*, EdgeSet >::const_iterator i = _node_to_edges.find(node);
+    GraphMap::const_iterator i = _node_to_edges.find(node);
     
     if( i != _node_to_edges.end() ) {
       return i->second.size();
@@ -557,9 +557,7 @@ Edge* Network::getEdgeBetweennessFor(Node* target,
   int mdist = getDistancesFrom(target, distances, weights, leafs);
   //Initialize the edges from the leafs:
   set<Node*>::iterator leaf_it;
-  EdgeSet::iterator e_it;
   Node* tmp_node, *other;
-  map<Node*, EdgeSet>::const_iterator es_it;
   double max_between = 0.0, tmp_between = 0.0;
   Edge* max_edge = 0;
   /**
@@ -571,19 +569,18 @@ Edge* Network::getEdgeBetweennessFor(Node* target,
   for( leaf_it = leafs.begin();
        leaf_it != leafs.end();
        leaf_it++) {
-    es_it = _node_to_edges.find(*leaf_it);
-    for(e_it = es_it->second.begin();
-	e_it != es_it->second.end();
-	e_it++) {
-      other = (*e_it)->getOtherNode( *leaf_it );
+    auto_ptr<EdgeIterator> es_it( getEdgeIterator( *leaf_it ) );
+    while( es_it->moveNext() ) {
+      Edge* this_edge = es_it->current();
+      other = this_edge->getOtherNode( *leaf_it );
       if( leafs.find( other ) == leafs.end() ) {
         //This edge does not go to another leaf:
 	tmp_between = (double)weights[other] /
 		                    (double)weights[*leaf_it];
-	my_between[ *e_it ] = tmp_between;
+	my_between[ this_edge ] = tmp_between;
         if( tmp_between > max_between ) {
           max_between = tmp_between;
-	  max_edge = *e_it;
+	  max_edge = this_edge;
 	}
 	//Climb it in an order.  When we insert we see if
 	//it is new or not:
@@ -609,14 +606,13 @@ Edge* Network::getEdgeBetweennessFor(Node* target,
     above_edges.clear();
     have_all_below = true;
     //Look at all the edges for this node to get the below score
-    es_it = _node_to_edges.find(tmp_node);
-    for(e_it = es_it->second.begin();
-	e_it != es_it->second.end();
-	e_it++) {
-      other = (*e_it)->getOtherNode( tmp_node );
+    auto_ptr<EdgeIterator> es_it( getEdgeIterator( tmp_node ) );
+    while( es_it->moveNext() ) {
+      Edge* this_edge = es_it->current();
+      other = this_edge->getOtherNode( tmp_node );
       if( distances[other] > distances[tmp_node] ) {
         //The neighbor is further from target
-	betit = my_between.find(*e_it);
+	betit = my_between.find(this_edge);
 	if( betit != my_between.end() ) {
 	  //We already have the score for this edge
 	  below_score += betit->second;
@@ -630,13 +626,13 @@ Edge* Network::getEdgeBetweennessFor(Node* target,
       }
       else if( distances[other] < distances[tmp_node] ) {
         //This is an above edge:
-	above_edges.insert( *e_it );
+	above_edges.insert( this_edge );
       }
     }
     if( have_all_below ) {
       //We can compute the betweenness for all above_edges
       double weight_ratio = 0.0;
-      for(e_it = above_edges.begin();
+      for(EdgeSet::iterator e_it = above_edges.begin();
 	  e_it != above_edges.end();
 	  e_it++) {
         //Make sure we don't try to score edges twice
@@ -724,7 +720,7 @@ double Network::getEdgeCC(Edge* e) const {
 
 Network* Network::getEdges(Node* node) const {
   Network* net = newNetwork();
-  map<Node*, EdgeSet>::const_iterator neit = _node_to_edges.find(node);
+  GraphMap::const_iterator neit = _node_to_edges.find(node);
   if( neit != _node_to_edges.end() ) {
     EdgeSet::const_iterator eit;
     for(eit = neit->second.begin();
@@ -752,7 +748,7 @@ Edge* Network::getEdge(Node* from, Node* to) const {
   if( df > dt ) {
     check = to;
   }
-  map<Node*, EdgeSet>::const_iterator it;
+  GraphMap::const_iterator it;
   it = _node_to_edges.find(check);
   const EdgeSet& eds = it->second;
   EdgeSet::const_iterator eit = eds.begin();
@@ -776,7 +772,7 @@ EdgeIterator* Network::getEdgeIterator() const
 
 EdgeIterator* Network::getEdgeIterator(Node* n) const
 {
-  map<Node*, EdgeSet>::const_iterator neit = _node_to_edges.find(n);
+  GraphMap::const_iterator neit = _node_to_edges.find(n);
   if( neit == _node_to_edges.end() ) {
     //No such edge:
     return 0;
@@ -787,7 +783,7 @@ EdgeIterator* Network::getEdgeIterator(Node* n) const
 Edge* Network::getEdgePtr(const Edge& edge) const {
     
     //Find the ptr of the matching edge:
-    map<Node*, EdgeSet>::const_iterator it1, it2;
+    GraphMap::const_iterator it1, it2;
     it1 = _node_to_edges.find(edge.first);
     it2 = _node_to_edges.find(edge.second);
     //Make sure these nodes have some edges:
@@ -1094,7 +1090,7 @@ bool Network::has(const Edge& edge) const {
 }
 
 bool Network::has(Edge* edge) const {
-  map<Node*, EdgeSet>::const_iterator neit = _node_to_edges.find( edge->first );
+  GraphMap::const_iterator neit = _node_to_edges.find( edge->first );
   if( neit != _node_to_edges.end() ) {
     //We have the first node, but do we have the edge:
     return (neit->second.count( edge ) != 0 );
@@ -1291,7 +1287,7 @@ int Network::remove(Edge* e_p) {
 
 int Network::remove(Node* node) {
   int removed_edges = 0;
-  map<Node*, EdgeSet>::iterator ne_it = _node_to_edges.find(node);
+  GraphMap::iterator ne_it = _node_to_edges.find(node);
   if( ne_it != _node_to_edges.end() ) {
     list<INetworkMonitor*>::iterator nm_it;
     //Let everybody know we are removing this node
