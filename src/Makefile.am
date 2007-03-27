@@ -10,6 +10,7 @@ netmodeler_LDADD = libnetmod.la
 lib_LTLIBRARIES = libnetmod.la
 libnetmod_la_SOURCES = amnesiacmessage.cpp amnesiacmessage.h \
 agglompart.h agglompart.cpp \
+addressednode.h addressednode.cpp \
 anycastmessage.cpp \
 anycastmessage.h \
 boundingiterator.h \
@@ -36,6 +37,8 @@ debiannode.cpp \
 debiannode.h \
 debianpackagenode.cpp \
 debianpackagenode.h \
+deetoomessage.h deetoomessage.cpp \
+deetoonetwork.h deetoonetwork.cpp \
 degreelawnetfac.h degreelawnetfac.cpp \
 degreepreferencefunction.h \
 discreterandvar.h \

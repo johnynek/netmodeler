@@ -73,6 +73,12 @@ class DeetooMessage : public Message {
     bool _cache;   //cache or query, cache=true, query=false
     unsigned long int _mid_range;  //(_r0,_r1)/2
     unsigned long int _r0, _r1;
+    /**
+     * Since we implement this recursively, this function allows us to not
+     * have to allocate and delete a new visited network each time.  This
+     * is an optimization for speed and memory
+     */
+    void visit(Node* anode, Network& net_to_visit, DeetooNetwork& visited_net);
   };
 	
 }
