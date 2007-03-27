@@ -33,7 +33,7 @@ const Network::NodePSet Network::_empty_nodeset;
 const Network::EdgeSet Network::_empty_edgeset;
 const Network Network::_empty_net;
 
-map<void*, int> Network::_ref_count;
+Network::CountMap Network::_ref_count;
 
 
 Network::Network()  {
@@ -45,10 +45,12 @@ Network::Network(const Network& net) {
 }
 
 Network::~Network() {
+    DEBUG_MSG("~Network: " << this)
 #ifdef DEBUG
     cout << "In Network::~Network() about to clear()" << endl;
 #endif
     clear();
+    DEBUG_MSG("In Network::~Network() cleared()")
 }
 
 Network::Network(istream& input) {
@@ -157,8 +159,13 @@ void Network::clear() {
     cout << "About to decrement all edges" << endl;
 #endif
     auto_ptr<EdgeIterator> ei( getEdgeIterator() );
+    DEBUG_MSG("Got edgeiterator");
     while(ei->moveNext()) {
+      DEBUG_MSG("get current:")
       Edge* e = ei->current();
+#ifdef DEBUG
+      cout << "Decrementing: " << e << endl;
+#endif
       decrementRefCount(e);
     }
     _node_to_edges.clear();
@@ -218,7 +225,7 @@ Network* Network::clone() const {
 
 int Network::decrementvRefCount(void* p) {
     int ret = -1;
-    map<void*, int>::iterator ref_it = _ref_count.find(p);
+    CountMap::iterator ref_it = _ref_count.find(p);
     if( ref_it != _ref_count.end() ) {
       ref_it->second = ref_it->second - 1;
       ret = ref_it->second;
@@ -764,9 +771,12 @@ Edge* Network::getEdge(Node* from, Node* to) const {
 EdgeIterator* Network::getEdgeIterator() const
 {
   Network::NetEdgeIterator* ei = new Network::NetEdgeIterator();
+  DEBUG_MSG("Made NetEdgeIterator")
   ei->_begin = _node_to_edges.begin();
   ei->_end = _node_to_edges.end();
+  DEBUG_MSG("set STL iterators")
   ei->reset();
+  DEBUG_MSG("reset")
   return ei;
 }
 
@@ -777,7 +787,7 @@ EdgeIterator* Network::getEdgeIterator(Node* n) const
     //No such edge:
     return 0;
   }
-  return new StlIterator<std::set, Edge*>(neit->second);
+  return new ContainerIterator<EdgeSet>(neit->second);
 }
 
 Edge* Network::getEdgePtr(const Edge& edge) const {
@@ -1106,7 +1116,7 @@ bool Network::has(Node* node) const {
 }
 
 int Network::incrementvRefCount(void* p) {
-    map<void*, int>::iterator ref_it = _ref_count.find(p);
+    CountMap::iterator ref_it = _ref_count.find(p);
     if( ref_it != _ref_count.end() ) {
       if( ref_it->second == 0 ) { cerr << "going from 0 -> 1 "<< p << endl; } 
       ref_it->second = ref_it->second + 1;
@@ -1371,6 +1381,7 @@ int Network::removeAndCluster(Node* n) {
 }
 
 bool Network::operator<(const Network& aNet) const {
+    if( this == &aNet ) { return false; }
     //Make sure networks with smaller nodes are <
     if( getNodeSize() != aNet.getNodeSize() ) {
         return (getNodeSize() < aNet.getNodeSize());
@@ -1383,8 +1394,27 @@ bool Network::operator<(const Network& aNet) const {
     //If two networks are the same size,
     //but have different set of nodes, let the STL sort it out:
     if( _node_to_edges != aNet._node_to_edges ) {
-        return (_node_to_edges < aNet._node_to_edges );
+      auto_ptr<NodeIterator> ni1( getNodeIterator() );
+      auto_ptr<NodeIterator> ni2( aNet.getNodeIterator() );
+      while( ni1->moveNext() && ni2->moveNext() ) {
+        Node* n1 = ni1->current();
+        Node* n2 = ni2->current();
+        if( n1 != n2 ) {
+          return n1 < n2;
+        }
+      }
+      auto_ptr<EdgeIterator> ei1( getEdgeIterator() );
+      auto_ptr<EdgeIterator> ei2( aNet.getEdgeIterator() );
+      while( ei1->moveNext() && ei2->moveNext() ) {
+        Edge* e1 = ei1->current();
+        Edge* e2 = ei2->current();
+        if( e1 != e2 ) {
+          return e1 < e2;
+        }
+      }
+
     }
+    //I guess these are equal
     return false;
 }
 
@@ -1687,7 +1717,12 @@ bool Network::NetEdgeIterator::moveNext()
 void Network::NetEdgeIterator::reset()
 {
   _nit = _begin;
-  _eit = _nit->second.begin();
+  if( _nit != _end ) {
+    _eit = _nit->second.begin();
+  }
+  else {
+    //we don't need to worry, moveNext won't ever move next 
+  }
   _called_movenext = false;
 }
 

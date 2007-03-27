@@ -55,7 +55,8 @@ namespace Starsky
        */
       double TrustMatrixElement(Node* i, Node* j);
 
-      double TrustMatrixElement(Node* i, Node* j, RealContentNetwork* rc_net, std::set<Node*> pre_trusted);
+      double TrustMatrixElement(Node* i, Node* j, RealContentNetwork* rc_net,
+                                Network::NodePSet pre_trusted);
      
       /* Writes the trust transition probability matrix to ascii file(s) 
        * 1 matrix row per line
@@ -76,13 +77,13 @@ namespace Starsky
        * @param eps the power iteration method will stop once the delta is less than eps
        * @return the principal eigenvector of the Markov chain
        */
-      std::vector<double>  getPrincipalEigVector(std::vector<Node*> matrix_order, std::set<Node*> pre_trusted,
+      std::vector<double>  getPrincipalEigVector(std::vector<Node*> matrix_order, Network::NodePSet pre_trusted,
 					    RealContentNetwork* rc_net, const double eps);     
 
       /** 
        * Same as the above functioin, but calculation is done in the log domain
        */
-      std::vector<double>  getPrincipalEigVectorLog(std::vector<Node*> matrix_order, std::set<Node*> pre_trusted, const double eps);      
+      std::vector<double>  getPrincipalEigVectorLog(std::vector<Node*> matrix_order, Network::NodePSet pre_trusted, const double eps);      
 
       double logadd(double num1, double num2);
 

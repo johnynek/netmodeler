@@ -24,6 +24,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #define HIDE_STL
 
+//#define USE_HASH
+
+#ifdef USE_HASH
+#include <ext/hash_map>
+#include <ext/hash_set>
+#include <ptr_hash.h>
+#endif
+
 #include "node.h"
 #include "edge.h"
 #include "iterator.h"
@@ -103,6 +111,8 @@ class Network {
    * edge between nodes, in other cases not.  By changing this typedef
    * from multiset to set, everything else should work.
    */
+
+#ifndef USE_HASH
 	///only to make life easy
         typedef std::set<Node*> NodePSet;	
         //typedef std::multiset<Edge> EdgeSet;
@@ -110,6 +120,13 @@ class Network {
 	typedef std::set<Edge*> EdgeSet;
         //This is the main storage for the network
         typedef std::map<Node*, EdgeSet> GraphMap;
+        typedef std::map<void*, int> CountMap;
+#else
+        typedef __gnu_cxx::hash_set<Node*, ptr_hash<Node> > NodePSet;	
+	typedef __gnu_cxx::hash_set<Edge*, ptr_hash<Edge> > EdgeSet;
+        typedef __gnu_cxx::hash_map<Node*, EdgeSet, ptr_hash<Node> > GraphMap;
+        typedef __gnu_cxx::hash_map<void*, int, ptr_hash<void> > CountMap;
+#endif
 	
 	/**
 	 * @param edge an edge to add.  This just allocates memory for a
@@ -549,7 +566,7 @@ class Network {
 	    /**
 	     * Here is the table of refernce counts
 	     */
-	    static std::map<void*, int> _ref_count;
+	    static CountMap _ref_count;
 
 	    /**
 	     * Here are some inner classes to implement some interators

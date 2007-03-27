@@ -71,6 +71,49 @@ class StlIterator : public Iterator<T> {
 };
 
 /**
+ * This is an Iterator for any STL Container model.
+ * @see http://www.sgi.com/tech/stl/Container.html
+ */
+template<class Cont>
+class ContainerIterator : public Iterator< typename Cont::value_type > {
+  public:
+    ContainerIterator(const Cont& con) : _con(con) {
+      reset();
+    }
+
+    ContainerIterator<Cont>* clone() {
+      return new ContainerIterator<Cont>(_con);
+    }
+    
+    const typename Cont::value_type& current() {
+      return (*_it);
+    }
+    
+    bool moveNext() {
+      if( _it == _con.end() ) {
+        return false;
+      }
+      if( _moved_to_first ) {
+        _it++;
+      }
+      else {
+        _moved_to_first = true;
+      }
+      return ( _it != _con.end() );
+    }
+    
+    void reset() {
+      _moved_to_first = false;
+      _it = _con.begin();
+    }
+
+  protected:
+    typename Cont::const_iterator _it;
+    const Cont& _con;
+    bool _moved_to_first;
+};
+
+/**
  * This is an Iterator that wraps standard STL containers.
  * This iterator totally "owns" the container, and deletes the
  * pointer when the last clone is deleted.

@@ -58,7 +58,7 @@ double TrustGraphMatrix::TrustMatrixElement(Node* i, Node* j)
   return prob;
 }
 
-double TrustGraphMatrix::TrustMatrixElement(Node* i, Node* j, RealContentNetwork* rc_net, set<Node*> pre_trusted)
+double TrustGraphMatrix::TrustMatrixElement(Node* i, Node* j, RealContentNetwork* rc_net, Network::NodePSet pre_trusted)
 {
   double prob = 0.0;
   std::map<Node*, double> ltv = rc_net->obtainRealNode(i)->getLTV();
@@ -108,7 +108,7 @@ void TrustGraphMatrix::TrustMatrixToAsciiFile(
 }
 
 vector<double>  TrustGraphMatrix::getPrincipalEigVector(vector<Node*> matrix_order, 
-							set<Node*> pre_trusted, RealContentNetwork* rc_net, const double eps)
+							Network::NodePSet pre_trusted, RealContentNetwork* rc_net, const double eps)
 {
   int sz = matrix_order.size();
   double d = 0.9;  //corresponds to the damping factor in google pagerank computation
@@ -188,7 +188,7 @@ vector<double>  TrustGraphMatrix::getPrincipalEigVector(vector<Node*> matrix_ord
   return new_vec;
 } 
 
-vector<double>  TrustGraphMatrix::getPrincipalEigVectorLog(vector<Node*> matrix_order, set<Node*> pre_trusted, const double eps)
+vector<double>  TrustGraphMatrix::getPrincipalEigVectorLog(vector<Node*> matrix_order, Network::NodePSet pre_trusted, const double eps)
 {
   int sz = matrix_order.size();
   vector<Node*>::const_iterator rows;
