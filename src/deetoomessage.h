@@ -78,7 +78,7 @@ class DeetooMessage : public Message {
      * have to allocate and delete a new visited network each time.  This
      * is an optimization for speed and memory
      */
-    void visit(Node* anode, Network& net_to_visit, DeetooNetwork& visited_net);
+    void visit(AddressedNode* anode, Network& net_to_visit, DeetooNetwork& visited_net);
   };
 	
 }

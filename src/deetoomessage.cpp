@@ -45,13 +45,13 @@ bool DeetooMessage::inRange(AddressedNode* inode)
 DeetooNetwork* DeetooMessage::visit(Node* n, Network& net)
 {
   DeetooNetwork* d2n = dynamic_cast<DeetooNetwork*>( net.newNetwork() );
-  visit(n, net, *d2n);
+  AddressedNode* start = dynamic_cast<AddressedNode*> (n);      //start node for broadcasting 
+  visit(start, net, *d2n);
   return d2n;
 }
 
-void DeetooMessage::visit(Node* n, Network& net, DeetooNetwork& visited_net)
+void DeetooMessage::visit(AddressedNode* start, Network& net, DeetooNetwork& visited_net)
 {
-  AddressedNode* start = dynamic_cast<AddressedNode*> (n);      //start node for broadcasting 
   //cout << "start node: " << start->getAddress(_cache) << endl;
   // If start node is not in the range(_r0, _r1), find the closest neighbor to lower bound in range.
   if ( (!inRange(start) ) )  //node is not in this range
@@ -114,7 +114,8 @@ void DeetooMessage::visit(Node* n, Network& net, DeetooNetwork& visited_net)
   std::map<unsigned long int, AddressedNode*>::iterator it_low;
   for (it_low=lower_neighbors.begin(); it_low!=lower_neighbors.end(); it_low++)
   {
-        visited_net.add(it_low->second);
+        //We don't need to add the node, it is also done when we add an edge
+        //visited_net.add(it_low->second);
 	visited_net.add(Edge(start, it_low->second) );
 	DeetooMessage m_low = DeetooMessage(last_lower, it_low->first, _cache);
 	//Here is the recursion.  Note we don't make a new network
@@ -138,7 +139,8 @@ void DeetooMessage::visit(Node* n, Network& net, DeetooNetwork& visited_net)
   std::map<unsigned long int, AddressedNode*>::reverse_iterator it_up;
   for (it_up=upper_neighbors.rbegin(); it_up!=upper_neighbors.rend(); it_up++)
   {
-          visited_net.add(it_up->second);
+        //We don't need to add the node, it is also done when we add an edge
+          //visited_net.add(it_up->second);
 	  visited_net.add(Edge(start, it_up->second) );
 	  DeetooMessage m_up = DeetooMessage(it_up->first, last_upper, _cache);
 	  //Here is the recursion.  Note we don't make a new network

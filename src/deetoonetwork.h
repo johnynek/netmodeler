@@ -71,18 +71,19 @@ class DeetooNetwork : public Network {
 	/**
 	 *Make ring connection between nodes @param nodeMap
 	 */
-	void formRing(std::map<unsigned long int, AddressedNode*> nodeMap);
+	void formRing(const std::map<unsigned long int, AddressedNode*>& nodeMap);
 	/**
 	 *@param cache if cache net, true, else if query net, false
 	 *make shortcut connection 
 	 */
-	void makeShortcutConnection(std::map<unsigned long int, AddressedNode*> nd_map, bool cache);
+	void makeShortcutConnection(const std::map<unsigned long int, AddressedNode*>& nd_map,
+                                    bool cache);
 	/**
 	 * @param n_map node map
 	 * @param t_addr calculated target address for shortcut
 	 * return the closest neighbor node to the t_addr
 	 */
-	AddressedNode* findShortcutNode(std::map<unsigned long int, AddressedNode*> n_map, unsigned long int t_addr);
+	AddressedNode* findShortcutNode(const std::map<unsigned long int, AddressedNode*>& n_map, unsigned long int t_addr);
 	/**
 	 * calculate the distance between addr_a and addr_b,
 	 * and return the distance
@@ -96,7 +97,7 @@ class DeetooNetwork : public Network {
 	/**
 	 * @param nd_map, create another network for query with query address in nd_map
 	 */
-	void createQueryNet(std::map<unsigned long int, AddressedNode*> nd_map);
+	void createQueryNet(const std::map<unsigned long int, AddressedNode*>& nd_map);
        /**
 	* @param cq_size column or row size for cache or query
 	* returns lower and upper bound addresses within cacheing or qurying range

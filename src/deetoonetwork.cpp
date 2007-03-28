@@ -31,11 +31,11 @@ DeetooNetwork::DeetooNetwork(int nodes, Ran1Random& r) : _r_short(r) {}
 
 #define AMAX 65536
 #define WMAX 4294967295
-void DeetooNetwork::formRing(std::map<unsigned long int, AddressedNode*> nodeMap) {
+void DeetooNetwork::formRing(const std::map<unsigned long int, AddressedNode*>& nodeMap) {
   AddressedNode* first = nodeMap.begin()->second;
   AddressedNode *tmp, *last = first;
   add(first);
-  std::map<unsigned long int, AddressedNode*>::iterator itNodeMap;
+  std::map<unsigned long int, AddressedNode*>::const_iterator itNodeMap;
   for (itNodeMap = nodeMap.begin(); itNodeMap != nodeMap.end(); itNodeMap++) {
     if (itNodeMap == nodeMap.begin() ) {
       //do nothing. it is already added before for loop.
@@ -51,7 +51,7 @@ void DeetooNetwork::formRing(std::map<unsigned long int, AddressedNode*> nodeMap
   add(Edge(last,first) );
 }
 
-void DeetooNetwork::makeShortcutConnection(std::map<unsigned long int, AddressedNode*> nd_map, bool cache) {
+void DeetooNetwork::makeShortcutConnection(const std::map<unsigned long int, AddressedNode*>& nd_map, bool cache) {
   auto_ptr<NodeIterator> ni( getNodeIterator() );
   while(ni->moveNext() ) {
     AddressedNode* nodei = dynamic_cast<AddressedNode*> (ni->current() );
@@ -90,13 +90,13 @@ void DeetooNetwork::create(int n) {
     //printNetInfo(true);
 }
 
-void DeetooNetwork::createQueryNet(std::map<unsigned long int, AddressedNode*> nd_map)
+void DeetooNetwork::createQueryNet(const std::map<unsigned long int, AddressedNode*>& nd_map)
 {
     //using addresses in query space, make node map for query.
     query_nm.clear();
     unsigned long int query_addr=0;
     AddressedNode* q_node;
-    std::map<unsigned long int, AddressedNode*>::iterator itNd_map;
+    std::map<unsigned long int, AddressedNode*>::const_iterator itNd_map;
     for (itNd_map = nd_map.begin(); itNd_map != nd_map.end(); itNd_map++)
     {
 	query_addr = (itNd_map->second)->getAddress(false);
@@ -129,10 +129,10 @@ AddressedNode* DeetooNetwork::getNodeFromAddress(const int addr) const {
 // Find the shortcut node
 // we have target address, let's find the nearest node 
 // to the target address
-AddressedNode* DeetooNetwork::findShortcutNode(std::map<unsigned long int, AddressedNode*> n_map, unsigned long int t_addr) {
+AddressedNode* DeetooNetwork::findShortcutNode(const std::map<unsigned long int, AddressedNode*>& n_map, unsigned long int t_addr) {
     AddressedNode* scNode;
-    std::map<unsigned long int, AddressedNode*>::iterator it_upper = n_map.upper_bound(t_addr);
-    std::map<unsigned long int, AddressedNode*>::iterator it_upper1 = it_upper;
+    std::map<unsigned long int, AddressedNode*>::const_iterator it_upper = n_map.upper_bound(t_addr);
+    std::map<unsigned long int, AddressedNode*>::const_iterator it_upper1 = it_upper;
     it_upper1--;
     if (it_upper == n_map.begin() || it_upper == n_map.end() )
     {

@@ -618,6 +618,8 @@ class Network {
 	        virtual void reset();
 		friend class Network;
 	      protected:
+                NeighborIterator();
+                NeighborIterator(Node* neighbors_of, const EdgeSet& edges);
 	        Node* _neighbors_of;  //This is the node that we are looking at neighbors of
 		EdgeSet::const_iterator _eit; //Iterator for the edges of this node
 		EdgeSet::const_iterator _beg;

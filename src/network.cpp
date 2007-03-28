@@ -342,12 +342,7 @@ NodeIterator* Network::getNeighborIterator(Node* n) const {
     return 0;
   }
   
-  Network::NeighborIterator* ni = new NeighborIterator();
-  ni->_beg = neit->second.begin();
-  ni->_end = neit->second.end();
-  ni->_neighbors_of = n;
-  ni->reset();
-  return ni;
+  return new NeighborIterator(n, neit->second );
 }
 
 Network* Network::getNeighbors(Node* node) const {
@@ -443,18 +438,22 @@ int Network::getDistancesFrom(Node* start,
   
   while( to_visit.size() > 0 ) {
     tmp_node = to_visit.front();
-    distance = distances[tmp_node] + 1;
+    int tmp_node_distance = distances[tmp_node];
+    distance = tmp_node_distance + 1;
     weight = weights[tmp_node];
     //Just stop if the distance is more than we should go
     if( is_max_depth && (distance > max_depth) ) { break; }
     neighbor_max_dist = 0;
-    auto_ptr<NodeIterator> neighit( getNeighborIterator(tmp_node) );
-    while( neighit->moveNext() ) {
-      Node* n = neighit->current();
+    NeighborIterator neighit(tmp_node, _node_to_edges.find(tmp_node)->second );
+    while( neighit.moveNext() ) {
+      Node* n = neighit.current();
       dit = distances.find( n );
       if( dit == distances.end() ) {
 	//We have not yet visited this node
-	distances[n] = distance;
+	pair< map<Node*, int>::iterator, bool> result;
+        result = distances.insert( pair<Node*, int>(n, distance) );
+        //Update dit:
+        dit = result.first;
 	weights[n] = weight;
 	to_visit.push( n );
 	//update the maximum
@@ -464,8 +463,9 @@ int Network::getDistancesFrom(Node* start,
         //There is more than one way to reach this node:
 	weights[n] += weight;
       }
-      if( neighbor_max_dist < distances[n] ) {
-        neighbor_max_dist = distances[n];
+      //We know dit:
+      if( neighbor_max_dist < dit->second ) {
+        neighbor_max_dist = dit->second;
       }
     }
     /**
@@ -475,7 +475,7 @@ int Network::getDistancesFrom(Node* start,
      * If they are all less than or equal to distance from tmp_node,
      * then tmp_node must be a leaf node
      */
-    if( neighbor_max_dist <= distances[tmp_node] ) {
+    if( neighbor_max_dist <= tmp_node_distance ) {
       leaf_nodes.insert(tmp_node);
     }
     //Remove the first element in the list
@@ -1123,7 +1123,7 @@ int Network::incrementvRefCount(void* p) {
       return ref_it->second;
     }
     else {
-      _ref_count[p] = 1;
+      _ref_count.insert( pair<void*, int>(p, 1) );
       return 1;
     }
     return -1;
@@ -1724,6 +1724,17 @@ void Network::NetEdgeIterator::reset()
     //we don't need to worry, moveNext won't ever move next 
   }
   _called_movenext = false;
+}
+
+Network::NeighborIterator::NeighborIterator(Node* n, const EdgeSet& edges) {
+  _beg = edges.begin();
+  _end = edges.end();
+  _neighbors_of = n;
+  reset();
+}
+
+Network::NeighborIterator::NeighborIterator() {
+
 }
 
 NodeIterator* Network::NeighborIterator::clone()
