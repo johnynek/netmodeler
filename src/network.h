@@ -24,6 +24,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #define HIDE_STL
 
+/**
+ * This turns on using hash_map and hash_set rather than map and set.
+ * we use the hash function defined in ptr_hash.  So far, benchmarks show
+ * this approach to be slower and use more memory than using map.  Perhaps
+ * we need a better hash function, perhaps GCC's hash containers are not
+ * good, it is really not clear.  I would expect hash_map and hash_set to
+ * be much faster, especially for large networks, but we have yet to see
+ * any such gains.
+ */
 //#define USE_HASH
 
 #ifdef USE_HASH

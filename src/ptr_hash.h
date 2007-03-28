@@ -27,7 +27,7 @@ template<typename T>
 struct ptr_hash {
   
   size_t operator()(const T* val) const {
-    return (size_t)val;
+    return (size_t)((size_t)val >> 2);
   }
 
 };
