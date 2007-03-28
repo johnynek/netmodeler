@@ -143,6 +143,10 @@ void Network::add(INetworkMonitor* nm)
 
 void Network::clear() {
     //Delete all the memory
+#ifdef DEBUG
+    cout << "About to decrement all edges" << endl;
+#endif
+    clearEdges();
 #ifdef DEBUG 
     cout << "About to decrement all nodes" << endl;
 #endif
@@ -153,20 +157,6 @@ void Network::clear() {
 #endif
       Node* node = ni->current();
       decrementRefCount(node);
-    }
-
-#ifdef DEBUG
-    cout << "About to decrement all edges" << endl;
-#endif
-    auto_ptr<EdgeIterator> ei( getEdgeIterator() );
-    DEBUG_MSG("Got edgeiterator");
-    while(ei->moveNext()) {
-      DEBUG_MSG("get current:")
-      Edge* e = ei->current();
-#ifdef DEBUG
-      cout << "Decrementing: " << e << endl;
-#endif
-      decrementRefCount(e);
     }
     _node_to_edges.clear();
 }
@@ -202,6 +192,7 @@ void Network::addJoiningEdgesFrom(const Network* net)
 
 void Network::clearEdges() {
     GraphMap::iterator neit = _node_to_edges.begin();
+    EdgeSet edges;
     for(neit = _node_to_edges.begin();
         neit != _node_to_edges.end();
         neit++) {
@@ -209,11 +200,17 @@ void Network::clearEdges() {
       for( eit = neit->second.begin();
            eit != neit->second.end();
            eit++ ) {
-        //Decrement this edge:
-	decrementRefCount(*eit);
+        edges.insert( *eit );
       }
       //Clear this set of edges:
       neit->second.clear();
+    }
+    //Now actually remove the edges:
+    EdgeSet::iterator eit;
+    for( eit = edges.begin();
+         eit != edges.end();
+         eit++ ) {
+      decrementRefCount(*eit);
     }
 }
 
@@ -770,14 +767,7 @@ Edge* Network::getEdge(Node* from, Node* to) const {
 
 EdgeIterator* Network::getEdgeIterator() const
 {
-  Network::NetEdgeIterator* ei = new Network::NetEdgeIterator();
-  DEBUG_MSG("Made NetEdgeIterator")
-  ei->_begin = _node_to_edges.begin();
-  ei->_end = _node_to_edges.end();
-  DEBUG_MSG("set STL iterators")
-  ei->reset();
-  DEBUG_MSG("reset")
-  return ei;
+  return new Network::NetEdgeIterator(_node_to_edges);
 }
 
 EdgeIterator* Network::getEdgeIterator(Node* n) const
@@ -1626,6 +1616,16 @@ void Network::NetNodeIterator::reset()
 }
 
 
+Network::NetEdgeIterator::NetEdgeIterator(const GraphMap& m) {
+  _begin = m.begin();
+  _end = m.end();
+  reset();
+}
+
+
+Network::NetEdgeIterator::NetEdgeIterator() {
+}
+
 EdgeIterator* Network::NetEdgeIterator::clone()
 {
   NetEdgeIterator* ne = new NetEdgeIterator();
@@ -1652,6 +1652,10 @@ Edge* const & Network::NetEdgeIterator::current()
 
 bool Network::NetEdgeIterator::moveNext()
 {
+  if( _begin == _end ) {
+    //This is empty
+    return false;
+  }
   DEBUG_MSG("Start of MoveNext");
   if( false == _called_movenext ) {
     DEBUG_MSG("not called movenext");
