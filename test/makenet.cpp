@@ -50,5 +50,7 @@ int main(int argc, char* argv[])
   }
 #endif
   delete nf;
+  cout << "#About to delete" << endl;
   delete net;
+  cout << "#Done" << endl;
 }
