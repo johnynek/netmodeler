@@ -196,12 +196,7 @@ void Network::clearEdges() {
     for(neit = _node_to_edges.begin();
         neit != _node_to_edges.end();
         neit++) {
-      EdgeSet::iterator eit;
-      for( eit = neit->second.begin();
-           eit != neit->second.end();
-           eit++ ) {
-        edges.insert( *eit );
-      }
+      edges.insert( neit->second.begin(), neit->second.end() );
       //Clear this set of edges:
       neit->second.clear();
     }
@@ -221,18 +216,11 @@ Network* Network::clone() const {
 }
 
 int Network::decrementvRefCount(void* p) {
-    int ret = -1;
     CountMap::iterator ref_it = _ref_count.find(p);
-    if( ref_it != _ref_count.end() ) {
-      ref_it->second = ref_it->second - 1;
-      ret = ref_it->second;
-      if( ret == 0 ) {
-	_ref_count.erase( ref_it );
-      }
-    }
-    else {
-      cerr << "tried to decrement: " << p << " past 0" << endl;
-    }
+    
+    ref_it->second = ref_it->second - 1;
+    int ret = ref_it->second;
+    if( ret == 0 ) { _ref_count.erase( ref_it ); }
     return ret;
 }
 
@@ -451,7 +439,7 @@ int Network::getDistancesFrom(Node* start,
         result = distances.insert( pair<Node*, int>(n, distance) );
         //Update dit:
         dit = result.first;
-	weights[n] = weight;
+	weights.insert( pair<Node*, int>(n, weight) );
 	to_visit.push( n );
 	//update the maximum
 	max_dist = (max_dist < distance ) ? distance : max_dist;
@@ -1108,7 +1096,9 @@ bool Network::has(Node* node) const {
 int Network::incrementvRefCount(void* p) {
     CountMap::iterator ref_it = _ref_count.find(p);
     if( ref_it != _ref_count.end() ) {
-      if( ref_it->second == 0 ) { cerr << "going from 0 -> 1 "<< p << endl; } 
+      //This was here for debugging, but valgrind thinks everything is fine,
+      //and it was never triggered, so don't bother:
+      //if( ref_it->second == 0 ) { cerr << "going from 0 -> 1 "<< p << endl; } 
       ref_it->second = ref_it->second + 1;
       return ref_it->second;
     }
