@@ -28,12 +28,14 @@ using namespace std;
 
 DeetooMessage::DeetooMessage(unsigned long int r0, unsigned long int r1, bool cache) : _r0(r0), _r1(r1), _cache(cache)
 {
-  if (r0 >= r1) {
-	cerr << "starting point should be less than ending point" << endl;
+  if (r0 > r1) {
+	cerr << "starting point should be less than ending point" << endl
+		<< "(" << _r0 << ", " << _r1 << ")" << endl;
   }
   _mid_range = (unsigned long int)( ( (double)(_r0)+(double)(_r1) )/(double)(2) );
   out_edge_count = 1;
   init_node = NULL;
+  _dist_to_lower = 4294967295;
 }
 
 bool DeetooMessage::inRange(AddressedNode* inode)
@@ -57,8 +59,7 @@ void DeetooMessage::visit(AddressedNode* start, Network& net, DeetooNetwork& vis
   if ( (!inRange(start) ) )  //node is not in this range
   {
       AddressedNode* next_node=NULL;
-      unsigned long int dist_to_lower = 0;
-      bool first_iteration =true;
+      unsigned long int current_dist_to_lower = _dist_to_lower;
       auto_ptr<NodeIterator> ni(net.getNeighborIterator(start) );
       while (ni->moveNext()  )
       {
@@ -69,14 +70,16 @@ void DeetooMessage::visit(AddressedNode* start, Network& net, DeetooNetwork& vis
 	  }
 	  else {
 	      unsigned long int dist = c_node->getDistanceTo(_mid_range, _cache) ;
-              if ( first_iteration || dist < dist_to_lower )
+              if ( dist < _dist_to_lower )
 	      {
                   next_node = c_node;
-	          dist_to_lower = dist;
-	          first_iteration = false;
+	          _dist_to_lower = dist;
 	      }
 	  }
       }	
+      if (current_dist_to_lower == _dist_to_lower) {
+	  return;
+      }
       //We have the closest neighbor to lower, start over there
       out_edge_count++;
       return visit(next_node, net, visited_net);

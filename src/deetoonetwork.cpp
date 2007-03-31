@@ -211,7 +211,7 @@ std::pair<unsigned long int, unsigned long int> DeetooNetwork::getRange(double c
   //cout << "set ranges==================" << endl;
   int start_cr = (int)(_r_short.getDouble01()*(double)(AMAX - cq_size - 1 ) );
   double end_cr = (double)start_cr + cq_size-1;
- if (end_cr > (AMAX-1) ) {
+ if (end_cr >= (AMAX-1) ) {
      range1 = WMAX;
      range0 = (unsigned long int)( ( (AMAX-1) - cq_size +1 ) * AMAX);
  } 
@@ -219,6 +219,5 @@ std::pair<unsigned long int, unsigned long int> DeetooNetwork::getRange(double c
      range0 = start_cr * AMAX;
      range1 = (unsigned long int) ( (end_cr * AMAX) + AMAX -1 );
  }
- //cout << "range0: " << range0 << ", range1: " << range1 << endl; 
   return make_pair(range0, range1);
 }

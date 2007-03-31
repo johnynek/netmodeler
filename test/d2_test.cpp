@@ -76,6 +76,7 @@ int main(int argc, char *argv[])
 	    //calculate starting column
 	    std::pair<unsigned long int, unsigned long int> c_ranges = cacheNet_ptr->getRange(cqsize);
 	    unsigned long int rg_start = c_ranges.first, rg_end = c_ranges.second;
+	    //cout << "in d2_test(cache): (r0,r1): (" << rg_start << ", " << rg_end << ")" << endl; 
 	    //make subnet which contains all nodes in the range
 	    DeetooNetwork* cacheNet = cacheNet_ptr.get();
 	    auto_ptr<DeetooMessage> cache_m ( new DeetooMessage(rg_start, rg_end, true) );
@@ -147,13 +148,14 @@ int main(int argc, char *argv[])
 	        //set starting point
 	        AddressedNode* query_start = dynamic_cast<AddressedNode*> (uns_start.select() );
 	        std::pair<unsigned long int, unsigned long int> q_ranges = cacheNet_ptr->getRange(cqsize);
-	        unsigned long int rg_start = q_ranges.first, rg_end = q_ranges.second;
+	        unsigned long int q_rg_start = q_ranges.first, q_rg_end = q_ranges.second;
+	        //cout << "in d2_test(query): (r0,r1): (" << q_rg_start << ", " << q_rg_end << ")" << endl; 
 	        //cout << "range start: " << rg_start << "\trange end: " << rg_end << endl;
 	        //which item do you want to retrieve?
 		std::string query = *item_it;
 
 		//cout << " current node's address:\t " << query_start->getAddress(false) << endl;
-	        auto_ptr<DeetooMessage> query_msg ( new DeetooMessage(rg_start, rg_end, false) );
+	        auto_ptr<DeetooMessage> query_msg ( new DeetooMessage(q_rg_start, q_rg_end, false) );
 		auto_ptr<DeetooNetwork> visited_net( query_msg->visit(query_start, *queryNet) );
 		
 	        int q_in_depth = visited_net->getDistance(query_msg->init_node);
