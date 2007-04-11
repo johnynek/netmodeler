@@ -117,14 +117,16 @@ void DeetooMessage::visit(AddressedNode* start, Network& net, DeetooNetwork& vis
   std::map<unsigned long int, AddressedNode*>::iterator it_low;
   for (it_low=lower_neighbors.begin(); it_low!=lower_neighbors.end(); it_low++)
   {
-        //We don't need to add the node, it is also done when we add an edge
-        //visited_net.add(it_low->second);
-	visited_net.add(Edge(start, it_low->second) );
-	DeetooMessage m_low = DeetooMessage(last_lower, it_low->first, _cache);
-	//Here is the recursion.  Note we don't make a new network
-	m_low.visit(it_low->second, net, visited_net);
-	last_lower = it_low->first +1;
-	last_node_low = it_low->second;
+	if ( _r0 != _r1) {
+          //We don't need to add the node, it is also done when we add an edge
+          //visited_net.add(it_low->second);
+	  visited_net.add(Edge(start, it_low->second) );
+	  DeetooMessage m_low = DeetooMessage(last_lower, it_low->first, _cache);
+	  //Here is the recursion.  Note we don't make a new network
+	  m_low.visit(it_low->second, net, visited_net);
+	  last_lower = it_low->first +1;
+	  last_node_low = it_low->second;
+	}
   }
   /**
    * I ignore the last bit since its direct neighbor, there's no node between start node and direct node.
@@ -142,14 +144,16 @@ void DeetooMessage::visit(AddressedNode* start, Network& net, DeetooNetwork& vis
   std::map<unsigned long int, AddressedNode*>::reverse_iterator it_up;
   for (it_up=upper_neighbors.rbegin(); it_up!=upper_neighbors.rend(); it_up++)
   {
+    if (_r0 != _r1) {
         //We don't need to add the node, it is also done when we add an edge
-          //visited_net.add(it_up->second);
-	  visited_net.add(Edge(start, it_up->second) );
-	  DeetooMessage m_up = DeetooMessage(it_up->first, last_upper, _cache);
-	  //Here is the recursion.  Note we don't make a new network
-	  m_up.visit(it_up->second, net, visited_net);
-	  last_upper = it_up->first -1;
-	  last_node_up = it_up->second;
+        //visited_net.add(it_up->second);
+	visited_net.add(Edge(start, it_up->second) );
+	DeetooMessage m_up = DeetooMessage(it_up->first, last_upper, _cache);
+	//Here is the recursion.  Note we don't make a new network
+	m_up.visit(it_up->second, net, visited_net);
+	last_upper = it_up->first -1;
+	last_node_up = it_up->second;
+    }
   }
   /**
    * I ignore the last bit since its direct neighbor, there's no node between start node and direct node.

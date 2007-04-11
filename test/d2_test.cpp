@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
     //for (int nodes = 100; nodes <= max_node; nodes = nodes*10) {
 	//cqsize determines how many rows or columns to multicast.
 	//cqsize = sqrt(B) / sqrt(N), where B is total space m*m
-	double cqsize = (double) (ADDR_MAX / (double)sqrt( nodes ) * alpha);
+	double cqsize = (double) ( (ADDR_MAX / (double)sqrt( nodes ) ) * sqrt(alpha) ); 
 	//Make DeetooNetwork for cache.
 	auto_ptr<DeetooNetwork> cacheNet_ptr( new DeetooNetwork(nodes, ran_no) );
 	cacheNet_ptr->create(nodes);
@@ -198,7 +198,7 @@ int main(int argc, char *argv[])
         result[nodes] = make_pair(hit_rate, ave_msgs);	
 	items.clear();
         //cout << "#nodes:\t" << "hit rate:\t" << "ave msgs:\t" << "ave_qEdge:\t" << "hops/hit_rate:\t" << "hitNodes:\t" << "cNodes:\t" << "cEdges:" << endl;
-	cout << nodes << "\t" << hit_rate << "\t" << ave_msgs << "\t" << ave_qEdges << "\t" << hops_hit << "\t" << ave_hit_nodes << "\t" << avg_c_nodes << "\t" << avg_c_edges << "\t" << avg_c_in_depth << "\t" << avg_c_depth << "\t" << avg_q_in_depth << "\t" << avg_q_depth << endl;
+	cout << nodes << "\t" << hit_rate << "\t" << ave_msgs << "\t" << ave_qEdges << "\t" << ave_qEdges+avg_q_depth-avg_q_in_depth << "\t" << hops_hit << "\t" << ave_hit_nodes << "\t" << avg_c_nodes << "\t" << avg_c_edges << "\t" << avg_c_edges+avg_c_depth-avg_c_in_depth <<  "\t" << avg_c_in_depth << "\t" << avg_c_depth << "\t" << avg_q_in_depth << "\t" << avg_q_depth << endl;
     //}
     //printInfo(result);
     //cout << "---------------End of Process-----------------------" << endl;
