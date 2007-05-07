@@ -26,7 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 using namespace Starsky;
 using namespace std;
 
-DeetooMessage::DeetooMessage(unsigned long int r0, unsigned long int r1, bool cache) : _r0(r0), _r1(r1), _cache(cache)
+DeetooMessage::DeetooMessage(unsigned long int r0, unsigned long int r1, bool cache, Ran1Random& r_num, double p_fail) : _r0(r0), _r1(r1), _cache(cache), _r_num(r_num), _p_fail(p_fail)
 {
   if (r0 > r1) {
 	cerr << "starting point should be less than ending point" << endl
@@ -48,12 +48,17 @@ DeetooNetwork* DeetooMessage::visit(Node* n, Network& net)
 {
   DeetooNetwork* d2n = dynamic_cast<DeetooNetwork*>( net.newNetwork() );
   AddressedNode* start = dynamic_cast<AddressedNode*> (n);      //start node for broadcasting 
+  //d2n->add(start);
   visit(start, net, *d2n);
   return d2n;
 }
 
 void DeetooMessage::visit(AddressedNode* start, Network& net, DeetooNetwork& visited_net)
 {
+  //For the network reliability test, with failure prob. p, returns nothing.
+  double p_edgefail = _r_num.getDouble01();
+  if (p_edgefail < _p_fail) { return; }
+  
   //cout << "start node: " << start->getAddress(_cache) << endl;
   // If start node is not in the range(_r0, _r1), find the closest neighbor to lower bound in range.
   if ( (!inRange(start) ) )  //node is not in this range
@@ -121,7 +126,7 @@ void DeetooMessage::visit(AddressedNode* start, Network& net, DeetooNetwork& vis
           //We don't need to add the node, it is also done when we add an edge
           //visited_net.add(it_low->second);
 	  visited_net.add(Edge(start, it_low->second) );
-	  DeetooMessage m_low = DeetooMessage(last_lower, it_low->first, _cache);
+	  DeetooMessage m_low = DeetooMessage(last_lower, it_low->first, _cache, _r_num, _p_fail);
 	  //Here is the recursion.  Note we don't make a new network
 	  m_low.visit(it_low->second, net, visited_net);
 	  last_lower = it_low->first +1;
@@ -148,7 +153,7 @@ void DeetooMessage::visit(AddressedNode* start, Network& net, DeetooNetwork& vis
         //We don't need to add the node, it is also done when we add an edge
         //visited_net.add(it_up->second);
 	visited_net.add(Edge(start, it_up->second) );
-	DeetooMessage m_up = DeetooMessage(it_up->first, last_upper, _cache);
+	DeetooMessage m_up = DeetooMessage(it_up->first, last_upper, _cache, _r_num, _p_fail);
 	//Here is the recursion.  Note we don't make a new network
 	m_up.visit(it_up->second, net, visited_net);
 	last_upper = it_up->first -1;

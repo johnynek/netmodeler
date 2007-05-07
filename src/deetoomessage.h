@@ -26,6 +26,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <message.h>
 #include <addressednode.h>
 #include <deetoonetwork.h>
+#include <ran1random.h>
+#include <random.h>
 
 namespace Starsky {
 
@@ -47,7 +49,7 @@ class DeetooMessage : public Message {
      * @param r1 upper limit of multicasting range
      * @param c_q cache message for caching if it's true, otherwise message for query 
      **/
-     DeetooMessage(unsigned long int r0, unsigned long int r1, bool cache=true);
+     DeetooMessage(unsigned long int r0, unsigned long int r1, bool cache, Ran1Random& r_num, double p_fail);
     /**
      * This will return all the nodes and edges in the
      * out component of a particular Node within a number of hops
@@ -74,6 +76,8 @@ class DeetooMessage : public Message {
     unsigned long int _mid_range;  //(_r0,_r1)/2
     unsigned long int _r0, _r1;
     unsigned long int _dist_to_lower;
+    Ran1Random& _r_num;
+    double _p_fail;
     /**
      * Since we implement this recursively, this function allows us to not
      * have to allocate and delete a new visited network each time.  This
