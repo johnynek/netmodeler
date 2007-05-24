@@ -103,6 +103,8 @@ class DeetooNetwork : public Network {
 	* returns lower and upper bound addresses within cacheing or qurying range
 	*/
 	std::pair<unsigned long int, unsigned long int> getRange(double cq_size);
+	int guessNetSize(AddressedNode* tnode, bool cq);
+	void createEvenNet(int net_size);
     protected:
 	Ran1Random& _r_short;
 };
