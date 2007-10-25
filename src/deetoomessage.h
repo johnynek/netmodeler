@@ -68,6 +68,10 @@ class DeetooMessage : public Message {
      */
     int out_edge_count;
     /**
+     * count failed search during insertion
+     */
+    //bool insert_fail;
+    /**
      * In given message, the first node to be visited in the range
      */
     AddressedNode* init_node;

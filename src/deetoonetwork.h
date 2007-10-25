@@ -68,6 +68,7 @@ class DeetooNetwork : public Network {
 	 * neighbor distribution.
 	 */
 	std::vector<int> getNeighborDistHist(int bin_count=10) const;
+	std::vector<unsigned long int> getNeighborDist();
 	/**
 	 *Make ring connection between nodes @param nodeMap
 	 */
@@ -103,7 +104,19 @@ class DeetooNetwork : public Network {
 	* returns lower and upper bound addresses within cacheing or qurying range
 	*/
 	std::pair<unsigned long int, unsigned long int> getRange(double cq_size);
+
+	/**
+	 * @param tnode target node to estimate network size
+	 * @param cq caching or querying
+	 * returns estimated network size (pick two neighbors, get ave distance,
+	 * divide whole address size by this ave distance -> estimated net size)
+	 */
 	int guessNetSize(AddressedNode* tnode, bool cq);
+	/**
+	 * @param net_size total number of nodes in this creating network
+	 * for making network with evenly distributed nodes in address space.
+	 * when a new node join, maximize minimum distance to the neighbors' address by picking up two candidate addresses then finally select and address with longer minimum distance to the neighbors.
+	 */
 	void createEvenNet(int net_size);
     protected:
 	Ran1Random& _r_short;

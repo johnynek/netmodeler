@@ -4,6 +4,9 @@
 #include <fstream>
 #include <cmath>
 
+/*
+ * add functionality of edge failure to d2_test.cpp
+ */
 using namespace Starsky;
 using namespace std;
 #define ADDR_MAX 65536
@@ -57,7 +60,7 @@ int main(int argc, char *argv[])
 	//double cqsize = (double) ( (ADDR_MAX / (double)sqrt( nodes ) ) * sqrt(alpha) ); 
 	//Make DeetooNetwork for cache.
 	auto_ptr<DeetooNetwork> cacheNet_ptr( new DeetooNetwork(nodes, ran_no) );
-	cacheNet_ptr->create(nodes);
+	cacheNet_ptr->createEvenNet(nodes);
 	
         //Insert k items from k randomly selceted nodes into the network.
 	int k = 100;
@@ -199,7 +202,7 @@ int main(int argc, char *argv[])
         }
         int item_size = items.size();
 	//cout << "total hits: \t" << total_hits << "\thit_nodes_sum: \t" << hit_nodes_sum << endl;
-	double hit_rate = (double)total_hits / (double)(max_it * item_size);
+        double hit_rate = (double)total_hits / (double)(max_it * item_size);
 	double ave_hit_nodes = (double)hit_nodes_sum / (double)(total_hits);
         double ave_msgs = (double)total_msgs / (double)(max_it * item_size);
         double ave_qEdges = (double)total_qEdgeSize / (double)(max_it * item_size);

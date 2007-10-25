@@ -184,19 +184,92 @@ void DeetooNetwork::printNetInfo(bool cache) {
    }
 }
 
+vector<unsigned long int> DeetooNetwork::getNeighborDist() {
+  vector<unsigned long int> ret_val;
+  unsigned long int this_dist;
+  int this_bin;
+  auto_ptr<EdgeIterator> ei (getEdgeIterator() );
+  while(ei->moveNext() ) {
+    Edge* e = ei->current();
+    AddressedNode* node_first = dynamic_cast<AddressedNode*> (e->first);
+    AddressedNode* node_second = dynamic_cast<AddressedNode*> (e->second);
+    this_dist = distanceTo(node_first->getAddress(1), node_second->getAddress(1) );
+    //cout << this_dist <<endl;
+    ret_val.push_back(this_dist);
+  }
+  return ret_val;
+}
+
 int DeetooNetwork::guessNetSize(AddressedNode* tnode,bool cq)
 {
-  std::map<int,AddressedNode*> distances;
-  distances.clear();
+  std::map<int,AddressedNode*> lefters, righters;
   
   //int count = 0;
   unsigned long int addr_min = WMAX;
   unsigned long int addr_max = 0;
   int this_dist, dist1, dist2;
   unsigned long int this_addr;
+  //cout << "================================================================" << endl;
+  //cout << "target Address: " << tnode->getAddress(cq) << endl;
   auto_ptr<NodeIterator> ni(getNeighborIterator(tnode) );
   while (ni->moveNext() ) {
     AddressedNode* c_node = dynamic_cast<AddressedNode*> (ni->current() );
+    this_addr = c_node->getAddress(cq);
+    if (this_addr < addr_min) { addr_min = this_addr; } //left most neighbor
+    if (this_addr > addr_max) { addr_max = this_addr; } //right modst neighbor
+    //cout << "current Address: " << c_node->getAddress(cq) << "\tc_dist: " << c_node->getDistanceTo(tnode->getAddress(cq), cq)<< endl;
+    // left neighbors
+    if (c_node->getAddress(cq) < tnode->getAddress(cq) ) {
+	this_dist = c_node->getDistanceTo(tnode->getAddress(cq), cq);
+	lefters.insert( make_pair( this_dist, c_node ) );
+	//lefters[this_dist] = c_node;
+    }
+    // right neighbors
+    else {
+	this_dist = c_node->getDistanceTo(tnode->getAddress(cq), cq);
+	righters.insert( make_pair( this_dist, c_node ) );
+	//righters[this_dist] = c_node;
+    }
+  }
+
+  //cout << "size of lefter and righter: " << lefters.size() << "\t" << righters.size() << endl;
+  /**
+  if (lefters.begin() == lefters.end() ) {
+	dist1 = righters.begin()->first;
+	std::map<int, AddressedNode*>::iterator this_it = righters.end();
+	this_it--;
+	dist2 = this_it->first;
+  }
+  else if (righters.begin() == righters.end() ) {
+	dist1 = lefters.begin()->first;
+	std::map<int, AddressedNode*>::iterator this_it = lefters.end();
+	this_it--;
+	dist2 = this_it->first;
+  }
+  else {
+	dist1 = lefters.begin()->first;
+	dist2 = righters.begin()->first;
+  }
+  **/
+  // If there are entries in lefters and righters, the first elements in them are direct neighbors.
+  if (lefters.size()!=0 && righters.size()!=0) {
+    dist1 = lefters.begin()->first;
+    dist2 = righters.begin()->first;
+  }
+  // else, target node is the most right node or the most left node,
+  // so, min_addr and max_addr nodes are the direct neighbors
+  else {
+    dist1 = tnode->getDistanceTo(addr_min, cq);
+    dist2 = tnode->getDistanceTo(addr_max, cq);
+  }
+  lefters.clear();
+  righters.clear();
+
+  //cout << "dist1 and dist2: " << dist1 << "\t" << dist2 << endl;
+
+
+
+  /*  
     this_dist = c_node->getDistanceTo(tnode->getAddress(cq),cq);
     this_addr = c_node->getAddress(cq);
     //cout << "this_dist: " << this_dist << endl;
@@ -210,15 +283,19 @@ int DeetooNetwork::guessNetSize(AddressedNode* tnode,bool cq)
   }
   else {
     std::map<int,AddressedNode*>::iterator dist_it = distances.begin();
+    // 'distances' is sorted as ascending order. So, first and second
     dist1 = dist_it->first;
-    dist_it++;
-    dist2 = dist_it->first;
+    do {
+      dist_it++;
+      dist2 = dist_it->first;
+    }
   }
-  //cout << "dist1 and dist2 : " << dist1 << "\t" << dist2 << endl;
-  unsigned long int d_ave = (unsigned long int) ( (dist1 + dist2) / 2);
+  **/
+  int d_ave = (int) ( (double) (dist1 + dist2) / 2.0);
   //cout << "d_ave: " << d_ave << endl;
-  int d_net = (int)( (WMAX / d_ave) + (1 / d_ave) );
+  int d_net = (int)( (double) (WMAX / d_ave) + (double) (1 / d_ave) );
   //cout << "d_net: " << d_net << endl;
+  //cout << "====================================================" << endl;
   /** 
   int log_d = (int)(log(d_net) );
   cout << "--------------------------------" << endl;
@@ -241,6 +318,12 @@ int DeetooNetwork::guessNetSize(AddressedNode* tnode,bool cq)
   return d_net;
 }
     
+/*
+ * createEvenNet is for making network with evenly distributed nodes in address space
+ * When a new node join, maximize minimum distance to the neighbors 
+ * by picking up two candidate addresses and finally select an address 
+ * with longer minimum distance to the neighbors.
+ */
 void DeetooNetwork::createEvenNet(int net_size) {
   node_map.clear();
   std::set<std::string> items;
@@ -257,6 +340,7 @@ void DeetooNetwork::createEvenNet(int net_size) {
     }
   }
   //cout << "node_map.size(): " << node_map.size() << endl;
+  
   //add all the others.
   unsigned long int r_addr1, r_addr2, up_addr, down_addr;
   int dist2up, dist2down;
@@ -266,25 +350,26 @@ void DeetooNetwork::createEvenNet(int net_size) {
     //cout << "------------------------------" << endl;
     //cout << "node_map.size(): " << node_map.size() << endl;
     //first location
-    r_addr1 = (unsigned long int)(_r_short.getDouble01() * (WMAX) );
+    r_addr1 = (unsigned long int)(_r_short.getDouble01() * (WMAX) ); // The first candidate address
     //cout << "addr1: " << r_addr1 << endl;
-    it_up = node_map.upper_bound(r_addr1 );
+    it_up = node_map.upper_bound(r_addr1 ); //The closest upper neighbor of new address
     up_addr =  it_up->first;
-    down_addr = (it_up--)->first;
-    dist2up = distanceTo(up_addr, r_addr1); 
-    dist2down = distanceTo(down_addr, r_addr1);
+    down_addr = (it_up--)->first;  // The closest lower neighbor of new address
+    dist2up = distanceTo(up_addr, r_addr1);  // distance to upper neighbor address
+    dist2down = distanceTo(down_addr, r_addr1);  // distance to lower neighbor address
     //dist1 = dist2up + dist2down; 
-    dist1 = std::min(dist2up , dist2down); 
+    dist1 = std::min(dist2up , dist2down);  // The first candidate's distance = minimum distance
     //second location
-    r_addr2 = (unsigned long int)(_r_short.getDouble01() * (WMAX) );
+    r_addr2 = (unsigned long int)(_r_short.getDouble01() * (WMAX) );  // The second candidate address
     //cout << "addr2: " << r_addr2 << endl;
-    it_up = node_map.upper_bound(r_addr2 );
+    it_up = node_map.upper_bound(r_addr2 );  
     up_addr =  it_up->first;
     down_addr = (it_up--)->first;
     dist2up = distanceTo(up_addr, r_addr2); 
     dist2down = distanceTo(down_addr, r_addr2); 
     //dist2 = dist2up + dist2down; 
     dist2 = std::min(dist2up , dist2down); 
+    
     //choose bigger distance
     AddressedNode* new_node;
     unsigned long int new_addr;
