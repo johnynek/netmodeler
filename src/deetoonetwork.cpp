@@ -184,7 +184,7 @@ void DeetooNetwork::printNetInfo(bool cache) {
    }
 }
 
-vector<unsigned long int> DeetooNetwork::getNeighborDist() {
+vector<unsigned long int> DeetooNetwork::getNeighborDist(bool cq) {
   vector<unsigned long int> ret_val;
   unsigned long int this_dist;
   int this_bin;
@@ -193,7 +193,7 @@ vector<unsigned long int> DeetooNetwork::getNeighborDist() {
     Edge* e = ei->current();
     AddressedNode* node_first = dynamic_cast<AddressedNode*> (e->first);
     AddressedNode* node_second = dynamic_cast<AddressedNode*> (e->second);
-    this_dist = distanceTo(node_first->getAddress(1), node_second->getAddress(1) );
+    this_dist = distanceTo(node_first->getAddress(cq), node_second->getAddress(cq) );
     //cout << this_dist <<endl;
     ret_val.push_back(this_dist);
   }

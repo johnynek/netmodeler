@@ -70,7 +70,7 @@ class DeetooMessage : public Message {
     /**
      * count failed search during insertion
      */
-    //bool insert_fail;
+    bool insert_fail;
     /**
      * In given message, the first node to be visited in the range
      */

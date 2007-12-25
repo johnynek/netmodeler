@@ -36,7 +36,7 @@ DeetooMessage::DeetooMessage(unsigned long int r0, unsigned long int r1, bool ca
   out_edge_count = 1;
   init_node = NULL;
   _dist_to_lower = 4294967295;
-  //insert_fail = false;
+  insert_fail = false;
 }
 
 bool DeetooMessage::inRange(AddressedNode* inode)
@@ -50,7 +50,6 @@ DeetooNetwork* DeetooMessage::visit(Node* n, Network& net)
   DeetooNetwork* d2n = dynamic_cast<DeetooNetwork*>( net.newNetwork() );
   AddressedNode* start = dynamic_cast<AddressedNode*> (n);      //start node for broadcasting 
   //d2n->add(start);
-  init_node = start;
   visit(start, net, *d2n);
   return d2n;
 }
@@ -60,7 +59,7 @@ void DeetooMessage::visit(AddressedNode* start, Network& net, DeetooNetwork& vis
   //For the network reliability test, with failure prob. p, returns nothing.
   double p_edgefail = _r_num.getDouble01();
   if (p_edgefail < _p_fail) { 
-      //insert_fail = true;
+      insert_fail = true;
       return; }
   
   //cout << "start node: " << start->getAddress(_cache) << endl;

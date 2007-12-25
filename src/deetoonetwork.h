@@ -68,7 +68,7 @@ class DeetooNetwork : public Network {
 	 * neighbor distribution.
 	 */
 	std::vector<int> getNeighborDistHist(int bin_count=10) const;
-	std::vector<unsigned long int> getNeighborDist();
+	std::vector<unsigned long int> getNeighborDist(bool cq);
 	/**
 	 *Make ring connection between nodes @param nodeMap
 	 */
