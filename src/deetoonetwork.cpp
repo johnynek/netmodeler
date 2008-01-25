@@ -74,6 +74,8 @@ void DeetooNetwork::makeShortcutConnection(const std::map<unsigned long int, Add
 void DeetooNetwork::create(int n) {
     //Let's make n different nodes!!
     node_map.clear();
+    // 1. Random network
+    /**
     while(node_map.size() < n) 
     {
 	unsigned long int r_addr = (unsigned long int)(_r_short.getDouble01() * (WMAX) );
@@ -85,6 +87,41 @@ void DeetooNetwork::create(int n) {
 	    add(anode);
 	}
     }
+    */
+    // 2. uniform network
+    /**
+    while(node_map.size() < n)
+    //for (unsigned long long u_addr = 0; u_addr <= WMAX; u_addr += step)
+    {
+      std::set<std::string> items;
+      items.clear();
+      //cout << "u_addr: " << u_addr << endl;
+      AddressedNode* anode = new AddressedNode(u_addr, items);
+      node_map[u_addr] = anode;
+      add(anode);
+      u_addr += step;
+    }
+    */
+    // 3. diagonal network
+    double step = (double)(AMAX/(double)n);
+    //cout << "step: " << step << endl;
+    unsigned long t_addr = 0;
+    while(node_map.size() < n)
+    {
+      std::set<std::string> items;
+      items.clear();
+      unsigned long addr = t_addr << 16 | t_addr;
+      //cout << "t_addr: " << t_addr << "\taddr: " << addr << endl;
+      //cout << "node map's size, addr: " << node_map.size() << "\t" << addr << endl;
+      AddressedNode* anode = new AddressedNode(addr,items);
+      //cout << "----------------------------------------------------" << endl
+      //       << "\t cache addr: \t" << addr << "\t query addr: \t" << anode->getAddress(0) << endl;
+      
+      node_map[addr] = anode;
+      add(anode);
+      t_addr +=step;
+    }
+
     //Form ring.
     formRing(node_map);
     //Establishing shortcut connections:

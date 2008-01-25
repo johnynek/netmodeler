@@ -147,7 +147,7 @@ int main(int argc, char *argv[])
 	DeetooNetwork* queryNet = queryNet_ptr.get();
 	//queryNet->printNetInfo(false);
         UniformNodeSelector uns_start(ran_no);
-	uns_start.selectFrom(queryNet_ptr.get() );
+	uns_start.selectFrom(queryNet );
 	for (item_it = items.begin(); item_it != items.end(); item_it++)
 	{
 	    int no_msg = 0, no_edges = 0;
