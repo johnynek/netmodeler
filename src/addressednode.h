@@ -18,14 +18,19 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-     */
+*/
      
 #ifndef starsky__addressednode_h
 #define starsky__addressednode_h
 
 #include "node.h"
 #include <set>
-
+//#define INT64
+#ifdef INT64
+  typedef unsigned long long my_int;
+#else
+  typedef unsigned long my_int;
+#endif
 namespace Starsky {
 
   /**
@@ -37,20 +42,20 @@ namespace Starsky {
       /**
        * address for cache
        */
-      unsigned long int _c_address;
+      my_int _c_address;
       /**
        * address for query 
        */
-      unsigned long int _q_address;
+      my_int _q_address;
       std::set<std::string> _itemSet;
       //bool _own;
-      unsigned long int _dist;
-      unsigned long int _small;
-      unsigned long int _big;
+      my_int _dist;
+      my_int _small;
+      my_int _big;
        
     public:
-      unsigned long int addr_i; // column address
-      unsigned long int addr_j; // row address
+      my_int addr_i; // column address
+      my_int addr_j; // row address
       bool cache;
       AddressedNode();
       /**
@@ -58,19 +63,19 @@ namespace Starsky {
        * @param item object to hold
        * @param own if true, delete the item when we are deleted
        */
-      AddressedNode(const unsigned long int addr, std::set<std::string> itemSet) ;
+      AddressedNode(const my_int addr, std::set<std::string> itemSet) ;
       ~AddressedNode() {_itemSet.clear(); }
       
       /**
        * @param cache true if cache, else query
        */
-      unsigned long int getAddress(bool cache);
+      my_int getAddress(bool cache);
       /**
        *@param nodes total nodes size
        *@param target calculate ring distance to the target
        * return distance to the target
        */
-      unsigned long int getDistanceTo(unsigned long int t_addr, bool cache);
+      my_int getDistanceTo(my_int t_addr, bool cache);
       /**
        * return to the pointer to the object being contained.
        */

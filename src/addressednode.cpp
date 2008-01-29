@@ -22,9 +22,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "addressednode.h"
 
 using namespace Starsky;
-
-#define AMAX 65536
-#define WMAX 4294967295
+//#define INT64
+#ifdef INT64
+  typedef unsigned long long my_int;
+  #define WMAX 18446744073709551615LL
+  #define AMAX 4294967296LL
+#else
+  typedef unsigned long my_int;
+  #define AMAX 65536L
+  #define WMAX 4294967295L
+#endif
 
 AddressedNode::AddressedNode()
 {
@@ -33,7 +40,7 @@ AddressedNode::AddressedNode()
 }
 
 
-AddressedNode::AddressedNode(const unsigned long int addr, std::set<std::string> itemSet)
+AddressedNode::AddressedNode(const my_int addr, std::set<std::string> itemSet)
 {
   _c_address = addr;
   addr_j = addr % AMAX;
@@ -42,15 +49,15 @@ AddressedNode::AddressedNode(const unsigned long int addr, std::set<std::string>
   _itemSet = itemSet;
 }
 
-unsigned long int AddressedNode::getAddress(bool cache)
+my_int AddressedNode::getAddress(bool cache)
 {
     if (cache) { return _c_address; }
     else { return _q_address; }
 }
 
-unsigned long int AddressedNode::getDistanceTo(unsigned long int t_addr, bool cache)
+my_int AddressedNode::getDistanceTo(my_int t_addr, bool cache)
 {
-  unsigned long int this_addr;
+  my_int this_addr;
   if (cache) { this_addr = _c_address; }
   else { this_addr = _q_address;}
   _small = std::min (this_addr, t_addr);

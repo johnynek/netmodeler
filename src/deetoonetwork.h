@@ -34,6 +34,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <vector>
 #include <algorithm>
 #include <iostream>
+//#define INT64
+#ifdef INT64
+  typedef unsigned long long my_int;
+#else
+  typedef unsigned long my_int;
+#endif
 
 namespace Starsky {
 
@@ -56,8 +62,8 @@ class DeetooNetwork : public Network {
 	 *@param address return Node by address
 	 */
 	//AddressedNode* getNodeFromAddress(const int address) const;
-	std::map<unsigned long int, AddressedNode*> node_map;  //<address, Node>
-	std::map<unsigned long int, AddressedNode*> query_nm;  // node map for query
+	std::map<my_int, AddressedNode*> node_map;  //<address, Node>
+	std::map<my_int, AddressedNode*> query_nm;  // node map for query
 	/**
 	 * print neighbors of each node.
 	 */
@@ -68,28 +74,28 @@ class DeetooNetwork : public Network {
 	 * neighbor distribution.
 	 */
 	std::vector<int> getNeighborDistHist(int bin_count=10) const;
-	std::vector<unsigned long int> getNeighborDist(bool cq);
+	std::vector<my_int> getNeighborDist(bool cq);
 	/**
 	 *Make ring connection between nodes @param nodeMap
 	 */
-	void formRing(const std::map<unsigned long int, AddressedNode*>& nodeMap);
+	void formRing(const std::map<my_int, AddressedNode*>& nodeMap);
 	/**
 	 *@param cache if cache net, true, else if query net, false
 	 *make shortcut connection 
 	 */
-	void makeShortcutConnection(const std::map<unsigned long int, AddressedNode*>& nd_map,
+	void makeShortcutConnection(const std::map<my_int, AddressedNode*>& nd_map,
                                     bool cache);
 	/**
 	 * @param n_map node map
 	 * @param t_addr calculated target address for shortcut
 	 * return the closest neighbor node to the t_addr
 	 */
-	AddressedNode* findShortcutNode(const std::map<unsigned long int, AddressedNode*>& n_map, unsigned long int t_addr);
+	AddressedNode* findShortcutNode(const std::map<my_int, AddressedNode*>& n_map, my_int t_addr);
 	/**
 	 * calculate the distance between addr_a and addr_b,
 	 * and return the distance
 	 */
-	unsigned long int distanceTo(unsigned long int addr_a, unsigned long int addr_b);
+	my_int distanceTo(my_int addr_a, my_int addr_b);
 	
 	/** 
 	 * @param n create new DeetooNetwork whose size is n
@@ -98,12 +104,12 @@ class DeetooNetwork : public Network {
 	/**
 	 * @param nd_map, create another network for query with query address in nd_map
 	 */
-	void createQueryNet(const std::map<unsigned long int, AddressedNode*>& nd_map);
+	void createQueryNet(const std::map<my_int, AddressedNode*>& nd_map);
        /**
 	* @param cq_size column or row size for cache or query
 	* returns lower and upper bound addresses within cacheing or qurying range
 	*/
-	std::pair<unsigned long int, unsigned long int> getRange(double cq_size);
+	std::pair<my_int, my_int> getRange(double cq_size);
 
 	/**
 	 * @param tnode target node to estimate network size
@@ -111,7 +117,7 @@ class DeetooNetwork : public Network {
 	 * returns estimated network size (pick two neighbors, get ave distance,
 	 * divide whole address size by this ave distance -> estimated net size)
 	 */
-	int guessNetSize(AddressedNode* tnode, bool cq);
+	my_int guessNetSize(AddressedNode* tnode, bool cq);
 	/**
 	 * @param net_size total number of nodes in this creating network
 	 * for making network with evenly distributed nodes in address space.

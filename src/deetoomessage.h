@@ -29,6 +29,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <ran1random.h>
 #include <random.h>
 
+//#define INT64
+#ifdef INT64
+  typedef unsigned long long my_int;
+#else
+  typedef unsigned long my_int;
+#endif
+
 namespace Starsky {
 
 /**
@@ -49,7 +56,7 @@ class DeetooMessage : public Message {
      * @param r1 upper limit of multicasting range
      * @param c_q cache message for caching if it's true, otherwise message for query 
      **/
-     DeetooMessage(unsigned long int r0, unsigned long int r1, bool cache, Ran1Random& r_num, double p_fail);
+     DeetooMessage(my_int r0, my_int r1, bool cache, Ran1Random& r_num, double p_fail);
     /**
      * This will return all the nodes and edges in the
      * out component of a particular Node within a number of hops
@@ -77,9 +84,9 @@ class DeetooMessage : public Message {
     AddressedNode* init_node;
   protected:
     bool _cache;   //cache or query, cache=true, query=false
-    unsigned long int _mid_range;  //(_r0,_r1)/2
-    unsigned long int _r0, _r1;
-    unsigned long int _dist_to_lower;
+    my_int _mid_range;  //(_r0,_r1)/2
+    my_int _r0, _r1;
+    my_int _dist_to_lower;
     Ran1Random& _r_num;
     double _p_fail;
     /**

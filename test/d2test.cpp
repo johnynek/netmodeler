@@ -10,11 +10,19 @@
 using namespace Starsky;
 using namespace std;
 #define ADDR_MAX 65536
+//#define INT64
+#ifdef INT64
+  typedef unsigned long long my_int;
+  #define ADDR_MAX 4294967296LL
+#else
+  typedef unsigned long my_int;
+  #define ADDR_MAX 65536L
+#endif
 
-void printInfo(map<int, pair<double, double> > result) {
+void printInfo(map<my_int, pair<double, double> > result) {
 	ofstream myfile("output1");
 	myfile << "#nodes: " << "\t" << "hit rate" << "\t" << "ave msgs" << "\t" << "hops/hit_rate" << endl;
-	map<int,pair<double, double> >::iterator it;
+	map<my_int,pair<double, double> >::iterator it;
 	for (it=result.begin(); it!=result.end(); it++) {
 		double hops_ps = it->second.second / it->second.first;
 		myfile << it->first << "\t" << it->second.first << "\t" << it->second.second << "\t" << hops_ps << endl;
@@ -24,8 +32,7 @@ void printInfo(map<int, pair<double, double> > result) {
 std::set<std::string> rstringGenerator ( int howmany, int length, Ran1Random& r )
 {
     std::set<std::string> items;
-    int k = howmany;
-    for (int no=0; no < k; no++)
+    for (int no=0; no < howmany; no++)
     {
 	std::string item;
 	for (int i = 0; i < length; i++)
@@ -52,8 +59,8 @@ int main(int argc, char *argv[])
     //double alpha = 1;
     Ran1Random ran_no;
     //set the multicasting range (randge0, range1)
-    unsigned long int rg_start, rg_end; 
-    map<int, pair<double, double> > result;
+    my_int rg_start, rg_end; 
+    map<my_int, pair<double, double> > result;
     //for (int nodes = 100; nodes <= max_node; nodes = nodes*10) {
 	//cqsize determines how many rows or columns to multicast.
 	//cqsize = sqrt(B) / sqrt(N), where B is total space m*m
@@ -61,6 +68,7 @@ int main(int argc, char *argv[])
 	//Make DeetooNetwork for cache.
 	auto_ptr<DeetooNetwork> cacheNet_ptr( new DeetooNetwork(nodes, ran_no) );
 	cacheNet_ptr->createEvenNet(nodes);
+	//cacheNet_ptr->create(nodes);
 	
         //Insert k items from k randomly selceted nodes into the network.
 	int k = 100;
@@ -69,18 +77,19 @@ int main(int argc, char *argv[])
         std::set<std::string>::iterator item_it;
     	UniformNodeSelector item_src(ran_no);
         item_src.selectFrom(cacheNet_ptr.get() );
-	int sum_c_nodes=0, sum_c_edges=0, sum_c_in_depth=0, sum_c_depth=0;
+	my_int sum_c_nodes=0, sum_c_edges=0, sum_c_in_depth=0, sum_c_depth=0;
 	for (item_it = items.begin(); item_it != items.end(); item_it++)
 	{
 	    //pick a random node to insert an item.
 	    AddressedNode* item_source = dynamic_cast<AddressedNode*> (item_src.select() );
-	    double cqsize = (double) ( (ADDR_MAX / (double)sqrt( cacheNet_ptr->guessNetSize(item_source,1) ) ) * sqrt(alpha) ); 
+	    //double cqsize = (double) ( (ADDR_MAX / (double)sqrt( cacheNet_ptr->guessNetSize(item_source,1) ) ) * sqrt(alpha) ); 
+	    double cqsize = (double) ( (ADDR_MAX / (double)sqrt( nodes ) ) * sqrt(alpha) ); 
             //insert the item to item_source node
 	    item_source->insertItem(*item_it );
 	    //decide cache range
 	    //calculate starting column
-	    std::pair<unsigned long int, unsigned long int> c_ranges = cacheNet_ptr->getRange(cqsize);
-	    unsigned long int rg_start = c_ranges.first, rg_end = c_ranges.second;
+	    std::pair<my_int, my_int> c_ranges = cacheNet_ptr->getRange(cqsize);
+	    my_int rg_start = c_ranges.first, rg_end = c_ranges.second;
 	    //cout << "in d2_test(cache): (r0,r1): (" << rg_start << ", " << rg_end << ")" << endl; 
 	    //make subnet which contains all nodes in the range
 	    DeetooNetwork* cacheNet = cacheNet_ptr.get();
@@ -88,16 +97,16 @@ int main(int argc, char *argv[])
 	    auto_ptr<DeetooMessage> cache_m ( new DeetooMessage(rg_start, rg_end, true, ran_no, p) );
 	    //cout << "after message" << endl;
 	    auto_ptr<DeetooNetwork> cached_net( cache_m->visit(item_source, *cacheNet) );
-	    //cout << "after visite" << endl;
+	    //cout << "after visit" << endl;
 	    //cout << "cached net's size" << cached_net->getNodeSize() << endl;
-	    int c_in_depth = cached_net->getDistance(cache_m->init_node); //in range depth
-	    //cout << "depth? " << endl;
+	    my_int c_in_depth = cached_net->getDistance(cache_m->init_node); //in range depth
+	    //cout << "depth? " << c_in_depth << endl;
 	    sum_c_in_depth += c_in_depth;
-	    int c_depth = c_in_depth + cache_m->out_edge_count;   // in depth + out of range depth
+	    my_int c_depth = c_in_depth + cache_m->out_edge_count;   // in depth + out of range depth
 	    sum_c_depth += c_depth;
-	    int c_nodes = cached_net->getNodeSize();
+	    my_int c_nodes = cached_net->getNodeSize();
 	    sum_c_nodes += c_nodes;
-	    int c_edges = cached_net->getEdgeSize();
+	    my_int c_edges = cached_net->getEdgeSize();
 	    sum_c_edges += c_edges;
 	    // Cache this item to all nodes in the cached_net.
 	    auto_ptr<NodeIterator> ni_insert (cached_net->getNodeIterator() );
@@ -129,12 +138,11 @@ int main(int argc, char *argv[])
 	//Check hit_rate (count hit)
 	//local broadcasting for query.
 	
-	int total_hits = 0;
-	int total_msgs = 0;
-	int total_q_in_depth = 0, total_q_depth = 0;
-	int total_qEdgeSize = 0, hit_nodes_sum=0;
+	my_int total_hits = 0;
+	my_int total_msgs = 0;
+	my_int total_q_in_depth = 0, total_q_depth = 0;
+	my_int total_qEdgeSize = 0, hit_nodes_sum=0;
 	int max_it = 100;
-	int i = 0;
         auto_ptr<DeetooNetwork> queryNet_ptr ( new DeetooNetwork(ran_no) );
 	queryNet_ptr->createQueryNet( (cacheNet_ptr.get() )->node_map);
 	/**  this while loop is for counting number of items on each node.
@@ -150,19 +158,20 @@ int main(int argc, char *argv[])
 	uns_start.selectFrom(queryNet );
 	for (item_it = items.begin(); item_it != items.end(); item_it++)
 	{
-	    int no_msg = 0, no_edges = 0;
-	    int sum_no_msg = 0, sum_qEdge = 0, sum_hits=0;
-	    int sum_q_in_depth = 0, sum_q_depth = 0;
-	    int reached = 0;
+	    my_int no_msg = 0, no_edges = 0;
+	    my_int sum_no_msg = 0, sum_qEdge = 0, sum_hits=0;
+	    my_int sum_q_in_depth = 0, sum_q_depth = 0;
+	    my_int reached = 0;
 	    //cout << i << "th item" << endl;
             for ( int it_no = 0; it_no < max_it; it_no++) {
-	        int hits = 0;
+	        my_int hits = 0;
 		//cout << "number of iteration: \t " << it_no << endl;
 	        //set starting point
 	        AddressedNode* query_start = dynamic_cast<AddressedNode*> (uns_start.select() );
-	        double cqsize = (double) ( (ADDR_MAX / (double)sqrt( queryNet->guessNetSize(query_start,0) ) ) * sqrt(alpha) ); 
-	        std::pair<unsigned long int, unsigned long int> q_ranges = cacheNet_ptr->getRange(cqsize);
-	        unsigned long int q_rg_start = q_ranges.first, q_rg_end = q_ranges.second;
+	        //double cqsize = (double) ( (ADDR_MAX / (double)sqrt( queryNet->guessNetSize(query_start,0) ) ) * sqrt(alpha) ); 
+	        double cqsize = (double) ( (ADDR_MAX / (double)sqrt( nodes ) ) * sqrt(alpha) ); 
+	        std::pair<my_int, my_int> q_ranges = cacheNet_ptr->getRange(cqsize);
+	        my_int q_rg_start = q_ranges.first, q_rg_end = q_ranges.second;
 	        //cout << "in d2_test(query): (r0,r1): (" << q_rg_start << ", " << q_rg_end << ")" << endl; 
 	        //cout << "range start: " << rg_start << "\trange end: " << rg_end << endl;
 	        //which item do you want to retrieve?
@@ -172,9 +181,9 @@ int main(int argc, char *argv[])
 	        auto_ptr<DeetooMessage> query_msg ( new DeetooMessage(q_rg_start, q_rg_end, false, ran_no, p) );
 		auto_ptr<DeetooNetwork> visited_net( query_msg->visit(query_start, *queryNet) );
 		
-	        int q_in_depth = visited_net->getDistance(query_msg->init_node);
+	        my_int q_in_depth = visited_net->getDistance(query_msg->init_node);
 		sum_q_in_depth += q_in_depth;
-	        int q_depth = q_in_depth + query_msg->out_edge_count;
+	        my_int q_depth = q_in_depth + query_msg->out_edge_count;
 		sum_q_depth += q_depth;
 	        // Send a query for this item to all node in the visited_net.
 	        auto_ptr<NodeIterator> niq (visited_net->getNodeIterator() );
@@ -195,6 +204,7 @@ int main(int argc, char *argv[])
 	    }
 	    hit_nodes_sum = hit_nodes_sum + sum_hits; 
 	    total_hits = total_hits + reached;
+	    cout << "total_hits, reached: " << total_hits << "\t" << reached << endl;
 	    total_msgs = total_msgs + sum_no_msg;
 	    total_qEdgeSize = total_qEdgeSize + sum_qEdge;
 	    total_q_in_depth += sum_q_in_depth; 

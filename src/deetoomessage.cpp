@@ -25,23 +25,35 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 using namespace Starsky;
 using namespace std;
+//#define INT64
+#ifdef INT64
+  typedef unsigned long long my_int;
+#else
+  typedef unsigned long my_int;
+#endif
 
-DeetooMessage::DeetooMessage(unsigned long int r0, unsigned long int r1, bool cache, Ran1Random& r_num, double p_fail) : _r0(r0), _r1(r1), _cache(cache), _r_num(r_num), _p_fail(p_fail)
+//typedef unsigned long long my_int;
+
+DeetooMessage::DeetooMessage(my_int r0, my_int r1, bool cache, Ran1Random& r_num, double p_fail) : _r0(r0), _r1(r1), _cache(cache), _r_num(r_num), _p_fail(p_fail)
 {
   if (r0 > r1) {
 	cerr << "starting point should be less than ending point" << endl
 		<< "(" << _r0 << ", " << _r1 << ")" << endl;
   }
-  _mid_range = (unsigned long int)( ( (double)(_r0)+(double)(_r1) )/(double)(2) );
+  _mid_range = (my_int)( ( (double)(_r0)+(double)(_r1) )/(double)(2) );
   out_edge_count = 1;
   init_node = NULL;
-  _dist_to_lower = 4294967295;
+  #ifdef INT64
+    _dist_to_lower = 18446744073709551615LL;
+  #else  
+    _dist_to_lower = 4294967295L;
+  #endif
   insert_fail = false;
 }
 
 bool DeetooMessage::inRange(AddressedNode* inode)
 {
-    unsigned long int nd_addr = inode->getAddress(_cache);
+    my_int nd_addr = inode->getAddress(_cache);
     return ( ( nd_addr >= _r0) && ( nd_addr <= _r1) );
 }	
 
@@ -67,7 +79,7 @@ void DeetooMessage::visit(AddressedNode* start, Network& net, DeetooNetwork& vis
   if ( (!inRange(start) ) )  //node is not in this range
   {
       AddressedNode* next_node=NULL;
-      unsigned long int current_dist_to_lower = _dist_to_lower;
+      my_int current_dist_to_lower = _dist_to_lower;
       auto_ptr<NodeIterator> ni(net.getNeighborIterator(start) );
       while (ni->moveNext()  )
       {
@@ -77,7 +89,7 @@ void DeetooMessage::visit(AddressedNode* start, Network& net, DeetooNetwork& vis
 	      return visit(c_node, net, visited_net);
 	  }
 	  else {
-	      unsigned long int dist = c_node->getDistanceTo(_mid_range, _cache) ;
+	      my_int dist = c_node->getDistanceTo(_mid_range, _cache) ;
               if ( dist < _dist_to_lower )
 	      {
                   next_node = c_node;
@@ -99,15 +111,15 @@ void DeetooMessage::visit(AddressedNode* start, Network& net, DeetooNetwork& vis
   //get upper neighbors and lower neighbors.
   //std::map will sort them according to their address, lowest first.
   //will divide neighbors to upeer and lower groups wrt its address
-  std::map<unsigned long int, AddressedNode*> lower_neighbors;  
-  std::map<unsigned long int, AddressedNode*> upper_neighbors;
+  std::map<my_int, AddressedNode*> lower_neighbors;  
+  std::map<my_int, AddressedNode*> upper_neighbors;
   auto_ptr<NodeIterator> ni(net.getNeighborIterator(start) );
   while(ni->moveNext() )
   {
     AddressedNode* current_node = dynamic_cast<AddressedNode*> (ni->current() );
     //check if current node is within the range
     if (inRange(current_node) ) {
-      unsigned long int c_node_addr = current_node->getAddress(_cache);
+      my_int c_node_addr = current_node->getAddress(_cache);
       if (c_node_addr < start->getAddress(_cache) )
       {
          lower_neighbors[c_node_addr]=current_node; 
@@ -120,9 +132,9 @@ void DeetooMessage::visit(AddressedNode* start, Network& net, DeetooNetwork& vis
   }
 
   //Start with lower neighbors first.
-  unsigned long int last_lower = _r0;
+  my_int last_lower = _r0;
   AddressedNode* last_node_low = NULL;
-  std::map<unsigned long int, AddressedNode*>::iterator it_low;
+  std::map<my_int, AddressedNode*>::iterator it_low;
   for (it_low=lower_neighbors.begin(); it_low!=lower_neighbors.end(); it_low++)
   {
 	if ( _r0 != _r1) {
@@ -147,9 +159,9 @@ void DeetooMessage::visit(AddressedNode* start, Network& net, DeetooNetwork& vis
   */
     
   //go to the uppper side.
-  unsigned long int last_upper = _r1;
+  my_int last_upper = _r1;
   AddressedNode* last_node_up = NULL;
-  std::map<unsigned long int, AddressedNode*>::reverse_iterator it_up;
+  std::map<my_int, AddressedNode*>::reverse_iterator it_up;
   for (it_up=upper_neighbors.rbegin(); it_up!=upper_neighbors.rend(); it_up++)
   {
     if (_r0 != _r1) {
