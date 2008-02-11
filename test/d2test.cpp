@@ -84,6 +84,7 @@ int main(int argc, char *argv[])
 	    AddressedNode* item_source = dynamic_cast<AddressedNode*> (item_src.select() );
 	    //double cqsize = (double) ( (ADDR_MAX / (double)sqrt( cacheNet_ptr->guessNetSize(item_source,1) ) ) * sqrt(alpha) ); 
 	    double cqsize = (double) ( (ADDR_MAX / (double)sqrt( nodes ) ) * sqrt(alpha) ); 
+	    //cout << "cqsize: " << cqsize << endl;
             //insert the item to item_source node
 	    item_source->insertItem(*item_it );
 	    //decide cache range
@@ -91,6 +92,8 @@ int main(int argc, char *argv[])
 	    std::pair<my_int, my_int> c_ranges = cacheNet_ptr->getRange(cqsize);
 	    my_int rg_start = c_ranges.first, rg_end = c_ranges.second;
 	    //cout << "in d2_test(cache): (r0,r1): (" << rg_start << ", " << rg_end << ")" << endl; 
+            //cout << "#cache" << endl; 
+	    //cout << cqsize << "\t" << rg_start << "\t" << rg_end << endl;
 	    //make subnet which contains all nodes in the range
 	    DeetooNetwork* cacheNet = cacheNet_ptr.get();
 	    //cout << "before message" << endl;
@@ -168,12 +171,15 @@ int main(int argc, char *argv[])
 		//cout << "number of iteration: \t " << it_no << endl;
 	        //set starting point
 	        AddressedNode* query_start = dynamic_cast<AddressedNode*> (uns_start.select() );
-	        //double cqsize = (double) ( (ADDR_MAX / (double)sqrt( queryNet->guessNetSize(query_start,0) ) ) * sqrt(alpha) ); 
-	        double cqsize = (double) ( (ADDR_MAX / (double)sqrt( nodes ) ) * sqrt(alpha) ); 
-	        std::pair<my_int, my_int> q_ranges = cacheNet_ptr->getRange(cqsize);
+	        double cqsize = (double) ( (ADDR_MAX / (double)sqrt( queryNet->guessNetSize(query_start,0) ) ) * sqrt(alpha) ); 
+	        //double cqsize = (double) ( (ADDR_MAX / (double)sqrt( nodes ) ) * sqrt(alpha) ); 
+		//cout << "cqsize: " << cqsize << endl;
+	        std::pair<my_int, my_int> q_ranges = queryNet_ptr->getRange(cqsize);
 	        my_int q_rg_start = q_ranges.first, q_rg_end = q_ranges.second;
 	        //cout << "in d2_test(query): (r0,r1): (" << q_rg_start << ", " << q_rg_end << ")" << endl; 
 	        //cout << "range start: " << rg_start << "\trange end: " << rg_end << endl;
+		//cout << "#query" << endl; 
+	        //cout << cqsize << "\t" << q_rg_start << "\t" << q_rg_end << endl;
 	        //which item do you want to retrieve?
 		std::string query = *item_it;
 
@@ -204,7 +210,7 @@ int main(int argc, char *argv[])
 	    }
 	    hit_nodes_sum = hit_nodes_sum + sum_hits; 
 	    total_hits = total_hits + reached;
-	    cout << "total_hits, reached: " << total_hits << "\t" << reached << endl;
+	    //cout << "total_hits, reached: " << total_hits << "\t" << reached << endl;
 	    total_msgs = total_msgs + sum_no_msg;
 	    total_qEdgeSize = total_qEdgeSize + sum_qEdge;
 	    total_q_in_depth += sum_q_in_depth; 

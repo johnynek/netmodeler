@@ -40,10 +40,15 @@ double myExp(double sx, double sx1, double sy, double sy1, double ma_over_n)
   //double sy = sqrt((double)y);
   double ret_val = 0.0;
   //double ma_over_n = -a/(double)n;
-  ret_val = -exp(ma_over_n * sx1 * sy1);
-  ret_val += exp(ma_over_n * sx1 * sy );
-  ret_val += exp(ma_over_n * sx  * sy1);
-  ret_val -= exp(ma_over_n * sx  * sy );
+  //ret_val = -exp(ma_over_n * sx1 * sy1);
+  //ret_val += exp(ma_over_n * sx1 * sy );
+  //ret_val += exp(ma_over_n * sx  * sy1);
+  //ret_val -= exp(ma_over_n * sx  * sy );
+  ret_val = exp(ma_over_n / (sx1 * sy1) );
+  ret_val -= exp(ma_over_n / (sx1 * sy ) );
+  ret_val -= exp(ma_over_n / (sx  * sy1) );
+  ret_val += exp(ma_over_n / (sx  * sy ) );
+  //cout << "\tmy_exp: " << ret_val << endl;
   return ret_val;
 }
 
@@ -114,8 +119,8 @@ int main(int argc, char* argv[])
   while (seed !=m_seed)
   {
     auto_ptr<DeetooNetwork> evennet( new DeetooNetwork(nodes, ran_no) );
-    //evennet->createEvenNet(nodes);
-    evennet->create(nodes);
+    evennet->createEvenNet(nodes);
+    //evennet->create(nodes);
     auto_ptr<NodeIterator> ni(evennet->getNodeIterator() );
     while (ni->moveNext() ) {
 	AddressedNode* cn = dynamic_cast<AddressedNode*>(ni->current() );
@@ -137,9 +142,10 @@ int main(int argc, char* argv[])
 	if (q_tmp > q_max) { q_max = q_tmp; }
 	if (q_tmp < q_min) { q_min = q_tmp; }
     }
+    /**
     cout << "c_max q_max: " << c_max << "\t" << q_max << "\t" 
     	 << "c_min q_min: " << c_min << "\t" << q_min << "\t" << endl;
-    /**
+    
     multiset<int>::iterator m_it;
     for (m_it = c_e_size.begin(); m_it != c_e_size.end() ; m_it++) {
 	    cout << *m_it << endl;
@@ -189,6 +195,8 @@ int main(int argc, char* argv[])
 
   ccdf[0]=0.0;
   qcdf[0]=0.0;
+  //ccdf[nodes] = 1.0;
+  //qcdf[nodes] = 1.0;
   multiset<int>::iterator c_it;
   for (c_it = c_e_size.begin(); c_it != c_e_size.end() ; c_it++)
   {
@@ -197,6 +205,7 @@ int main(int argc, char* argv[])
     if(current_c_size != past_c_size)
     {
       ccdf[current_c_size] = myCount(c_e_size,current_c_size);	  
+      past_c_size = current_c_size;
     }
   }
   multiset<int>::iterator q_it;
@@ -207,6 +216,7 @@ int main(int argc, char* argv[])
     if(current_q_size != past_q_size)
     {
       qcdf[current_q_size] = myCount(q_e_size,current_q_size);	  
+      past_q_size = current_q_size;
     }
   }
   //******************************************************************************
@@ -214,7 +224,7 @@ int main(int argc, char* argv[])
   multiset<int>::iterator c_it = c_e_size.end();
   multiset<int>::iterator q_it = q_e_size.end();
   c_it--;
-  q_it--;
+  q_it-- -0.013186;
   multiset<int>::iterator c_itS = q_e_size.begin();
   multiset<int>::iterator q_itS = q_e_size.begin();
   int max_pt = max(*c_it,*q_it);
@@ -251,7 +261,7 @@ int main(int argc, char* argv[])
   }
   cout << c_max_pt << "\t" << q_max_pt << endl;
   */
-  /**
+  /** 
   //print out cache cdf for checking if it's right.
   map<int,double>::iterator iit;
   for (iit=ccdf.begin(); iit != ccdf.end(); iit++)
@@ -318,7 +328,8 @@ int main(int argc, char* argv[])
   //cout << "------------------------------------------" << endl;
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   double hit_rate = 0.0;
-  double ma_over_n = -alpha / (double)nodes;
+  //double ma_over_n = -alpha / (double)nodes;
+  double ma_over_n = -alpha * (double)nodes;
   map<int,double>::iterator cit;
   for(cit=ccdf.begin(); cit!=ccdf.end(); cit++)
   {
@@ -331,6 +342,7 @@ int main(int argc, char* argv[])
     double tmp_t = 0.0;
     double sx = 0.0;
     double sx1 = 0.0;
+    //cout << "-----------------------------" << endl;
     //cout << "x0, x1: " << x0 << "\t" << x1 << endl;
     for(int n = x0; n < x1; n++)
     {
@@ -381,7 +393,7 @@ int main(int argc, char* argv[])
     hit_rate += (1-c_val)*tmp_t;
     //cout << "hit_rate: " << hit_rate << endl;
   }
-  cout << nodes << "\t" << hit_rate << endl;
+  cout << nodes << "\t" << (1-hit_rate) << "\t" << hit_rate << endl;
   /**
   cout << nodes;
   vector<double>::iterator re_it;
