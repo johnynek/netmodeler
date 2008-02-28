@@ -27,30 +27,42 @@ double myCount(const multiset<int>& ary, int val)
   double ret_val = (double)ret_count / (double)(ary.size() );
   return ret_val;
 }
+/**
+ * returns 1-exp(-a*n/(sqrt(n)*sqrt(m)))
+ * @param sx, sqrt(x), @param sy, sqrt(y)
+ * @param an, -alpha * net_size
+ */
+double myFunc(double sx, double sy, double man) {
+  return 1 - exp(man/(sx*sy));
+}
 
 /*
- * myExp is function calculating sum of 4 exponentials
+ * quadExp is function calculating sum of 4 exponentials
  */
-//double myExp(int x, int y, int n, double a)
-double myExp(double sx, double sx1, double sy, double sy1, double ma_over_n)
+double quadExp(double sx, double sx1, double sy, double sy0, double ma_t_n)
 {
-  //double sx1 = sqrt((double)x + 1.0);
-  //double sy1 = sqrt((double)y + 1.0);
-  //double sx = sqrt((double)x);
-  //double sy = sqrt((double)y);
   double ret_val = 0.0;
-  //double ma_over_n = -a/(double)n;
-  //ret_val = -exp(ma_over_n * sx1 * sy1);
-  //ret_val += exp(ma_over_n * sx1 * sy );
-  //ret_val += exp(ma_over_n * sx  * sy1);
-  //ret_val -= exp(ma_over_n * sx  * sy );
-  ret_val = exp(ma_over_n / (sx1 * sy1) );
-  ret_val -= exp(ma_over_n / (sx1 * sy ) );
-  ret_val -= exp(ma_over_n / (sx  * sy1) );
-  ret_val += exp(ma_over_n / (sx  * sy ) );
+  //double (*sExp)(double, double, double);
+  //sExp = dExp;
+  ret_val  = myFunc(sx1,sy ,ma_t_n);
+  ret_val -= myFunc(sx ,sy ,ma_t_n);
+  ret_val -= myFunc(sx1,sy0,ma_t_n);
+  ret_val += myFunc(sx ,sy0,ma_t_n);
   //cout << "\tmy_exp: " << ret_val << endl;
   return ret_val;
 }
+double duoExp(double sp, double sp1, double cons, double ma_t_n, bool xy) 
+{
+  double ret_val = 0.0;
+  if (xy == true) {
+    ret_val = myFunc(sp1, cons, ma_t_n) - myFunc(sp, cons, ma_t_n);
+  }
+  else {
+    ret_val = myFunc(cons, sp1, ma_t_n) - myFunc(cons, sp, ma_t_n);
+  }
+  return ret_val;
+}
+
 
 /*
  * returns missing cdf data
@@ -60,40 +72,31 @@ double myExp(double sx, double sx1, double sy, double sy1, double ma_over_n)
  */
 double getCdf(const map<int,double>& imap, int k)
 {
-  /**
-  double ret, n1, n2, c1, c2; 
-  map<int,double>::const_iterator it = imap.begin();
-  map<int,double>::const_iterator ite = imap.end();
-  ite--;
-  //cout << "==========================================================" << endl;
-  if (k < it->first)
-  {
-    ret = it->second/(double)(it->first) * k;
-  }
-  else if (k >= ite->first)
-  {
-    ret = 1.0;
-  }   
-  else
-  {
-    it = imap.lower_bound(k);
-    n2 = it->first;
-    c2 = it->second;
-    it--;
-    n1 = it->first;
-    c1 = it->second;
-    ret = ((double)(c2 - c1)/(double)(n2-n1))*(k-n1) + c1; 
-    //cout << "k,n1,n2,c1,c2: " << k << "\t" << n1 << "\t" << n2 << "\t" << c1 << "\t" << c2 << endl;
-  }
-  //cout << "getCdf: " << ret << endl;
-  */
-  double ret;
   map<int,double>::const_iterator it = imap.upper_bound(k);
   it--;
-  ret = it->second;
-    
-  return ret;
+  //double ret = it->second;
+  //return ret;
+  return it->second;
 }
+map<int,double> cdfMap(multiset<int> in) {
+  map<int,double> ret_map;
+  //ret_map[0]=0.0;
+  multiset<int>::iterator it;
+  for (it = in.begin(); it != in.end() ; it++)
+  {
+    int past = -1;	  
+    int curr = *it;
+    if(curr != past)
+    {
+      ret_map[curr] = myCount(in,curr);	  
+      past = curr;
+    }
+  }
+  return ret_map;
+}
+
+
+
 
 int main(int argc, char* argv[])
 {
@@ -157,195 +160,53 @@ int main(int argc, char* argv[])
     */
     seed--;
   }
-  //-----------------------------------------------------------------------
-  // get the cdf from the data(c_e_size and q_e_size distribution).
-  //***********************************************************************
-  // limiting cdfs to 99%
-  /**
-  int c_step = (int)(c_max / 99.0);
-  int q_step = (int)(q_max / 99.0);
-  if (c_step == 0) { c_step = 1; }
-  if (q_step == 0) { q_step = 1; }
-  int c_max_pt = 0;
-  int q_max_pt = 0;
-  float cdf_limit = 0.99;
-  for (int c_no = 0; c_no <= c_max; c_no += c_step)
-  {
-    double cct = myCount(c_e_size,c_no);
-    if (cct <= cdf_limit) {
-      c_max_pt = c_no;
-    }
-    else { break; }
-    //if (cct <=0.99 && qct <= 0.99) {break;}
-  }
-  //cout << "q_max, q_step: " << q_max << "\t" << q_step << endl;
-  for (int q_no = 0; q_no <= q_max; q_no += q_step)
-  {
-    double qct = myCount(q_e_size,q_no);
-    if (qct <= cdf_limit) {
-      q_max_pt = q_no;
-    }
-    else { break; }
-    //if (cct <=0.99 && qct <= 0.99) {break;}
-  }
-  */
-  //cout << "maxs: " << c_max_pt <<"\t" << q_max_pt << endl;
   //**********************************************************************
-  map<int,double> qcdf, ccdf;
+  //map<int,double> ccdf = cdfMap(c_e_size);
+  //map<int,double> qcdf = cdfMap(q_e_size);
+  map<int,double> ccdf, qcdf;
+  ccdf[nodes] = 1.0;
+  qcdf[nodes] = 1.0;
+  ccdf[nodes-1]=0.5;
+  qcdf[nodes-1]=0.5;
+  c_min = q_min = nodes-1;
+  c_max = q_max = nodes;
 
-  ccdf[0]=0.0;
-  qcdf[0]=0.0;
-  //ccdf[nodes] = 1.0;
-  //qcdf[nodes] = 1.0;
-  multiset<int>::iterator c_it;
-  for (c_it = c_e_size.begin(); c_it != c_e_size.end() ; c_it++)
-  {
-    int past_c_size = -1;	  
-    int current_c_size = *c_it;
-    if(current_c_size != past_c_size)
-    {
-      ccdf[current_c_size] = myCount(c_e_size,current_c_size);	  
-      past_c_size = current_c_size;
-    }
-  }
-  multiset<int>::iterator q_it;
-  for (q_it = q_e_size.begin(); q_it != q_e_size.end() ; q_it++)
-  {
-    int past_q_size = -1;	  
-    int current_q_size = *q_it;
-    if(current_q_size != past_q_size)
-    {
-      qcdf[current_q_size] = myCount(q_e_size,current_q_size);	  
-      past_q_size = current_q_size;
-    }
-  }
-  //******************************************************************************
-  /**
-  multiset<int>::iterator c_it = c_e_size.end();
-  multiset<int>::iterator q_it = q_e_size.end();
-  c_it--;
-  q_it-- -0.013186;
-  multiset<int>::iterator c_itS = q_e_size.begin();
-  multiset<int>::iterator q_itS = q_e_size.begin();
-  int max_pt = max(*c_it,*q_it);
-  int min_pt = min(*c_itS,*q_itS);
-  int step = (int)(max_pt / 99.0);
-  int rg_max = 0;
-  //For a small size network, it happens zero step size. do not let this happen.
-  if (step == 0) 
-  { 
-    step = 1;
-    rg_max = max_pt+step;
-  }
-  else
-  {
-    rg_max = max_pt + step -1;
-  }
-  cout << "rg_max, step, max_pt, min_pt: " << rg_max << "\t" << step << "\t" << max_pt << "\t" << min_pt << endl;
-  int c_max_pt = 0;
-  int q_max_pt = 0;
-  // count cdf till 99% for faster running time.
-  map<int,double> qcdf, ccdf;
-  for (int no = min_pt; no <= rg_max; no+=step)
-  {
-    double cct = myCount(c_e_size,no);
-    double qct = myCount(q_e_size,no);
-    if (cct <= 0.99) {
-      ccdf[no] = cct;
-      c_max_pt = no;
-    }
-    if (qct <= 0.99) {
-    qcdf[no] = qct;
-    q_max_pt = no;
-    }
-  }
-  cout << c_max_pt << "\t" << q_max_pt << endl;
-  */
-  /** 
-  //print out cache cdf for checking if it's right.
-  map<int,double>::iterator iit;
-  for (iit=ccdf.begin(); iit != ccdf.end(); iit++)
-  {
-    cout << iit->first << "\t" << iit->second << endl;
-  }
-  cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
-  map<int,double>::iterator qit;
-  for (qit=qcdf.begin(); qit != qcdf.end(); qit++)
-  {
-    cout << qit->first << "\t" << qit->second << endl;
-  }
-  */
-  //-----------------------------------------------------------------------
-  //The last part: Let's get the hit rate using ccdf and qcdf
-  //double hit_rate = 0.0;
-
-
-  //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  //vector<double> hit_rate(11,0.0);
-  //for (int n = 0; n <= c_max_pt; n++)
-
-  /**
-  for (int n = 0; n <= c_max; n++)
-  {
-    double tmp = 0.0;
-    //cout << "-=---------------------------------" << endl;
-    //vector<double> tmp(11,0.0);
-    //tmp.clear();
-    //tmp.assign(11,0);
-    //int m = 69742;
-    //for (int m = 0; m <= q_max_pt; m++)
-    for (int m = 0; m <= q_max; m++)
-    {
-      double v_t = myExp(n,m,nodes,alpha);
-      double cdf_t = getCdf(qcdf,m);
-      tmp += (1-cdf_t) * v_t;
-      //cout << "m, myExp, cdf, tmp: " << m << "\t" << v_t << "\t" << cdf_t << "\t" << tmp << endl;
-      //tmp.at(0) += (1-cdf_t) * myExp(n,m,nodes,0.1);
-      //int pos1 = 1;
-      //for (double al = 0.5; al <=5; al+=0.5)
-      //{
-        //tmp += (1-cdf_t) * v_t;
-      //  tmp.at(pos1) += (1-cdf_t) * myExp(n,m,nodes,al);
-      //  pos1++;
-      //}
-      
-    }
-    
-    //vector<double>::iterator t_it;
-    //int pos = 0;
-    //for (t_it = tmp.begin(); t_it != tmp.end(); t_it++)
-    //{
-    //  hit_rate.at(pos) += (*t_it) * (1-getCdf(ccdf,n) );
-    //  pos++;
-    //}
-    double tmp_cdf = getCdf(ccdf,n);
-    hit_rate += tmp * (1 - tmp_cdf);
-    //cout << nodes << "\t" << hit_rate << endl;
-    //cout << "n,tmp,tmp_cdf,hit_rate: " << n << "\t" << tmp << "\t" << tmp_cdf << "\t" << hit_rate << endl;
-  }
-  */
-
-  //cout << "------------------------------------------" << endl;
-  //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  double hit_rate = 0.0;
   //double ma_over_n = -alpha / (double)nodes;
   double ma_over_n = -alpha * (double)nodes;
+  double hit_rate = 0.0; 
+  cout << "c_min, q_min: " << c_min << "\t" << q_min << endl;
+  double fac = myFunc(sqrt(c_min-1),sqrt(q_min-1),ma_over_n);
+  cout << "fac: " << fac << endl;
+  double quad_sum = 0.0;
+  double sum1 = 0.0, sum2 = 0.0;
   map<int,double>::iterator cit;
   for(cit=ccdf.begin(); cit!=ccdf.end(); cit++)
   {
     int x0 = cit->first;
     double c_val = cit->second;
+    cout << "x0: " << x0 << "\tccdf: " << c_val << endl;
     cit++;
     if (cit == ccdf.end() ) {break;}
     int x1 = cit->first;
+    cout << "x1: " << x1 << "\tccdf: " << c_val << endl;
     cit--;
     double tmp_t = 0.0;
+    double tmp_sum1 = 0.0;
+    bool sum2_check = false;
     double sx = 0.0;
     double sx1 = 0.0;
+    double c_val_tmp = 0.0;
     //cout << "-----------------------------" << endl;
     //cout << "x0, x1: " << x0 << "\t" << x1 << endl;
-    for(int n = x0; n < x1; n++)
+    for(int n = x0-1; n < x1; n++)
     {
+      if (n < x0) { 
+        c_val_tmp = 0; 
+      }
+      else {
+        c_val_tmp = c_val;
+      }
+      cout << "n, c_val: " << n << "\t" << c_val_tmp << endl;
       if (sx1 == 0.0) 
       {
 	sx = sqrt((double)n);
@@ -355,22 +216,27 @@ int main(int argc, char* argv[])
         sx = sx1;
       }
       sx1 = sqrt((double)n+1.0);
+      double tmp_sum2 = 0.0;
       map<int,double>::iterator qit;
       double q_ret = 0.0;
       for(qit=qcdf.begin();qit!=qcdf.end(); qit++)
       {
         int y0 = qit->first;
 	double q_val = qit->second;
+	double q_val_tmp = 0.0;
 	qit++;
 	if(qit == qcdf.end() ) { break; }
 	int y1 = qit->first;
 	qit--;
-        //cout << "y0, y1: " << y0 << "\t" << y1 << endl;
+        cout << "y0, y1: " << y0 << "\t" << y1 << endl;
 	double tmp = 0.0;
 	double sy = 0.0;
 	double sy1 = 0.0;
-	for(int m = y0; m < y1; m++)
+	for(int m = y0-1; m < y1; m++)
 	{
+	  if (m < y0) { q_val_tmp = 0; }
+	  else { q_val_tmp = q_val; }
+	  cout << "m,q_val: " << m << "\t" << q_val_tmp << endl;
 	  if (sy1 == 0.0)
 	  {
 	    sy = sqrt((double)m);
@@ -379,20 +245,35 @@ int main(int argc, char* argv[])
 	  {
             sy = sy1;
 	  }
-	  sy1 = sqrt((double)m+1.0);
+	  sy1 = sqrt((double)m-1.0);
 	  //cout << "n, m, sx, sx1, sy, sy1, ma: " << n << "\t" << m << "\t" << sx << "\t" << sx1 << "\t" << sy << "\t" << sy1 << "\t" << ma_over_n << endl;
-          tmp += myExp(sx,sx1,sy,sy1,ma_over_n);
+          tmp += quadExp(sx,sx1,sy,sy1,ma_over_n);
+	  cout << "innerst tmp: " << tmp << endl;
+	  if ( !sum2_check ) {
+	    tmp_sum2 +=duoExp(sy1,sy,(c_min -1),ma_over_n,0);
+	    cout << "tmp_sum2: " << tmp_sum2 << endl;
+	    cout << "how many" << endl;
+	    sum2_check = true;
+	  }
 	}
 	//cout << "tmp: " << tmp << endl;
-	q_ret += (1-q_val) * tmp;
+	q_ret += (1-q_val_tmp) * tmp;
+	sum2 += (1-q_val_tmp) * tmp_sum2;
       }
+      //if (!sum2_check) {
+        tmp_sum1 += duoExp(sx1,sx,(q_min-1),ma_over_n,1);
+      //}
       //cout << "q_ret: " << q_ret << endl;
       tmp_t += q_ret;
     }
+    sum1 += (1-c_val_tmp) * tmp_sum1;
     //cout << "tmp_t, hit_rate: " << tmp_t << "\t" << (1-c_val)*tmp_t << endl;
-    hit_rate += (1-c_val)*tmp_t;
+    //hit_rate += (1-c_val)*tmp_t;
+    quad_sum += (1-c_val_tmp)*tmp_t;
     //cout << "hit_rate: " << hit_rate << endl;
   }
+  hit_rate += fac + sum1 + sum2 + quad_sum;
+  cout << nodes << "\t" << fac << "\t" << sum1+fac << "\t" << sum2+sum1+fac << "\t" << hit_rate << endl;
   cout << nodes << "\t" << (1-hit_rate) << "\t" << hit_rate << endl;
   /**
   cout << nodes;

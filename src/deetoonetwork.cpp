@@ -244,7 +244,44 @@ vector<my_int> DeetooNetwork::getNeighborDist(bool cq) {
   }
   return ret_val;
 }
+my_int DeetooNetwork::guessNetSizeLog(AddressedNode* tnode,bool cq)
+{
+  my_int log_d = guessNetSize(tnode,cq);
+  //cout << "nd_map size: " << node_map.size() << "\tquery_nm size: " << query_nm.size() << endl;
+  std::map<my_int, AddressedNode*>::const_iterator upper;
+  //cout << "--------------------------------" << endl;
+  if (cq) {
+    //log_d = (my_int)(log(node_map.size()) );
+    upper = node_map.upper_bound(tnode->getAddress(cq) );
+    for (int iter = 0; iter < log_d; iter++) {
+      if (upper == node_map.end() ) {
+        upper = node_map.begin();
+      }
+      //cout << upper->first << endl;
+      upper++;
+    }
+  }
+  else {
+    //log_d = (my_int)(log(query_nm.size()) );
+    upper = query_nm.upper_bound(tnode->getAddress(cq) );
+    for (int iter = 0; iter < log_d; iter++) {
+      if (upper == query_nm.end() ) {
+        upper = query_nm.begin();
+      }
+      //cout << upper->first << endl;
+      upper++;
+    }
+  }
 
+  my_int dist_to = tnode->getDistanceTo(upper->first, cq);
+  //cout << dist_to << "\t" << log_d << endl;
+  double temp = (double)(log_d) / (double)(dist_to);
+  //cout << "temp: " << temp << endl;
+  my_int new_est = (my_int)( temp * WMAX);
+  //cout << new_est << endl;
+  return new_est;
+
+}
 my_int DeetooNetwork::guessNetSize(AddressedNode* tnode,bool cq)
 {
   std::map<my_int,AddressedNode*> lefters, righters;
@@ -341,6 +378,7 @@ my_int DeetooNetwork::guessNetSize(AddressedNode* tnode,bool cq)
   my_int d_net = (my_int)( (double) (WMAX / d_ave) + (double) (1 / d_ave) );
   //cout << "d_net: " << d_net << endl;
   //cout << "====================================================" << endl;
+  return d_net;
   /** 
   my_int log_d = (my_int)(log(d_net) );
   cout << "--------------------------------" << endl;
@@ -360,7 +398,6 @@ my_int DeetooNetwork::guessNetSize(AddressedNode* tnode,bool cq)
   //cout << new_est << endl;
   return new_est;
   **/
-  return d_net;
 }
     
 /*

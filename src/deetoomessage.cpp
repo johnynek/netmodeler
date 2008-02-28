@@ -134,7 +134,7 @@ void DeetooMessage::visit(AddressedNode* start, Network& net, DeetooNetwork& vis
   //Start with lower neighbors first.
   my_int last_lower = _r0;
   AddressedNode* last_node_low = NULL;
-  std::map<my_int, AddressedNode*>::iterator it_low;
+  std::map<my_int, AddressedNode*>::const_iterator it_low;
   for (it_low=lower_neighbors.begin(); it_low!=lower_neighbors.end(); it_low++)
   {
 	if ( _r0 != _r1) {

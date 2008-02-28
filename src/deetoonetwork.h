@@ -119,6 +119,10 @@ class DeetooNetwork : public Network {
 	 */
 	my_int guessNetSize(AddressedNode* tnode, bool cq);
 	/**
+	 * using distance between log_N neighbors
+	 */
+	my_int guessNetSizeLog(AddressedNode* tnode, bool cq);
+	/**
 	 * @param net_size total number of nodes in this creating network
 	 * for making network with evenly distributed nodes in address space.
 	 * when a new node join, maximize minimum distance to the neighbors' address by picking up two candidate addresses then finally select and address with longer minimum distance to the neighbors.
