@@ -1,2 +1,11 @@
-.arch-ids/.*
-\{arch\}/.*
+syntax: regexp
+.*\.l?o
+\.deps
+\.libs
+\.la
+#Here are some autotools cruft
+autom4te.cache
+config/
+configure
+libtool
+config\.status
