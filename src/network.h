@@ -602,12 +602,14 @@ class Network {
 	     */
 	    class NetEdgeIterator : EdgeIterator {
 	      public: 
+                NetEdgeIterator(const GraphMap& m);
                 virtual EdgeIterator* clone();
                 virtual Edge* const & current();
 	        virtual bool moveNext();
 	        virtual void reset();
 		friend class Network;
               protected:
+                NetEdgeIterator();
                 GraphMap::const_iterator _nit;
                 GraphMap::const_iterator _begin;
                 GraphMap::const_iterator _end;

@@ -65,6 +65,7 @@ edgerewirer.h edgerewirer.cpp \
 edgeswapper.h edgeswapper.cpp \
 emailnetwork.cpp \
 emailnetwork.h \
+event.h event.cpp \
 exppreference.cpp \
 exppreference.h \
 expdrv.h \
