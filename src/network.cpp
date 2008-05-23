@@ -816,7 +816,7 @@ Iterator<std::string>* Network::getEIMembers() const {
   std::set<std::string>* mems = new std::set<std::string>();
   mems->insert("getTriangles");
   mems->insert("getWedges");
-  return new StlPIterator<std::set, std::string>(mems);
+  return new ContainerPIterator<std::set<std::string> >(mems);
 }
 
 EdgeDoubMember Network::getEDMember(const std::string& name) const {
@@ -829,7 +829,7 @@ EdgeDoubMember Network::getEDMember(const std::string& name) const {
 Iterator<std::string>* Network::getEDMembers() const {
   std::set<std::string>* mems = new std::set<std::string>();
   mems->insert("getEdgeCC");
-  return new StlPIterator<std::set, std::string>(mems);
+  return new ContainerPIterator<std::set<std::string> >(mems);
 }
 
 double Network::getExpectedTransitivity() const {
@@ -892,7 +892,7 @@ Iterator<std::string>* Network::getNIMembers() const {
   mems->insert("getDegree");
   mems->insert("getTriangles");
   mems->insert("getWedges");
-  return new StlPIterator<std::set, std::string>(mems);
+  return new ContainerPIterator<std::set<std::string> >(mems);
 }
 
 NodeDoubMember Network::getNDMember(const std::string& name) const {
@@ -904,7 +904,7 @@ NodeDoubMember Network::getNDMember(const std::string& name) const {
 Iterator<std::string>* Network::getNDMembers() const {
   std::set<std::string>* mems = new std::set<std::string>();
   mems->insert("getClusterCoefficient");
-  return new StlPIterator<std::set, std::string>(mems);
+  return new ContainerPIterator<std::set<std::string> >(mems);
 }
 
 #ifndef HIDE_STL

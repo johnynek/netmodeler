@@ -49,21 +49,21 @@ int main(int argc, char* argv[])
   fi2.reset();
   std::list<Node*> node_list;
   fi2.pushInto(node_list);
-  StlIterator<std::list, Node*> stlit(node_list);
+  ContainerIterator<std::list<Node*> > stlit(node_list);
   while( stlit.moveNext() ) {
     std::cout << stlit.current()->toString() << std::endl;
   }
   std::set<Node*> node_set;
   stlit.reset();
   stlit.insertInto(node_set);
-  Iterator<Node*>* stlit2 = new StlIterator<std::list, Node*>(node_list);
+  Iterator<Node*>* stlit2 = new ContainerIterator<std::list<Node*> >(node_list);
   while( stlit2->moveNext() ) {
     std::cout << stlit2->current()->toString() << std::endl;
   }
   delete stlit2;
-  std::cout << "StlPIterator test:" << std::endl;
+  std::cout << "ContainerPIterator test:" << std::endl;
   std::set<Node*>* ns = new std::set<Node*>( node_set );
-  Iterator<Node*>* pstl1 = new StlPIterator<std::set, Node*>(ns);
+  Iterator<Node*>* pstl1 = new ContainerPIterator<std::set<Node*> >(ns);
   while( pstl1->moveNext() ) {
     std::cout << pstl1->current()->toString() << std::endl;
   }

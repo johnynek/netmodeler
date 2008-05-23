@@ -38,7 +38,7 @@ vector<SuperString> SuperString::split(const string& delim) const {
 
 Iterator<SuperString>* SuperString::spliterator(const string& delim) const {
   vector<SuperString>* cont = psplit(delim);
-  return new StlPIterator< vector, SuperString >(cont);
+  return new ContainerPIterator< vector<SuperString> >(cont);
 }
 
 vector<SuperString>* SuperString::psplit(const string& delim) const {

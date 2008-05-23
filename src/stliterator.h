@@ -26,51 +26,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 namespace Starsky {
 
 /**
- * This is an Iterator that wraps standard STL iterators.  It would
- * be useful for making Starsky::Iterators out of iterators from any
- * single (non-map) container.
- */
-template<template <typename> class Cont, typename T>
-class StlIterator : public Iterator<T> {
-
-  public:
-    StlIterator(const Cont<T>& con) : _con(con) {
-      reset();
-    }
-
-    StlIterator<Cont, T>* clone() {
-      return new StlIterator<Cont,T>(_con);
-    }
-    
-    const T& current() {
-      return (*_it);
-    }
-    
-    bool moveNext() {
-      if( _it == _con.end() ) {
-        return false;
-      }
-      if( _moved_to_first ) {
-        _it++;
-      }
-      else {
-        _moved_to_first = true;
-      }
-      return ( _it != _con.end() );
-    }
-    
-    void reset() {
-      _moved_to_first = false;
-      _it = _con.begin();
-    }
-
-  protected:
-    typename Cont<T>::const_iterator _it;
-    const Cont<T>& _con;
-    bool _moved_to_first;
-};
-
-/**
  * This is an Iterator for any STL Container model.
  * @see http://www.sgi.com/tech/stl/Container.html
  */
@@ -114,29 +69,23 @@ class ContainerIterator : public Iterator< typename Cont::value_type > {
 };
 
 /**
- * This is an Iterator that wraps standard STL containers.
- * This iterator totally "owns" the container, and deletes the
- * pointer when the last clone is deleted.
+ * This is an Iterator for any STL Container model.
+ * @see http://www.sgi.com/tech/stl/Container.html
+ * This deletes the pointer to the original container when all clones
+ * are deleted.
  */
-template<template <typename> class Cont, typename T>
-class StlPIterator : public Iterator<T> {
-
+template<class Cont>
+class ContainerPIterator : public Iterator< typename Cont::value_type > {
   public:
-    StlPIterator(Cont<T>* con) : _con(con) {
+    ContainerPIterator(Cont* con) : _con(con) {
       reset();
     }
 
-    StlPIterator<Cont, T>* clone() {
-      StlPIterator<Cont, T>* ret_val = new StlPIterator<Cont,T>(_con);
-      ret_val->_moved_to_first = _moved_to_first;
-      ret_val->_it = _it;
-      return ret_val;
-    }
-
-    ~StlPIterator() {
+    ContainerPIterator<Cont>* clone() {
+      return new ContainerPIterator<Cont>(_con);
     }
     
-    const T& current() {
+    const typename Cont::value_type& current() {
       return (*_it);
     }
     
@@ -157,22 +106,22 @@ class StlPIterator : public Iterator<T> {
       _moved_to_first = false;
       _it = _con->begin();
     }
-
   private:
     //Don't allow copies
-    StlPIterator&  operator = (const StlPIterator& other) { /*..*/}
+    ContainerPIterator&  operator = (const ContainerPIterator& other) { /*..*/}
     //Don't allow copy constructors.
-    StlPIterator(const StlPIterator& other) { /*..*/ }
-    StlPIterator(cnt_ptr< Cont<T> >& con) : _con(con) {
+    ContainerPIterator(const ContainerPIterator& other) { /*..*/ }
+    ContainerPIterator(cnt_ptr<Cont>& con) : _con(con) {
       reset();
     }
-    StlPIterator() { }
+    ContainerPIterator() { }
+
   protected:
-    typename Cont<T>::const_iterator _it;
-    cnt_ptr< Cont<T> > _con;
+    typename Cont::const_iterator _it;
+    cnt_ptr<Cont> _con;
     bool _moved_to_first;
 };
-	
+
 }
 
 #endif
