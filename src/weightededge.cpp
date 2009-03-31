@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "weightededge.h"
 #include <iostream>
 #include <sstream>
+#include <typeinfo>
 
 using namespace Starsky;
 
@@ -31,7 +32,7 @@ WeightedEdge::WeightedEdge (Node * start, Node * end, double w) : Edge(start,end
 
 WeightedEdge::WeightedEdge(Node* start, Node* end, const std::string& attr) : Edge(start,end)
 {
-  _weight = atof( attr.c_str() );
+  std::istringstream( attr ) >> _weight;
 }
 
 std::string WeightedEdge::getAttributes() const
@@ -82,7 +83,7 @@ bool WeightedEdge::operator==(const Edge& a) const
     return (first == a.first) && (second == a.second)
 	    && (_weight == a.getWeight());
   }
-  catch (std::bad_cast x) {
+  catch (std::bad_cast) {
     return false;
   }
 }
