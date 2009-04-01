@@ -1,8 +1,13 @@
 .PHONY : netmodeler.h
 
 netmodeler.h : 
+	tmpnm=`tempfile`
 	rm -f netmodeler.h;
-	ls *.h | sed -e 's/\(.*\)/#include "\1"/' > netmodeler.h
+	echo "#ifndef __STARSKY_NETMODELER__" > $tmpnm	
+	echo "#define __STARSKY_NETMODELER__" >> $tmpnm	
+	ls *.h | sed -e 's/\(.*\)/#include "\1"/' >> $tmpnm
+	echo "#endif" >> $tmpnm	
+	mv $tmpnm netmodeler.h
 
 noinst_PROGRAMS = netmodeler
 netmodeler_SOURCES = main.cpp netmodeler.h
