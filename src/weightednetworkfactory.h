@@ -49,10 +49,6 @@ class WeightedNetworkFactory : public NetworkFactory {
      * Read from a file
      */
     virtual Network* create(std::istream& input);
-  protected:
-    NodeFactory* _nf;
-    EdgeFactory* _ef;
-    
 };
 
 }

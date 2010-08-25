@@ -27,10 +27,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 using namespace std;
 using namespace Starsky;
 
-WeightedNetworkFactory::WeightedNetworkFactory()
+WeightedNetworkFactory::WeightedNetworkFactory() :
+	NetworkFactory(new NodeFactory(), new WeightedEdgeFactory())
 {
-  _nf = new NodeFactory();
-  _ef = new WeightedEdgeFactory();
+
 }
 
 WeightedNetworkFactory::WeightedNetworkFactory(NodeFactory* nf, EdgeFactory* ef) : NetworkFactory(nf,ef)
