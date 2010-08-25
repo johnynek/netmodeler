@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef starsky__optionparser_h
 #define starsky__optionparser_h
 
+#include <stdlib.h>
 #include <map>
 #include <string>
 #include <vector>
@@ -101,7 +102,7 @@ class OptionParser {
      * to parse the options.
      * @throws OptionException if there are missing required options.
      */
-    void parse(int argv, char* argv[]);
+    void parse(int argc, char* argv[]);
   protected:
     std::map<std::string, std::string> _options;
     std::vector<std::string> _reqs;
