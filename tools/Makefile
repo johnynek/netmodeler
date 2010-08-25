@@ -1,6 +1,6 @@
 PROGS =  p2pmodeler spamgraph comdot graph_deg_dist hoodofmax \
 	triangleman merger comtree compsplit bpsim noisycom trianglefilter \
-	thresher thresh_sg
+	thresher subgraph
 LIBPROGS = comgraph
 LIBS = optionparser.o
 NMDIR = ../src
