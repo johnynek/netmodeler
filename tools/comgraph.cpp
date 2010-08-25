@@ -144,12 +144,14 @@ int main(int argc, char* argv[]) {
   //Here we can choose what kind of network to use:
   NetworkFactory* nf;
   if( op.getBoolOpt("weighted", false) ) {
-    nf = new WeightedNetworkFactory();
+    nf = new WeightedNetworkFactory(new NamedNodeFactory(),
+                                    new WeightedEdgeFactory());
     comfinder->useWeights(true);
   }
   else {
     //Here is unweighted:
-    nf = new NetworkFactory();
+    nf = new NetworkFactory(new NamedNodeFactory(),
+                            new EdgeFactory());
   }
   Network* net;
   if( op.getStringOpt("input", "-") == "-" ) {
