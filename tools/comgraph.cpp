@@ -47,7 +47,7 @@ long expected_comnorm(set<Network*>* part)
 }
 
 void printCommunities(INetworkPartitioner* ap,
-		      ostream& out, string prefix, const Network& net) {
+		      ostream& out, string prefix, const Network& net, bool recurse) {
     stringstream community;
 #ifdef DEBUG
     cout << prefix << endl;
@@ -92,7 +92,9 @@ void printCommunities(INetworkPartitioner* ap,
         }
         out << endl;
 	//Recurse:
-	//printCommunities(ap, out, this_com.str(), *this_comnet);
+        if(recurse) {
+	  printCommunities(ap, out, this_com.str(), *this_comnet, true);
+        }
       }
     }
     //Free up the memory
@@ -114,6 +116,7 @@ int main(int argc, char* argv[]) {
   opts.push_back("seed");
   opts.push_back("prob");
   opts.push_back("weighted");
+  opts.push_back("recursive");
   
   OptionParser op(reqs, opts);
   try { 
@@ -137,9 +140,13 @@ int main(int argc, char* argv[]) {
   else if ( op.getStringOpt("method", "") == "ClusterPart" ) {
     comfinder = new ClusterPart(prob);
   }
+  else if ( op.getStringOpt("method", "") == "InfoCom" ) {
+    comfinder = new InfoCom();
+  }
   else {
     comfinder = new RandAgPart(r, op.getStringOpt("method","") ,prob);
   }
+  bool recurse = op.getBoolOpt("recursive", false);
   
   //Here we can choose what kind of network to use:
   NetworkFactory* nf;
@@ -192,7 +199,7 @@ int main(int argc, char* argv[]) {
       
       
       //Recursively print the communities
-      printCommunities(comfinder, out, com.str(), *this_component );
+      printCommunities(comfinder, out, com.str(), *this_component, recurse);
       //Print Newman:
       //out << "#Newman::" << endl;
       //printCommunities(&ncom, out, com.str(), *this_component );

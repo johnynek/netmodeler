@@ -91,6 +91,7 @@ incrementable.h \
 inetworkpartitioner.h inetworkpartitioner.cpp \
 inetworkmapper.h \
 inetworkmonitor.h \
+infocom.h infocom.cpp \
 inodeselector.h \
 intstats.h intstats.cpp \
 iterator.h \
@@ -135,6 +136,7 @@ prefdelcompattnetwork.cpp \
 prefdelcompattnetwork.h \
 ran1random.cpp \
 ran1random.h \
+randcompnetwork.h randcompnetwork.cpp \
 random.cpp \
 randomdirectednetwork.cpp \
 randomdirectednetwork.h \
