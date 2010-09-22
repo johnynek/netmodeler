@@ -40,36 +40,14 @@ struct networkptr_gt : public std::binary_function<Network*, Network*, bool> {
     return !(*x < *y);
   }
 };
-	
-   /**
-    * This function deletes the result of a previous
-    * partition.  This should be called when the
-    * data is no longer used
-    */
-class INetworkPartitioner {
 
+/**
+ * A representation of a partitioning a network
+ */
+class NetworkPartition {
   public:
-   /**
-    * Delete the memory of this partition.  If you want to "keep"
-    * a component network, just set that entry to 0 or remove it
-    * from the list.
-    */
-   virtual void deletePartition(std::vector<Network*>*  part);
-
-  /**
-   * Interface which Community finding algorithms
-   * can subclass
-   */
-   double modularityOf(std::vector<Network*>* partition, const Network& orig);
-   /**
-    * The caller of this function should delete this memory
-    * when done (Network* and vector<>*)
-    * deletePartition does this for you.
-    * This vector is sorted from largest to smallest ([0] is the biggest)
-    */
-   virtual std::vector<Network*>* partition(const Network& input) = 0;
-  
-
+    NetworkPartition(const Network& orig, std::vector<Network*>* part);
+    ~NetworkPartition();
    /**
     * This is gives a hierarchical picture of the network.  Each cluster
     * becomes a node.  Two clusters have an edge between them if there
@@ -80,7 +58,44 @@ class INetworkPartitioner {
     * @return a Network where is node is a ContainerNode<Network> and
     * each edge is a ContainerEdge<Network>.
     */
-   Network* partitionAsNetwork(const Network& orig, std::vector<Network*>* part) const;
+   const Network& asNetwork();
+
+   const std::vector<Network*>& asVector() const { return *_part; }  
+
+   Iterator<Network*>* getComponents() const;
+ 
+   double getModularity() const; 
+
+  private:
+    NetworkPartition(const NetworkPartition& copy) : _orig(copy._orig) {
+      //Don't do this. 
+    }
+    const Network& _orig;
+    std::vector<Network*>* _part;
+    Network* _part_as_net;
+};
+	
+   /**
+    * This function deletes the result of a previous
+    * partition.  This should be called when the
+    * data is no longer used
+    */
+class INetworkPartitioner {
+
+  public:
+  /**
+   * Interface which Community finding algorithms
+   * can subclass
+   */
+   double modularityOf(std::vector<Network*>* partition, const Network& orig);
+   /**
+    * The caller of this function should delete the result
+    * when done.
+    * This vector is sorted from largest to smallest ([0] is the biggest)
+    */
+   virtual NetworkPartition* partition(const Network& input) = 0;
+  
+
    /**
     * Uses the Frobenius norm to compute |A - B|, |A|, and |B| for
     * the communities given.  The partition matrix is an N x N matrix

@@ -59,13 +59,13 @@ void printCommunities(AgglomPart& ap, string prefix, const Network& net,
     out << "subgraph cluster" << prefix << " {" << endl;
     out << "node [style=filled];" << endl;
     if( q_t[step] > 0.25 ) {
-      
-      vector< Network* >* comms = ap.getCommunity(net,step, joins);
+      auto_ptr<NetworkPartition> comms_np(ap.getCommunity(net, step, joins)); 
+      const vector< Network* >& comms = comms_np->asVector();
       vector< Network* >::const_iterator comit;
       Network::NodePSet::const_iterator comnodeit;
       int com = 0;
-      for(comit = comms->begin();
-	  comit != comms->end();
+      for(comit = comms.begin();
+	  comit != comms.end();
 	  comit++) {
 	Network* this_commun = *comit;
         stringstream this_com;
@@ -74,9 +74,6 @@ void printCommunities(AgglomPart& ap, string prefix, const Network& net,
 	printCommunities(ap, this_com.str(), *this_commun, out, printed_edges, depth + 1);
       }
       //Print the end of the subgraph
-      
-      //Free up the memory
-      ap.deletePartition(comms);
     }
     else {
       //The community cannot be split further, so print it out:
@@ -105,7 +102,7 @@ void printCommunities(AgglomPart& ap, string prefix, const Network& net,
     out << "}" << endl;
 }
 
-int main(int argc, char* argv) {
+int main(int argc, char** argv) {
 
   Network my_net(cin);
   cout << "graph G {" << endl; 
@@ -113,16 +110,16 @@ int main(int argc, char* argv) {
   //Look on components:
   ComponentPart cp;
   NewmanCom comfinder;
-  vector<Network*>* components = cp.partition(my_net);
+  auto_ptr<NetworkPartition> components_np(cp.partition(my_net));
+  const vector<Network*>& components = components_np->asVector();
   vector<Network*>::const_iterator comp_it;
   int community = 0;
-  for(comp_it = components->begin(); comp_it != components->end(); comp_it++) {
+  for(comp_it = components.begin(); comp_it != components.end(); comp_it++) {
     stringstream com;
     com << community++;
     Network* this_net = *comp_it;
     printCommunities(comfinder, com.str(), *this_net, cout, printed_edges, 1);
   }
-  cp.deletePartition(components);
   printEdges(my_net, printed_edges, "[len=16, color=green]");
   cout << "}" << endl;
   return 1;

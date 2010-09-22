@@ -50,12 +50,13 @@ int main(int argc, char* argv[]) {
   set<Network*> spamg, hamg;
   
      ComponentPart cp;
-     vector<Network*>* components = cp.partition(graph);
+     auto_ptr<NetworkPartition> netpart(cp.partition(graph));
+     vector<Network*> components(netpart->asVector());
      vector<Network*>::iterator comp_it;
      Edge* cut_edge = 0;
-     while( components->size() > 0 ) {
+     while( components.size() > 0 ) {
        //Choose the biggest graph
-       comp_it = components->begin();
+       comp_it = components.begin();
        Network* this_net = *comp_it;
        Network::NodePSet::const_iterator n_it;
        int kmax = 0;
@@ -85,15 +86,14 @@ int main(int argc, char* argv[]) {
              cut_edge = this_comp->getEdgeBetweenness(bet);
              this_comp->remove( cut_edge->first );
              this_comp->remove( cut_edge->second );
-	     
-             vector<Network*>* split = cp.partition(*this_comp);
-             components->insert(components->end(), split->begin(), split->end());
-	     cp.deletePartition( split );
+	     auto_ptr<NetworkPartition> split_part(cp.partition(*this_comp)); 
+             const vector<Network*>& split = split_part->asVector();
+             components.insert(components.end(), split.begin(), split.end());
            }
          }
        }
        //cout << "graphs: " << components.size() << endl;
-       components->erase( comp_it );
+       components.erase( comp_it );
      }
 
   //Print out the nodes in each spamg and hamg

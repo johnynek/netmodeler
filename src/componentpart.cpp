@@ -24,7 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 using namespace std;
 using namespace Starsky;
 
-vector<Network*>* ComponentPart::partition(const Network& input)
+NetworkPartition* ComponentPart::partition(const Network& input)
 {
     vector<Network*>* out = new vector<Network*>();
     Network* tmp_net = 0;
@@ -68,5 +68,5 @@ vector<Network*>* ComponentPart::partition(const Network& input)
 	}
     }
     sort(out->begin(), out->end(), networkptr_gt());
-    return out;
+    return new NetworkPartition(input, out);
 }

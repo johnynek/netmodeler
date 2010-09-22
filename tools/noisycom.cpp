@@ -79,10 +79,9 @@ int main(int argc, char* argv[]) {
       mapper = new EdgeSwapper(ef, ran, p);
     }
     mapper->map(&net_copy);
-    vector<Network*>* part = comfinder->partition(net_copy);
-    double q = comfinder->modularityOf(part, *net);
+    auto_ptr<NetworkPartition> part(comfinder->partition(net_copy));
+    double q = part->getModularity();
     cout << p << "\t" << q << endl;
-    comfinder->deletePartition(part);
     delete mapper;
   }
   return 0;

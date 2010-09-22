@@ -87,14 +87,13 @@ int main(int argc, char* argv[]) {
     //cout << "#node count: " << rcn.getNodeSize() << endl; 
     ave_d += (2.0*rcn.getEdgeSize())/(double)rcn.getNodeSize();
     //Now run the clustering:
-    vector<Network*>* part = comfinder->partition(rcn);
-    double acc = rcn.accuracyOfPartition(part);
-    double inf = rcn.informationOfPartition(part);
+    auto_ptr<NetworkPartition> part(comfinder->partition(rcn));
+    double acc = rcn.accuracyOfPartition(part.get());
+    double inf = rcn.informationOfPartition(part.get());
     //cout << "#acc = " << acc << endl;
     //cout << "#inf = " << inf << endl;
     accuracy += acc;
     information += inf;
-    comfinder->deletePartition(part);
     delete comfinder;
   }
   cout << "accuracy = "<<(accuracy/iter) << endl; 

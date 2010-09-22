@@ -33,12 +33,12 @@ namespace Starsky {
   */
   class NullPart : public INetworkPartitioner {
     public:
-      virtual std::vector<Network*>* partition(const Network& net) {
+      virtual NetworkPartition* partition(const Network& net) {
         std::vector<Network*>* ret = new std::vector<Network*>();
         //Make a copy rather than cast away the constness of net
         Network* n = net.clone();
         ret->push_back( n );
-        return ret;
+        return new NetworkPartition(net, ret);
       }
   };
 	

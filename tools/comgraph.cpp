@@ -54,10 +54,11 @@ void printCommunities(INetworkPartitioner* ap,
 #endif
     community << prefix << ".";
     //Print out the communities:
-   vector<Network*>* vcoms = ap->partition(net);
-   double mod = ap->modularityOf(vcoms, net);
-   //if( true ) 
-   if( mod > 0.2 ) 
+   auto_ptr<NetworkPartition> netpart(ap->partition(net));
+   const vector<Network*>& vcoms = netpart->asVector();
+   double mod = netpart->getModularity();
+   if( true ) 
+   //if( mod > 0.2 ) 
    //if( net.getNodeSize() > 1 ) 
    {
       out << "#" << prefix << "=" << mod << endl;
@@ -75,11 +76,11 @@ void printCommunities(INetworkPartitioner* ap,
 #endif
       cout << "mod: " << mod << endl;
       //cout << "Got best split"<< endl;
-      vector< Network* >::iterator comit;
+      vector< Network* >::const_iterator comit;
       Network::NodePSet::const_iterator comnodeit;
       int com = 0;
-      for(comit = vcoms->begin();
-	  comit != vcoms->end();
+      for(comit = vcoms.begin();
+	  comit != vcoms.end();
 	  comit++) {
         stringstream this_com;
         this_com << community.str() << com++;
@@ -97,8 +98,6 @@ void printCommunities(INetworkPartitioner* ap,
         }
       }
     }
-    //Free up the memory
-    ap->deletePartition(vcoms);
 }
 
 
@@ -172,7 +171,8 @@ int main(int argc, char* argv[]) {
   Network& my_net = *net;
   cout << "#loaded net" << endl; 
   ComponentPart cp;
-  vector<Network*>* comms = cp.partition(my_net);
+  auto_ptr<NetworkPartition> netpart(cp.partition(my_net));
+  const vector<Network*>& comms = netpart->asVector();
   //We also want to compare the output to the Newman:
   NewmanCom ncom;
   while(iterations-- > 0 ) {
@@ -190,14 +190,12 @@ int main(int argc, char* argv[]) {
     out << std::endl;
 
     //Look on components:
-    vector< Network* >::iterator comit;
+    vector< Network* >::const_iterator comit;
     int community = 0;
-    for(comit = comms->begin(); comit != comms->end(); comit++) {
+    for(comit = comms.begin(); comit != comms.end(); comit++) {
       stringstream com;
       com << community++;
       Network* this_component = *comit;
-      
-      
       //Recursively print the communities
       printCommunities(comfinder, out, com.str(), *this_component, recurse);
       //Print Newman:
@@ -205,8 +203,6 @@ int main(int argc, char* argv[]) {
       //printCommunities(&ncom, out, com.str(), *this_component );
     }
   }
-  //Delete the memory we allocated:
-  cp.deletePartition(comms);
   delete net;
   delete comfinder;
   return 1;

@@ -27,28 +27,85 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 using namespace std;
 using namespace Starsky;
 
-void INetworkPartitioner::deletePartition(vector<Network*>* part)
-{
+NetworkPartition::NetworkPartition(const Network& orig, vector<Network*>* part) :
+  _orig(orig), _part(part), _part_as_net(0) { }
+
+NetworkPartition::~NetworkPartition() {
+  
   vector<Network*>::iterator it;
-  for(it = part->begin(); it != part->end(); it++)
+  for(it = _part->begin(); it != _part->end(); it++)
   {
     //Delete the Network:
     if( *it != 0 ) {
       delete *it;
     }
   }
-  //Delete the Set:
-  delete part;
+  delete _part;
+  if( _part_as_net != 0 ) {
+    delete _part_as_net;
+    _part_as_net = 0;
+  }
 }
 
-double INetworkPartitioner::modularityOf(vector<Network*>* partition,
-		                         const Network& orig)
-{
+const Network& NetworkPartition::asNetwork() {
+  if( _part_as_net == 0 ) {
+    Network* result = new Network();
+    std::map<Node*, Network*> node_to_part;
+    std::map<Network*, ContainerNode<Network>* > part_to_node;
+    ContainerIterator<std::vector<Network*> > partit(*_part);
+    //Add the nodes of the network:
+    while( partit.moveNext() ) {
+      Network* temp_net = partit.current();
+      std::auto_ptr<NodeIterator> ni( temp_net->getNodeIterator() );
+      while( ni->moveNext() ) {
+        node_to_part[ ni->current() ] = temp_net;
+      }
+      //Make a new network, but don't own this network
+      ContainerNode<Network>* n = new ContainerNode<Network>( temp_net, false );
+      part_to_node[ temp_net ] = n;
+      result->add(n);
+    }
+    //Now we add the edges, which includes all the edges that go between nodes:
+    std::auto_ptr<EdgeIterator> ei( _orig.getEdgeIterator() );
+    while( ei->moveNext() ) {
+      Edge* this_edge = ei->current();
+      Node* a = this_edge->first;
+      Node* b = this_edge->second;
+      Network* neta = node_to_part[a];
+      Network* netb = node_to_part[b];
+      if( neta != netb ) {
+        //These two nodes are not in the same component
+        Node* nneta = part_to_node[neta];
+        Node* nnetb = part_to_node[netb];
+        Edge* temp_e = result->getEdge(nneta, nnetb);
+        if( temp_e == 0 ) {
+          //We are making a new edge:
+  	Network* new_net = new Network();
+  	temp_e = new ContainerEdge<Network>(nneta, nnetb, new_net);
+          result->add(temp_e);
+        }
+        //There is already an edge:
+        ContainerEdge<Network>* ce = dynamic_cast<ContainerEdge<Network>* >(temp_e);
+        Network* con_net = ce->get();
+        con_net->add( this_edge );
+      }
+    }
+    _part_as_net = result;
+  }
+  return *_part_as_net;
+}
 
+Iterator<Network*>* NetworkPartition::getComponents() const
+{
+  return new ContainerIterator<vector<Network*> >(*_part);
+}
+
+double NetworkPartition::getModularity() const
+{
   //Now net_vec indexes the communities
   map<Node*, Network*> node_community;
   vector<Network*>::const_iterator netit;
-  for(netit = partition->begin(); netit != partition->end(); netit++)
+  for(netit = _part->begin(); netit != _part->end(); netit++)
   {
     auto_ptr<NodeIterator> ni( (*netit)->getNodeIterator() );
     while( ni->moveNext() ) {
@@ -59,7 +116,7 @@ double INetworkPartitioner::modularityOf(vector<Network*>* partition,
   map<Network*, map<Network*, double> > e_ij;
   Network *com1, *com2;
   double e_total = 0.0;
-  auto_ptr<EdgeIterator> ei( orig.getEdgeIterator() );
+  auto_ptr<EdgeIterator> ei( _orig.getEdgeIterator() );
   while( ei->moveNext() ) {
     Edge* this_edge = ei->current();
     com1 = node_community[ this_edge->first ];
@@ -70,10 +127,10 @@ double INetworkPartitioner::modularityOf(vector<Network*>* partition,
   }
   //Normalize e_ij:
   vector<Network*>::const_iterator netit2;
-  for(netit = partition->begin(); netit != partition->end(); netit++)
+  for(netit = _part->begin(); netit != _part->end(); netit++)
   {
     Network* ni = *netit;
-    for(netit2 = partition->begin(); netit2 != partition->end(); netit2++)
+    for(netit2 = _part->begin(); netit2 != _part->end(); netit2++)
     {
       Network* nj = *netit2;
       e_ij[ni][nj] /= e_total;
@@ -81,11 +138,11 @@ double INetworkPartitioner::modularityOf(vector<Network*>* partition,
   }
   //Make a_i;
   map<Network*, double> a_i;
-  for(netit = partition->begin(); netit != partition->end(); netit++)
+  for(netit = _part->begin(); netit != _part->end(); netit++)
   {
     Network* ni = *netit;
     a_i[ni] = 0.0;
-    for(netit2 = partition->begin(); netit2 != partition->end(); netit2++)
+    for(netit2 = _part->begin(); netit2 != _part->end(); netit2++)
     {
       Network* nj = *netit2;
       a_i[ni] += e_ij[ni][nj];
@@ -94,7 +151,7 @@ double INetworkPartitioner::modularityOf(vector<Network*>* partition,
   //We don't neccesarily start at Q=0;
   double q = 0.0;
   //for(int i = 0; i < e_ij.size(); i++) {
-  for(netit = partition->begin(); netit != partition->end(); netit++)
+  for(netit = _part->begin(); netit != _part->end(); netit++)
   {
     Network* i = *netit;
     q += e_ij[i][i] - a_i[i] * a_i[i];
@@ -172,51 +229,4 @@ long INetworkPartitioner::distance(std::vector<Network*>* A,
     }
   }
   return dist;
-}
-
-Network* INetworkPartitioner::partitionAsNetwork(const Network& orig,
-		std::vector<Network*>* part) const
-{
-  Network* result = new Network();
-  std::map<Node*, Network*> node_to_part;
-  std::map<Network*, ContainerNode<Network>* > part_to_node;
-  ContainerIterator<std::vector<Network*> > partit(*part);
-  //Add the nodes of the network:
-  while( partit.moveNext() ) {
-    Network* temp_net = partit.current();
-    std::auto_ptr<NodeIterator> ni( temp_net->getNodeIterator() );
-    while( ni->moveNext() ) {
-      node_to_part[ ni->current() ] = temp_net;
-    }
-    //Make a new network, but don't own this network
-    ContainerNode<Network>* n = new ContainerNode<Network>( temp_net, false );
-    part_to_node[ temp_net ] = n;
-    result->add(n);
-  }
-  //Now we add the edges, which includes all the edges that go between nodes:
-  std::auto_ptr<EdgeIterator> ei( orig.getEdgeIterator() );
-  while( ei->moveNext() ) {
-    Edge* this_edge = ei->current();
-    Node* a = this_edge->first;
-    Node* b = this_edge->second;
-    Network* neta = node_to_part[a];
-    Network* netb = node_to_part[b];
-    if( neta != netb ) {
-      //These two nodes are not in the same component
-      Node* nneta = part_to_node[neta];
-      Node* nnetb = part_to_node[netb];
-      Edge* temp_e = result->getEdge(nneta, nnetb);
-      if( temp_e == 0 ) {
-        //We are making a new edge:
-	Network* new_net = new Network();
-	temp_e = new ContainerEdge<Network>(nneta, nnetb, new_net);
-        result->add(temp_e);
-      }
-      //There is already an edge:
-      ContainerEdge<Network>* ce = dynamic_cast<ContainerEdge<Network>* >(temp_e);
-      Network* con_net = ce->get();
-      con_net->add( this_edge );
-    }
-  }
-  return result;
 }

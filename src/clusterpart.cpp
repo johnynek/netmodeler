@@ -24,7 +24,7 @@ using namespace Starsky;
 
 ClusterPart::ClusterPart(double m): _min_cc(m) { }
 
-std::vector<Network*>* ClusterPart::partition(const Network& input) {
+NetworkPartition* ClusterPart::partition(const Network& input) {
   MinCCEdgeTester test(&input, _min_cc);
   std::auto_ptr<Network> net( input.clone() );
   ClassFilterator<MinCCEdgeTester, Edge*> fi(input.getEdgeIterator(),

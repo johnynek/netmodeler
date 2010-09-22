@@ -162,12 +162,10 @@ void getThresholdPoints(Network* net, int points,
       DEBUG("About to map");
       pm.map( &tmp_net );
       DEBUG("About to partition");
-      vector<Network*>* comps = comp_part.partition(tmp_net);
-      Network* largest = (*comps)[0];
+      auto_ptr<NetworkPartition> comps(comp_part.partition(tmp_net));
+      Network* largest = comps->asVector()[0];
       nodes_sum += largest->getNodeSize();
       edges_sum += largest->getEdgeSize();
-      //Free up the partition memory:
-      comp_part.deletePartition( comps );
     }
     double node_ave = (double)nodes_sum/(double)samples;
     double edge_ave = (double)edges_sum/(double)samples;

@@ -69,7 +69,7 @@ RandCompNetwork::~RandCompNetwork() {
   delete[] _clusters;
 }
 
-double RandCompNetwork::accuracyOfPartition(vector<Network*>* partition) const {
+double RandCompNetwork::accuracyOfPartition(NetworkPartition* part) const {
   auto_ptr<EdgeIterator> ei(getEdgeIterator());
   std::set<Edge*> in_cluster;
   while(ei->moveNext()) {
@@ -83,9 +83,9 @@ double RandCompNetwork::accuracyOfPartition(vector<Network*>* partition) const {
   }
   long long correct_internal = 0;
   long long incorrect_internal = 0;
-  for(vector<Network*>::const_iterator it = partition->begin();
-      it != partition->end(); it++) { 
-    Network* this_net = *it;
+  auto_ptr<Iterator<Network*> > it(part->getComponents());
+  while(it->moveNext()) {
+    Network* this_net = it->current();
     auto_ptr<EdgeIterator> tei(this_net->getEdgeIterator());
     while(tei->moveNext()) {
       Edge* this_edge = tei->current();
@@ -114,7 +114,7 @@ double RandCompNetwork::accuracyOfPartition(vector<Network*>* partition) const {
   return (double)correct/(double)total_edges;
 }
 
-double RandCompNetwork::informationOfPartition(vector<Network*>* partition) const {
+double RandCompNetwork::informationOfPartition(NetworkPartition* part) const {
   auto_ptr<EdgeIterator> ei(getEdgeIterator());
   std::set<Edge*> in_cluster;
   while(ei->moveNext()) {
@@ -129,9 +129,9 @@ double RandCompNetwork::informationOfPartition(vector<Network*>* partition) cons
   long long total_internal = in_cluster.size();
   long long correct_internal = 0;
   long long incorrect_internal = 0;
-  for(vector<Network*>::const_iterator it = partition->begin();
-      it != partition->end(); it++) { 
-    Network* this_net = *it;
+  auto_ptr<Iterator<Network*> > it(part->getComponents());
+  while(it->moveNext()) {
+    Network* this_net = it->current();
     auto_ptr<EdgeIterator> tei(this_net->getEdgeIterator());
     while(tei->moveNext()) {
       Edge* this_edge = tei->current();
