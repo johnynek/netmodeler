@@ -2,7 +2,7 @@
 This program is part of Netmodeler, a library for graph and network
 modeling and simulation.
 Copyright (C) 2005  University of California
-Copyright (C) 2005  P. Oscar Boykin <boykin@pobox.com>, University of Florida
+Copyright (C) 2005-2010  P. Oscar Boykin <boykin@pobox.com>, University of Florida
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -24,6 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <set>
 #include <map>
+#include <algorithm>
 #include <network.h>
 #include <containernode.h>
 #include <containeredge.h>
@@ -41,13 +42,34 @@ struct networkptr_gt : public std::binary_function<Network*, Network*, bool> {
   }
 };
 
+template<typename T>
+struct ptr_gt {
+  bool operator()(T x, T y) { 
+    if( *x < *y ) {
+      //x is smaller, so it is not greater:
+      return false;
+    }
+    //We know: *y <= *x
+    if( *y < *x ) {
+      //*y <= *x and *y < *x, so, *x is bigger:
+      return true;
+    }
+    else {
+      // *x == *y
+      return false;
+    }
+  }
+};
+
 /**
  * A representation of a partitioning a network
  */
 class NetworkPartition {
   public:
-    NetworkPartition(const Network& orig, std::vector<Network*>* part);
-    ~NetworkPartition();
+    /*
+     * part is deleted when this object is deleted
+     */
+    NetworkPartition(const Network& orig, std::vector<cnt_ptr<Network> >* part);
    /**
     * This is gives a hierarchical picture of the network.  Each cluster
     * becomes a node.  Two clusters have an edge between them if there
@@ -59,20 +81,49 @@ class NetworkPartition {
     * each edge is a ContainerEdge<Network>.
     */
    const Network& asNetwork();
+   /** Caller must delete this memory when done
+    */
+   std::map<Node*, cnt_ptr<Network> >* asMap() const;
+   const std::vector<cnt_ptr<Network> >& asVector() const { return *_part; }  
 
-   const std::vector<Network*>& asVector() const { return *_part; }  
-
-   Iterator<Network*>* getComponents() const;
+   Iterator<cnt_ptr<Network> >* getComponents() const;
+   /** Treat e_ij like a probability and return mutual information
+    */
+   double getComInformation() const;
+   /** This is O(C log (N/C)) where C is number of comp, N is nodes
+    * use asMap if you need this to be faster
+    * returns 0 if this node is not in the partition
+    */
+   cnt_ptr<Network> getComponentOf(Node* n) const;
+   const Network& getOriginal() const { return _orig; }
  
    double getModularity() const; 
+   /** Create a new partition where the given node has been isolated
+    * if n is not in the partition, return 0.
+    */
+   NetworkPartition* isolate(Node* n) const;
+   /** Allocate a new partition the same as the current one with a join
+    *  called must delete this memory when done
+    * if comp1 == comp2 return 0.
+    */
+   NetworkPartition* join(const cnt_ptr<Network>& comp1, const cnt_ptr<Network>& comp2) const;
+   /** Put this edge (and both nodes) into comp
+    */
+   NetworkPartition* transfer(const cnt_ptr<Network>& comp, Edge* edge) const;
+   /** return the number of partitions here
+    */
+   int size() const;
 
   private:
-    NetworkPartition(const NetworkPartition& copy) : _orig(copy._orig) {
-      //Don't do this. 
-    }
+    //Here are some vector<Network*> management functions:
+    static bool remove(std::vector<cnt_ptr<Network> >* part, const cnt_ptr<Network>& com);
+    static bool replace(std::vector<cnt_ptr<Network> >* part, const cnt_ptr<Network>& com1,
+                        const cnt_ptr<Network>& com2);
+    static void insert(std::vector<cnt_ptr<Network> >* part, const cnt_ptr<Network>& com);
+
     const Network& _orig;
-    std::vector<Network*>* _part;
-    Network* _part_as_net;
+    cnt_ptr<std::vector<cnt_ptr<Network> > > _part;
+    cnt_ptr<Network> _part_as_net;
 };
 	
    /**
@@ -83,11 +134,6 @@ class NetworkPartition {
 class INetworkPartitioner {
 
   public:
-  /**
-   * Interface which Community finding algorithms
-   * can subclass
-   */
-   double modularityOf(std::vector<Network*>* partition, const Network& orig);
    /**
     * The caller of this function should delete the result
     * when done.

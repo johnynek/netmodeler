@@ -1,0 +1,8 @@
+*.o
+*.so
+*.lo
+src/netmodeler.h
+src/netmodeler
+src/Makefile
+src/Makefile.in
+src/libnetmod.la

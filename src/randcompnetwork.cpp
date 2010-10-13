@@ -83,9 +83,9 @@ double RandCompNetwork::accuracyOfPartition(NetworkPartition* part) const {
   }
   long long correct_internal = 0;
   long long incorrect_internal = 0;
-  auto_ptr<Iterator<Network*> > it(part->getComponents());
+  auto_ptr<Iterator<cnt_ptr<Network> > > it(part->getComponents());
   while(it->moveNext()) {
-    Network* this_net = it->current();
+    const cnt_ptr<Network>& this_net = it->current();
     auto_ptr<EdgeIterator> tei(this_net->getEdgeIterator());
     while(tei->moveNext()) {
       Edge* this_edge = tei->current();
@@ -129,9 +129,9 @@ double RandCompNetwork::informationOfPartition(NetworkPartition* part) const {
   long long total_internal = in_cluster.size();
   long long correct_internal = 0;
   long long incorrect_internal = 0;
-  auto_ptr<Iterator<Network*> > it(part->getComponents());
+  auto_ptr<Iterator<cnt_ptr<Network> > > it(part->getComponents());
   while(it->moveNext()) {
-    Network* this_net = it->current();
+    const cnt_ptr<Network>& this_net = it->current();
     auto_ptr<EdgeIterator> tei(this_net->getEdgeIterator());
     while(tei->moveNext()) {
       Edge* this_edge = tei->current();

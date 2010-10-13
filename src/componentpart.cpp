@@ -26,8 +26,8 @@ using namespace Starsky;
 
 NetworkPartition* ComponentPart::partition(const Network& input)
 {
-    vector<Network*>* out = new vector<Network*>();
-    Network* tmp_net = 0;
+    vector<cnt_ptr<Network> >* out = new vector<cnt_ptr<Network> >();
+    cnt_ptr<Network> tmp_net = 0;
     
     Network::NodePSet to_check, checked;
     Network::NodePSet::iterator check_it;
@@ -67,6 +67,6 @@ NetworkPartition* ComponentPart::partition(const Network& input)
 	else {
 	}
     }
-    sort(out->begin(), out->end(), networkptr_gt());
+    sort(out->begin(), out->end(), ptr_gt<cnt_ptr<Network> >());
     return new NetworkPartition(input, out);
 }

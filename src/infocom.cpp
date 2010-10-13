@@ -132,6 +132,42 @@ double InfoCom::h2(double p) {
   return - p * log(p)/log(2.0) - (1.0 - p) * log(1.0 - p)/log(2.0);
 }
 
+double InfoCom::informationOf(NetworkPartition* part) {
+  /*
+   * We need to know p_c|e, p_c|\bar{e} and p_e
+   */
+  const Network& orig = part->getOriginal();
+  double E = (double)orig.getEdgeSize();
+  double N = (double)orig.getNodeSize();
+  double Ebar = N*(N-1.0)/2.0 - E;
+
+  auto_ptr<Iterator<cnt_ptr<Network> > > comps(part->getComponents());
+  
+  double p_c = 0.0;
+  double p_cge = 0.0;
+  double p_cgebar = 0.0;
+  while(comps->moveNext()) {
+    double ni = (double)comps->current()->getNodeSize();
+    //degrees!! in this component
+    double eii = 2.0 * (double)comps->current()->getEdgeSize();
+    p_c += ni * (ni - 1.0);
+    p_cge += eii;
+    p_cgebar += (ni * (ni - 1.0)) - eii;
+  }
+  //Renormalize:
+  p_c /= (N*(N-1.0));
+  p_cge /= (2.0 * E);
+  p_cgebar /= (2.0 * Ebar);
+  double p_e = 2 * E/(N*(N-1.0)); 
+  double p_ebar = 1.0 - p_e; 
+  //We should have: p_c = p_e * p_cge + p_ebar * p_cgebar
+  if( abs(p_c - (p_e * p_cge + p_ebar * p_cgebar)) > 0.0001 ) {
+    cout << "p_c(" << p_c << ") != "
+         << "p_e * p_cge + p_ebar * p_cgebar" << p_e * p_cge + p_ebar * p_cgebar <<endl;
+  }
+  return h2(p_c) - p_e * h2(p_cge) - p_ebar * h2(p_cgebar);
+}
+
 void InfoCom::getProbs(int ci, int cj, double eij, double& pe,
                        double& pc, double& pce, double& pceb) const {
   double ni = (double)_node_cnt[ci];

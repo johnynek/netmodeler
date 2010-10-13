@@ -148,6 +148,12 @@ realcontentnetwork.cpp \
 realcontentnetwork.h \
 realnode.cpp \
 realnode.h \
+saopt.h \
+sapartitioner.h sapartitioner.cpp \
+shuffleedgeselector.h \
+shuffleedgeselector.cpp \
+shufflenodeselector.h \
+shufflenodeselector.cpp \
 simkinnetwork.cpp \
 simkinnetwork.h \
 simplerulenet.h \

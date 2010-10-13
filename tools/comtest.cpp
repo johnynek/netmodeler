@@ -38,6 +38,7 @@ int main(int argc, char* argv[]) {
   optionals.push_back("seed");
   optionals.push_back("iter");
   optionals.push_back("min_cc");
+  optionals.push_back("sasteps");
   OptionParser op(reqs, optionals);
   try {
     op.parse(argc, argv);
@@ -51,7 +52,7 @@ int main(int argc, char* argv[]) {
   double exp_d = op.getDoubleOpt("exp_d", 0.0);
   double r = op.getDoubleOpt("out-in-ratio", 0.0);
   int seed = op.getIntOpt("seed", -1);
-  
+  string method = op.getStringOpt("method",""); 
   Ran1Random rand(seed);
   vector<int> cluster_cnts;
   cluster_cnts.resize(n_cluster, size_cluster);
@@ -60,18 +61,26 @@ int main(int argc, char* argv[]) {
   double accuracy = 0.0;
   double ave_d = 0.0;
   double information = 0.0;
+  double mod = 0.0;
   for(int i = 0; i < iter; i++) {
-    INetworkPartitioner* comfinder = 0;
-    if( op.getStringOpt("method", "") == "Newman" ) {
+    cnt_ptr<INetworkPartitioner> comfinder;
+    if( method == "Newman" ) {
       comfinder = new NewmanCom();
     }
-    else if ( op.getStringOpt("method", "") == "InfoCom" ) {
+    else if (method == "InfoCom" ) {
       comfinder = new InfoCom();
     }
-    else if ( op.getStringOpt("method", "") == "ComponentPart" ) {
+    else if ( method == "SAPartitioner" ) {
+      //ModularityEnergy energy;
+      //ComInfoEnergy energy;
+      InformationEnergy energy;
+      int sasteps = op.getIntOpt("sasteps", -1);
+      comfinder = new SAPartitioner(rand, energy, sasteps);
+    }
+    else if ( method == "ComponentPart" ) {
       comfinder = new ComponentPart();
     }
-    else if ( op.getStringOpt("method", "") == "ClusterPart" ) {
+    else if ( method == "ClusterPart" ) {
       double min_cc = op.getDoubleOpt("min_cc", -1.0);
       if( min_cc < 0.0 ) {
         cerr << "option min_cc required >= 0.0" << endl;
@@ -94,9 +103,10 @@ int main(int argc, char* argv[]) {
     //cout << "#inf = " << inf << endl;
     accuracy += acc;
     information += inf;
-    delete comfinder;
+    mod += part->getModularity();
   }
   cout << "accuracy = "<<(accuracy/iter) << endl; 
   cout << "information = "<<(information/iter) << endl; 
+  cout << "modularity = " << mod/iter << endl;
   cout << "#ave_d=" << ave_d / iter << endl;
 }

@@ -170,7 +170,7 @@ NetworkPartition* AgglomPart::getCommunity(const Network& net, int step,
 {
   //Remake the node_community structure:
   int community = 0;
-  vector<Network*> comm_node;
+  vector<cnt_ptr<Network> > comm_node;
   comm_node.resize( net.getNodeSize() );
   auto_ptr<NodeIterator> ni( net.getNodeIterator() );
   while( ni->moveNext() ) {
@@ -192,11 +192,11 @@ NetworkPartition* AgglomPart::getCommunity(const Network& net, int step,
   for(int k = 0; k < step; k++) {
     join1 = joins[k].first;
     join2 = joins[k].second;
-    comm_node[ join1 ]->add( comm_node[ join2 ] );
+    comm_node[ join1 ]->add( comm_node[ join2 ].get() );
     comm_node[ join2 ]->clear();
   }
   //Prepare the output:
-  vector< Network* >* out = new vector<Network*>();
+  vector< cnt_ptr<Network> >* out = new vector<cnt_ptr<Network> >();
   for(int k = 0; k < comm_node.size(); k++) {
     if( comm_node[k]->getNodeSize() > 0 ) {
       //Add the edges 
@@ -205,14 +205,9 @@ NetworkPartition* AgglomPart::getCommunity(const Network& net, int step,
       out->push_back( comm_node[k] );
       comm_node[k] = 0;
     }
-    else {
-      //Better delete this network:
-      delete comm_node[k];
-      comm_node[k] = 0;
-    }
   }
   //Sort the output:
-  sort(out->begin(), out->end(), networkptr_gt());
+  sort(out->begin(), out->end(), ptr_gt<cnt_ptr<Network> >());
   return new NetworkPartition(net, out);
 }
 

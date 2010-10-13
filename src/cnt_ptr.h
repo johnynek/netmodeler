@@ -57,10 +57,18 @@ class cnt_ptr {
     bool operator==(T* ptr) const {
       return (_ptr == ptr);
     }
+    bool operator!=(T* ptr) const {
+      return (_ptr != ptr);
+    }
     //This should work even when S is a subtype of T or vice-versa
     template<typename S>
     bool operator==(const cnt_ptr<S>& cp) const {
       return (_ptr == cp._ptr );
+    }
+    //This should work even when S is a subtype of T or vice-versa
+    template<typename S>
+    bool operator!=(const cnt_ptr<S>& cp) const {
+      return (_ptr != cp._ptr );
     }
     //This should work even when S is a subtype of T or vice-versa
     template<typename S>
