@@ -31,14 +31,18 @@ RandCompNetwork::RandCompNetwork(const vector<int>& cnt,
   //Initialize the cluster number ptrs:
   _clusters = new int[cnt.size()];
   int* p_cluster = _clusters;
+  auto_ptr< vector< cnt_ptr<Network> > > part_v(new vector< cnt_ptr<Network> >());
   //Make the nodes first:
   for(int cluster = 0; cluster < cnt.size(); cluster++) {
     *p_cluster = cluster;
     //Use
     int cluster_count = cnt[cluster];
+    cnt_ptr<Network> cluster_net(new Network());
+    part_v->push_back(cluster_net);
     for(int node_c = 0; node_c < cluster_count; node_c++) {
        ContainerNode<int>* this_node = new ContainerNode<int>(p_cluster, false);
        add(this_node);
+       cluster_net->add(this_node);
     }
     //Use ptr arithmetic here
     p_cluster++;
@@ -64,6 +68,12 @@ RandCompNetwork::RandCompNetwork(const vector<int>& cnt,
       }
     }
   }
+  //Put in the joining edges
+  for(vector< cnt_ptr<Network> >::iterator it = part_v->begin();
+      it != part_v->end(); it++) {
+    (*it)->addJoiningEdgesFrom(this);
+  }
+  _part = new NetworkPartition(*this, part_v.release());
 }
 RandCompNetwork::~RandCompNetwork() {
   delete[] _clusters;

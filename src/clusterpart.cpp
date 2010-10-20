@@ -32,7 +32,16 @@ NetworkPartition* ClusterPart::partition(const Network& input) {
   //Remove the edges that match.
   net->remove(&fi); 
   ComponentPart cp;
-  return cp.partition(*net);
+  std::auto_ptr<NetworkPartition> part( cp.partition(*net) );
+  //Now we need to add the edges:
+  std::auto_ptr<Iterator<cnt_ptr<Network> > > comps(part->getComponents());
+  std::vector<cnt_ptr<Network> >* final_parts = new std::vector<cnt_ptr<Network> >();
+  while(comps->moveNext()) {
+    const cnt_ptr<Network>& this_comp = comps->current();
+    this_comp->addJoiningEdgesFrom(&input);
+    final_parts->push_back( this_comp );
+  }
+  return new NetworkPartition(input, final_parts);
 }
 
 ClusterPart::MinCCEdgeTester::MinCCEdgeTester(const Network* net, double m): _net(net),

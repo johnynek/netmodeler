@@ -61,7 +61,11 @@ int main(int argc, char* argv[]) {
   double accuracy = 0.0;
   double ave_d = 0.0;
   double information = 0.0;
+  double cominf = 0.0;
+  double c_inf = 0.0;
+  double c_cominf = 0.0;
   double mod = 0.0;
+  double c_mod = 0.0;
   for(int i = 0; i < iter; i++) {
     cnt_ptr<INetworkPartitioner> comfinder;
     if( method == "Newman" ) {
@@ -93,6 +97,7 @@ int main(int argc, char* argv[]) {
       return -1;
     }
     RandCompNetwork rcn(cluster_cnts, exp_d, r, rand);
+    const cnt_ptr<NetworkPartition>& correct = rcn.correctPartition();
     //cout << "#node count: " << rcn.getNodeSize() << endl; 
     ave_d += (2.0*rcn.getEdgeSize())/(double)rcn.getNodeSize();
     //Now run the clustering:
@@ -104,9 +109,17 @@ int main(int argc, char* argv[]) {
     accuracy += acc;
     information += inf;
     mod += part->getModularity();
+    c_mod += correct->getModularity();
+    c_inf += InfoCom::informationOf(correct.get());
+    cominf += part->getComInformation();
+    c_cominf += correct->getComInformation();
   }
   cout << "accuracy = "<<(accuracy/iter) << endl; 
   cout << "information = "<<(information/iter) << endl; 
   cout << "modularity = " << mod/iter << endl;
+  cout << "correct mod = " << c_mod/iter << endl;
+  cout << "cominfo = " << cominf/iter << endl;
+  cout << "correct cominfo = " << c_cominf/iter << endl;
+  cout << "InfoCom::informationOf(correct) = " << c_inf/iter << endl;
   cout << "#ave_d=" << ave_d / iter << endl;
 }

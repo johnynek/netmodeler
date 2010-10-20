@@ -42,6 +42,7 @@ class RandCompNetwork : public Network {
 	                  double exp_degree, double out_p_in_p_ratio,
 		          Random& rand);
         ~RandCompNetwork();
+        const cnt_ptr<NetworkPartition>& correctPartition() const { return _part; }
         double accuracyOfPartition(NetworkPartition* part) const;
         /** how much information does partition have about edge cluster membership
          * random variable: is edge internal or external to a cluster.
@@ -52,6 +53,7 @@ class RandCompNetwork : public Network {
     protected:
         double getInCompProb(double d, int n_c, int ntot, double r) const;	
         int* _clusters;
+        cnt_ptr<NetworkPartition> _part;
 };
 
 }
