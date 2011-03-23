@@ -63,6 +63,7 @@ int main(int argc, char* argv[]) {
   double information = 0.0;
   double cominf = 0.0;
   double c_inf = 0.0;
+  double part_inf = 0.0;
   double c_cominf = 0.0;
   double mod = 0.0;
   double c_mod = 0.0;
@@ -111,15 +112,29 @@ int main(int argc, char* argv[]) {
     mod += part->getModularity();
     c_mod += correct->getModularity();
     c_inf += InfoCom::informationOf(correct.get());
+    part_inf += InfoCom::informationOf(part.get());
     cominf += part->getComInformation();
     c_cominf += correct->getComInformation();
   }
-  cout << "accuracy = "<<(accuracy/iter) << endl; 
-  cout << "information = "<<(information/iter) << endl; 
-  cout << "modularity = " << mod/iter << endl;
-  cout << "correct mod = " << c_mod/iter << endl;
-  cout << "cominfo = " << cominf/iter << endl;
-  cout << "correct cominfo = " << c_cominf/iter << endl;
-  cout << "InfoCom::informationOf(correct) = " << c_inf/iter << endl;
-  cout << "#ave_d=" << ave_d / iter << endl;
+  vector< pair<string, double> > results;
+  results.push_back( pair<string, double>("accuracy", (accuracy/iter)));
+  results.push_back( pair<string, double>("information", (information/iter)));
+  results.push_back( pair<string, double>("modularity", (mod/iter)));
+  results.push_back( pair<string, double>("correct modularity", (c_mod/iter)));
+  results.push_back( pair<string, double>("cominfo", (cominf/iter)));
+  results.push_back( pair<string, double>("correct cominfo", (c_cominf/iter)));
+  results.push_back( pair<string, double>("I(C;E)", (part_inf/iter)));
+  results.push_back( pair<string, double>("correct I(C;E)", (c_inf/iter)));
+  results.push_back( pair<string, double>("<d>", (ave_d/iter)));
+  cout << "#";
+  for(vector< pair<string, double> >::iterator rit = results.begin();
+      rit != results.end(); rit++) {
+    cout << rit->first << ", ";
+  }
+  cout << endl;
+  for(vector< pair<string, double> >::iterator rit = results.begin();
+      rit != results.end(); rit++) {
+    cout << rit->second << ", ";
+  }
+  cout << endl;
 }

@@ -168,9 +168,9 @@ double RandCompNetwork::informationOfPartition(NetworkPartition* part) const {
   double p_ext = (double)total_external/(double)total_edges;
   double p_Igi = (double)correct_internal/(double)total_internal;
   double p_Ege = (double)correct_external/(double)total_external;
-  //cout << "p_int: " << p_int << " p_ext: " << p_ext << " p_Igi: " << p_Igi << " p_Ege: " << p_Ege << endl;
+  cout << "p_int: " << p_int << " p_ext: " << p_ext << " p_Igi: " << p_Igi << " p_Ege: " << p_Ege << endl;
   double p_I = (double)(correct_internal + incorrect_internal)/(double)total_edges;
-  //cout << "p_I = " << p_I << endl;
+  cout << "p_I = " << p_I << endl;
   if( p_int <= 0.0 ) {
     if( p_I <= 0.0 ) {
       return 1.0;
